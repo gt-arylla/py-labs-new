@@ -10,6 +10,7 @@ import time
 import csv
 import math
 from scipy.interpolate import griddata
+import fun
 
 #Define Paths
 directory="G://Developer//py-labs//npyImport//App7//"
