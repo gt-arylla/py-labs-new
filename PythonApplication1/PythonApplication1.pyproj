@@ -24,7 +24,16 @@
     <Compile Include="fun.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="main_script.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="plotter.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PythonApplication1.py" />
+    <Compile Include="useful_things.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
