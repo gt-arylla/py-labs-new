@@ -6,6 +6,17 @@ import math
 import copy
 import itertools as it
 import csv
+import PIL.Image
+import PIL.ExifTags
+import pandas as pd
+import statsmodels.discrete.discrete_model as sm
+import statsmodels.tools.tools as sm_tool
+from operator import itemgetter
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegressionCV
+from sklearn.svm import LinearSVC
+from sklearn.cross_validation import train_test_split
+from sklearn import metrics
 
 #converts nan to binary where nan values are 0 and non-nan values are 1
 def nanTObin(input_mat,flipper=False):
@@ -96,6 +107,8 @@ def cct(input_img):
     print type(i_cct[0,0])
     print i_cct
     return i_cct
+
+
 def area_filter(input_img,min_area,max_area=0):
     contours, hierarchy = cv2.findContours(copy.copy(input_img), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     print len(contours)
@@ -235,85 +248,103 @@ def multi_photo_model(csv_file,photo_number,test_type,unique_array,mark,confiden
                # print sum(mark_pred_mini_list)
                 #print counter
                # print print_pred_counter
-                if test_type==0:#one photo method
+                if test_type==0:#zero photo method
+                    if sum(mark_pred_mini_list)>=-0.5:
+                        print_pred_counter+=1
+                if test_type==1:#one photo method
                     if sum(mark_pred_mini_list)>=0.5:
                         print_pred_counter+=1
-                if test_type==20:
-                    if sum(mark_pred_mini_list)==2:
+                if test_type==2:#two photo method
+                    if sum(mark_pred_mini_list)>=1.5:
                         print_pred_counter+=1
-                if test_type==21:
-                    max_confidence=max(confidence_mini_list)
-                    for k in range(0,len(confidence_mini_list)):
-                        if confidence_mini_list[k]==max_confidence:
-                            pred_val_final=mark_pred_mini_list[k]
-                    if pred_val_final==1:
+                if test_type==3:#three photo method
+                    if sum(mark_pred_mini_list)>=2.5:
                         print_pred_counter+=1
-                if test_type==30:#three pics, best two out of three of the mark_pred wins
-                    if sum(mark_pred_mini_list)>1.5:
+                if test_type==4:#four photo method
+                    if sum(mark_pred_mini_list)>=3.5:
                         print_pred_counter+=1
-                if test_type==31:#three pics, best two out of three of the mark_pred wins
-                    if sum(mark_pred_mini_list)>2.5:
+                if test_type==5:#five photo method
+                    if sum(mark_pred_mini_list)>=3.5:
                         print_pred_counter+=1
-                if test_type==32:
-                    max_confidence=max(confidence_mini_list)
-                    for k in range(0,len(confidence_mini_list)):
-                        if confidence_mini_list[k]==max_confidence:
-                            pred_val_final=mark_pred_mini_list[k]
-                    if pred_val_final==1:
-                        print_pred_counter+=1
-                if test_type==33:
-                    avg_pred_val=sum(mark_pred_mini_list)/float(len(mark_pred_mini_list))
-                    if avg_pred_val==0:
-                        null=1;
-                    elif avg_pred_val==1:
-                        print_pred_counter+=1
-                    else: #split into blank and print 
-                        print_vec=[]
-                        blank_vec=[]
-                        for k in range(0,len(mark_pred_mini_list)):
-                            if mark_pred_mini_list[k]==0:
-                                blank_vec.append(confidence_mini_list[k])
-                            elif mark_pred_mini_list[k]==1:
-                                print_vec.append(confidence_mini_list[k])
-                        blank_conf_avg=sum(blank_vec)/float(len(blank_vec))
-                        print_conf_avg=sum(print_vec)/float(len(print_vec))
-                        if print_conf_avg>blank_conf_avg:
-                            print_pred_counter+=1
+               #if test_type==0:#one photo method
+                #    if sum(mark_pred_mini_list)>=0.5:
+                #        print_pred_counter+=1
+                #if test_type==20:
+                #    if sum(mark_pred_mini_list)==2:
+                #        print_pred_counter+=1
+                #if test_type==21:
+                #    max_confidence=max(confidence_mini_list)
+                #    for k in range(0,len(confidence_mini_list)):
+                #        if confidence_mini_list[k]==max_confidence:
+                #            pred_val_final=mark_pred_mini_list[k]
+                #    if pred_val_final==1:
+                #        print_pred_counter+=1
+                #if test_type==30:#three pics, best two out of three of the mark_pred wins
+                #    if sum(mark_pred_mini_list)>1.5:
+                #        print_pred_counter+=1
+                #if test_type==31:#three pics, best two out of three of the mark_pred wins
+                #    if sum(mark_pred_mini_list)>2.5:
+                #        print_pred_counter+=1
+                #if test_type==32:
+                #    max_confidence=max(confidence_mini_list)
+                #    for k in range(0,len(confidence_mini_list)):
+                #        if confidence_mini_list[k]==max_confidence:
+                #            pred_val_final=mark_pred_mini_list[k]
+                #    if pred_val_final==1:
+                #        print_pred_counter+=1
+                #if test_type==33:
+                #    avg_pred_val=sum(mark_pred_mini_list)/float(len(mark_pred_mini_list))
+                #    if avg_pred_val==0:
+                #        null=1;
+                #    elif avg_pred_val==1:
+                #        print_pred_counter+=1
+                #    else: #split into blank and print 
+                #        print_vec=[]
+                #        blank_vec=[]
+                #        for k in range(0,len(mark_pred_mini_list)):
+                #            if mark_pred_mini_list[k]==0:
+                #                blank_vec.append(confidence_mini_list[k])
+                #            elif mark_pred_mini_list[k]==1:
+                #                print_vec.append(confidence_mini_list[k])
+                #        blank_conf_avg=sum(blank_vec)/float(len(blank_vec))
+                #        print_conf_avg=sum(print_vec)/float(len(print_vec))
+                #        if print_conf_avg>blank_conf_avg:
+                #            print_pred_counter+=1
 
-                if test_type==4:#three pics, best two out of three of the mark_pred wins
-                    if sum(mark_pred_mini_list)>1.5:
-                        print_pred_counter+=1
-                if test_type==40:#three pics, best two out of three of the mark_pred wins
-                    if sum(mark_pred_mini_list)>2.5:
-                        print_pred_counter+=1
-                if test_type==41:#three pics, best two out of three of the mark_pred wins
-                    if sum(mark_pred_mini_list)>3.5:
-                        print_pred_counter+=1
-                if test_type==42:#three pics, best two out of three of the mark_pred wins
-                    max_confidence=max(confidence_mini_list)
-                    for k in range(0,len(confidence_mini_list)):
-                        if confidence_mini_list[k]==max_confidence:
-                            pred_val_final=mark_pred_mini_list[k]
-                    if pred_val_final==1:
-                        print_pred_counter+=1
-                if test_type==43:
-                    avg_pred_val=sum(mark_pred_mini_list)/float(len(mark_pred_mini_list))
-                    if avg_pred_val==0:
-                        null=1;
-                    elif avg_pred_val==1:
-                        print_pred_counter+=1
-                    else: #split into blank and print 
-                        print_vec=[]
-                        blank_vec=[]
-                        for k in range(0,len(mark_pred_mini_list)):
-                            if mark_pred_mini_list[k]==0:
-                                blank_vec.append(confidence_mini_list[k])
-                            elif mark_pred_mini_list[k]==1:
-                                print_vec.append(confidence_mini_list[k])
-                        blank_conf_avg=sum(blank_vec)/float(len(blank_vec))
-                        print_conf_avg=sum(print_vec)/float(len(print_vec))
-                        if print_conf_avg>blank_conf_avg:
-                            print_pred_counter+=1
+                #if test_type==4:#three pics, best two out of three of the mark_pred wins
+                #    if sum(mark_pred_mini_list)>1.5:
+                #        print_pred_counter+=1
+                #if test_type==40:#three pics, best two out of three of the mark_pred wins
+                #    if sum(mark_pred_mini_list)>2.5:
+                #        print_pred_counter+=1
+                #if test_type==41:#three pics, best two out of three of the mark_pred wins
+                #    if sum(mark_pred_mini_list)>3.5:
+                #        print_pred_counter+=1
+                #if test_type==42:#three pics, best two out of three of the mark_pred wins
+                #    max_confidence=max(confidence_mini_list)
+                #    for k in range(0,len(confidence_mini_list)):
+                #        if confidence_mini_list[k]==max_confidence:
+                #            pred_val_final=mark_pred_mini_list[k]
+                #    if pred_val_final==1:
+                #        print_pred_counter+=1
+                #if test_type==43:
+                #    avg_pred_val=sum(mark_pred_mini_list)/float(len(mark_pred_mini_list))
+                #    if avg_pred_val==0:
+                #        null=1;
+                #    elif avg_pred_val==1:
+                #        print_pred_counter+=1
+                #    else: #split into blank and print 
+                #        print_vec=[]
+                #        blank_vec=[]
+                #        for k in range(0,len(mark_pred_mini_list)):
+                #            if mark_pred_mini_list[k]==0:
+                #                blank_vec.append(confidence_mini_list[k])
+                #            elif mark_pred_mini_list[k]==1:
+                #                print_vec.append(confidence_mini_list[k])
+                #        blank_conf_avg=sum(blank_vec)/float(len(blank_vec))
+                #        print_conf_avg=sum(print_vec)/float(len(print_vec))
+                #        if print_conf_avg>blank_conf_avg:
+                #            print_pred_counter+=1
                 counter+=1
                 #print 'update counter'
 
@@ -339,5 +370,373 @@ def multi_photo_model(csv_file,photo_number,test_type,unique_array,mark,confiden
 
     return truth, true_positive_percentage, false_positive_percentage
 
-#def logistic_regression(csv_file,x_cols,row_keep, printer)
+def logistic_regression(csv_file,x_cols,row_keep, printer,mark_pos=-1):
+    data=pd.read_csv(csv_file, header=0)
 
+    for keeper_list in row_keep:
+        if len(keeper_list)==2:
+            data=data.loc[data[keeper_list[0]].isin(keeper_list[1])]
+
+    drop = range(data.shape[1])
+
+    mark_loc=0
+    drop=np.delete(drop,x_cols)
+    if mark_pos==-1:
+        mark_loc=len(x_cols)-1
+    else:
+        mark_loc=mark_pos
+    data.drop(data.columns[drop], axis=1, inplace=True)
+    print(data.head(10))
+    data=data.dropna(axis=0,how='any')
+  
+    y = data.iloc[:,mark_loc]
+    #Drop the 4th col for X data
+    data.drop(data.columns[[mark_loc]], axis=1, inplace=True)
+    X = data.iloc[:,:]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.000, random_state=0)
+    y_train.astype('int')
+    y_test.astype('int')
+    X_train.shape
+    classifier = LogisticRegression(solver='newton-cg', random_state = 0,fit_intercept=True,class_weight=None)
+
+    classifier.fit(X_train, y_train)
+
+    y_pred = classifier.predict(X_train)
+
+
+
+    from sklearn.metrics import confusion_matrix
+            
+    confusion_matrix = confusion_matrix(y_train, y_pred)
+    #print confusion_matrix
+    tn=confusion_matrix[0,0]
+    fp=confusion_matrix[0,1]
+    tp=confusion_matrix[1,1]
+    fn=confusion_matrix[1,0]
+    tpr=tp/float(tp+fn)
+    tnr=tn/float(tn+fp)
+    fpr=fp/float(fp+tn)
+    #truth=tpr-(1-tnr)
+    truth=tpr-fpr
+    
+    if printer:
+        print 'Truth: ' + str(truth)
+        print 'TPP: '+str(tpr)
+        print 'fpr: '+str(fpr)
+
+        for row in range(0,len(X_train.index)):
+            mark_perc= classifier.predict_proba(X_train.iloc[[row]])[0,1]
+            LUX= X_train.iloc[[row]].values[0,14]
+            print " ",
+            mark= y_train.iloc[[row]].values[0]
+            if mark_perc<0.5:
+                pred_mark=0
+                confidence=(0.5-mark_perc)*2
+            else:
+                pred_mark=1
+                confidence=(mark_perc-0.5)*2
+            if pred_mark==mark:
+                accuracy=1
+            else:
+                accuracy=0
+            multiple1=100
+            multiple2=300
+            if LUX<=1000:
+                MultLux=np.floor((LUX + multiple1/2) / multiple1) * multiple1
+            else:
+                MultLux=np.floor((LUX + multiple2/2) / multiple2) * multiple2
+            MultLux=int(MultLux)
+            print str(mark_perc)+","+str(LUX)+","+str(MultLux)+","+str(mark)+","+str(pred_mark)+","+str(accuracy)+","+str(confidence)
+
+        print(confusion_matrix)
+        print y_train.mean()
+        print classifier.coef_
+        print classifier.intercept_
+
+        print(str(data.shape[0])+', {:.5f}'.format(classifier.score(X_train, y_train)))+","+str(truth)+ "," + str(tpr) + "," + str(fpr) + "," + str(tp) + "," + str(fn) + "," + str(tn) + "," + str(fp)
+    return [truth,tpr,fpr,classifier.coef_,classifier.intercept_]
+
+def logistic_regression_prep(csv_file,x_cols,row_keep=[[0]], tst_size=0.000,mark_pos=-1,dataframe_checker=False,dataframe_input=[]):
+    if dataframe_checker:
+        data=dataframe_input
+    else:
+        data=pd.read_csv(csv_file, header=0)
+
+    for keeper_list in row_keep:
+        if len(keeper_list)==2:
+            data=data.loc[data[keeper_list[0]].isin(keeper_list[1])]
+
+    drop = range(data.shape[1])
+
+    mark_loc=0
+    drop=np.delete(drop,x_cols)
+    if mark_pos==-1:
+        mark_loc=len(x_cols)-1
+    else:
+        mark_loc=mark_pos
+    data.drop(data.columns[drop], axis=1, inplace=True)
+    
+    data=data.dropna(axis=0,how='any')
+  
+    y = data.iloc[:,mark_loc]
+    #Drop the 4th col for X data
+    data.drop(data.columns[[mark_loc]], axis=1, inplace=True)
+    X = data.iloc[:,:]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=tst_size, random_state=0)
+    y_train.astype('int')
+    
+    return [X_train,y_train,X_test,y_test]
+
+
+def logistic_regression_model(X_train,y_train, printer=False,tester_switch=False,xTst=[],yTst=[]):
+   
+    classifier = LogisticRegression(solver='newton-cg', random_state = 0,fit_intercept=True,class_weight=None)
+
+    classifier.fit(X_train, y_train)
+
+    if tester_switch:
+        X_train=xTst
+        y_train=yTst
+
+    y_pred = classifier.predict(X_train)
+    
+    from sklearn.model_selection import cross_validate
+    from sklearn.metrics import recall_score,f1_score,log_loss,roc_auc_score
+    from sklearn.metrics import mean_squared_error
+    scoring=['recall','neg_mean_squared_error','f1','neg_log_loss','roc_auc']
+    scores=cross_validate(classifier,X_train,y_train,scoring=scoring,cv=10,return_train_score=False)
+    print np.average(scores['test_recall']),
+    print ",",
+    print np.average(scores['test_neg_mean_squared_error']),
+    print ",",
+    print np.average(scores['test_f1']),
+    print ",",
+    print np.average(scores['test_neg_log_loss']),
+    print ",",
+    print np.average(scores['test_roc_auc']),
+    
+
+
+    from sklearn.metrics import classification_report
+    report=classification_report(y_train,y_pred,digits=4)
+    print report
+
+    from sklearn.metrics import confusion_matrix
+    confusion_matrix = confusion_matrix(y_train, y_pred) 
+    #print confusion_matrix
+    tn=confusion_matrix[0,0]
+    fp=confusion_matrix[0,1]
+    tp=confusion_matrix[1,1]
+    fn=confusion_matrix[1,0]
+    tpr=tp/float(tp+fn)
+    tnr=tn/float(tn+fp)
+    fpr=fp/float(fp+tn)
+    #truth=tpr-(1-tnr)
+    truth=tpr-fpr
+    
+    if printer:
+        print 'Truth: ' + str(truth)
+        print 'TPP: '+str(tpr)
+        print 'fpr: '+str(fpr)
+
+        for row in range(0,len(X_train.index)):
+            mark_perc= classifier.predict_proba(X_train.iloc[[row]])[0,1]
+            LUX= X_train.iloc[[row]].values[0,14]
+            print " ",
+            mark= y_train.iloc[[row]].values[0]
+            if mark_perc<0.5:
+                pred_mark=0
+                confidence=(0.5-mark_perc)*2
+            else:
+                pred_mark=1
+                confidence=(mark_perc-0.5)*2
+            if pred_mark==mark:
+                accuracy=1
+            else:
+                accuracy=0
+            multiple1=100
+            multiple2=300
+            if LUX<=1000:
+                MultLux=np.floor((LUX + multiple1/2) / multiple1) * multiple1
+            else:
+                MultLux=np.floor((LUX + multiple2/2) / multiple2) * multiple2
+            MultLux=int(MultLux)
+            print str(mark_perc)+","+str(LUX)+","+str(MultLux)+","+str(mark)+","+str(pred_mark)+","+str(accuracy)+","+str(confidence)
+
+        print(confusion_matrix)
+        print y_train.mean()
+        print classifier.coef_
+        print classifier.intercept_
+
+        print(str(data.shape[0])+', {:.5f}'.format(classifier.score(X_train, y_train)))+","+str(truth)+ "," + str(tpr) + "," + str(fpr) + "," + str(tp) + "," + str(fn) + "," + str(tn) + "," + str(fp)
+    return [truth,tpr,fpr,classifier.coef_,classifier.intercept_]
+
+def sm_logistic_regression_model(X_train,y_train, printer=False,tester_switch=False,xTst=[],yTst=[]):
+   
+    X_train=sm_tool.add_constant(X_train)
+
+    classifier = sm.Logit(y_train,X_train)
+
+    result=classifier.fit(disp=0,warn_convergence=False)
+
+    coeffs=result.params.values
+
+    #print coeffs
+
+    #print result.summary()
+
+    #print result.pred_table(0.5)
+    
+    
+    
+    prediction_train=result.predict(X_train)
+    
+    pred_train=sm_logistic_model_tester(prediction_train,y_train)
+    #print pred_train
+
+
+    xTst=sm_tool.add_constant(xTst)
+    prediction_test=result.predict(xTst)
+    
+    pred_test=sm_logistic_model_tester(prediction_test,yTst)
+    #print len(prediction_train)
+    #print len(prediction_test)
+
+   
+    #print pred_test
+    #print pred_train[0],
+    #print ";",
+    #print pred_test[0],
+    #print ";",
+    #print pred_test[1],
+    #print ";",
+    #print pred_test[2],
+    #print ";",
+    #print pred_train[1],
+    #print ";",
+    #print pred_train[2]
+    #print prediction
+
+    return [pred_train[0],pred_test[0],pred_test[1],pred_test[2],pred_train[1],pred_train[2]]
+
+def sm_logistic_model_tester(mark_perc_vec,y_train):
+    y_train_list=y_train.values.tolist()
+    #print y_train_list
+    if not len(mark_perc_vec)==len(y_train_list):
+        print "**********ERROR**********"
+        print len(mark_perc_vec)
+        print len(y_train_list)
+    tp_counter=0;
+    fp_counter=0;
+    tn_counter=0;
+    fn_counter=0;
+    accuracy_holder=[]
+    for index in range(len(mark_perc_vec)):
+        if y_train_list[index]==0:
+            if mark_perc_vec[index]>0.5:
+                fp_counter+=1
+                accuracy_holder.append(0)
+            elif mark_perc_vec[index]<=0.5:
+                tn_counter+=1
+                accuracy_holder.append(1)
+        elif y_train_list[index]==1:
+            if mark_perc_vec[index]>0.5:
+                tp_counter+=1
+                accuracy_holder.append(1)
+            elif mark_perc_vec[index]<=0.5:
+                fn_counter+=1
+                accuracy_holder.append(0)
+    Sen=tp_counter/float(tp_counter+fn_counter)
+    Spec=tn_counter/float(fp_counter+tn_counter)
+    J=Sen+Spec-1
+    return J,Sen,Spec,tp_counter,tn_counter,fp_counter,fn_counter
+
+
+def logistic_model_tester(X_train,y_train,coeffs,intercept):
+    x_train_list=X_train.values.tolist()
+    y_train_list=y_train.values.tolist()
+    logistic_result=[]
+    for index in range(len(x_train_list)):
+        
+        log_res=logistic_percent_calculator(coeffs,intercept,x_train_list[index])
+        #print x_train_list[index],
+        #print log_res,
+        #print ",",
+        #print y_train_list[index]
+        if log_res>0.5:
+            mark_pred=1
+        else:
+            mark_pred=0
+        logistic_result.append([y_train_list[index],mark_pred])
+    tp_counter=0;
+    fp_counter=0;
+    tn_counter=0;
+    fn_counter=0;
+    accuracy_holder=[]
+    for mark_pair in logistic_result:
+        if mark_pair[0]==0:
+            if mark_pair[1]==1:
+                fp_counter+=1
+                accuracy_holder.append(0)
+            elif mark_pair[1]==0:
+                tn_counter+=1
+                accuracy_holder.append(1)
+        elif mark_pair[0]==1:
+            if mark_pair[1]==1:
+                tp_counter+=1
+                accuracy_holder.append(1)
+            elif mark_pair[1]==0:
+                fn_counter+=1
+                accuracy_holder.append(0)
+
+    tpr=tp_counter/float(tp_counter+fn_counter)
+    fpr=fp_counter/float(fp_counter+tn_counter)
+    truth=tpr-fpr
+    return truth,tpr,fpr,tp_counter,tn_counter,fp_counter,fn_counter,accuracy_holder,logistic_result
+
+def print_exif_UC(image_path):
+    img=PIL.Image.open(image_path)
+    exif={
+         PIL.ExifTags.TAGS[k]:v
+         for k, v in img._getexif().items()
+         if k in PIL.ExifTags.TAGS
+         }
+    return exif['UserComment']
+   
+def logistic_percent_calculator(coeffs,intercept,parameters):
+    if not len(coeffs)==len(parameters):
+        return -1
+    else:
+        t_sum=0
+        for iter in range(0,len(coeffs)):
+            t_sum+=coeffs[iter]*parameters[iter]
+        t_sum+=intercept
+        log_regression=float(1)/float(1+math.exp(t_sum*-1))
+        return log_regression
+
+def import_and_sort_csv(csv_file,return_number,sort_index):
+    super_list=[]
+    with open(csv_file) as csvfile:
+        readCSV = csv.reader(csvfile,delimiter=',')
+        for row in readCSV:
+            try:
+                float_row=[float(i) for i in row]
+
+                min_val=np.min([float_row[0],float_row[1]])
+                max_stats=np.max([float_row[0:5]])
+            
+                float_row.insert(0,min_val)
+
+                if min_val>0 and min_val<=1 and max_stats<=1:
+                    super_list.append(float_row)
+            except:
+                null=1
+    
+    super_list=sorted(super_list,key=itemgetter(sort_index),reverse=True)
+    print type(super_list[0][0])
+    for i in range(0,return_number):
+        print super_list[i]
+
+    return 0

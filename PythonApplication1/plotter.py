@@ -15,27 +15,41 @@ def FAF_plotter(csv_file,x_col_in,y_col_in,s_col,yaxis=[],xaxis=[]):
     
     #count rows
     with open(csv_file) as csvfile:
-        readCSV=csv.reader(csvfile,delimiter=',')
-        row_count=sum(1 for row in readCSV)
+        readCSV = csv.reader(csvfile,delimiter=',')
+        row_count = sum(1 for row in readCSV)
 
     with open(csv_file) as csvfile:
-        readCSV=csv.reader(csvfile,delimiter=',')
+        readCSV = csv.reader(csvfile,delimiter=',')
         for row in readCSV:
-            col_count=len(row)
+            col_count = len(row)
             break
 
     #Import Data
     print 'Import Data...'
-    all_data=np.zeros(shape=(row_count,col_count))
-    row_count=0
+    if len(s_col)==1:
+        dummy_add=True
+        s_col.append(col_count)
+    else:
+        dummy_add=False
+    if dummy_add:
+        col_count+=1
+    all_data = np.zeros(shape=(row_count - 1,col_count))
+    row_count = 0
     with open(csv_file) as csvfile:
-        readCSV=csv.reader(csvfile,delimiter=',')
+        readCSV = csv.reader(csvfile,delimiter=',')
+        counter = 0
         for row in readCSV:
-            try:
-                all_data[row_count,:]=row
-                row_count+=1
-            except:
-                print "Row Import Failed"
+            if counter > 0:
+                try:
+                    if dummy_add:
+                        row.append(0)
+                    all_data[row_count,:] = row
+                    row_count+=1
+                except:
+                    print "Row Import Failed"
+            else:
+                headers = row
+            counter+=1
     print all_data
 
     '''
@@ -55,9 +69,9 @@ def FAF_plotter(csv_file,x_col_in,y_col_in,s_col,yaxis=[],xaxis=[]):
                     unique_vals[i].append(all_data[row,i]);
     print unique_vals
     '''
-    unique_vals=[]
+    unique_vals = []
     for i in s_col:
-        unique_list=np.unique(all_data[:,i])
+        unique_list = np.unique(all_data[:,i])
         unique_vals.append(unique_list)
 
     print unique_vals
@@ -70,48 +84,48 @@ def FAF_plotter(csv_file,x_col_in,y_col_in,s_col,yaxis=[],xaxis=[]):
 
     #Construct vector of unique values, saved as strings
     print 'Construct vector of unique values, saved as strings...'
-    unique_vals_string=[]
+    unique_vals_string = []
     for i in np.arange(len(unique_vals)):
-        unique_vals_string.append([]);
+        unique_vals_string.append([])
         for j in np.arange(len(unique_vals[i])):
             unique_vals_string[i].append(str(unique_vals[i][j]))
 
     #construct super vector with all possible combinations of unique vals
     print 'construct super vector with all possible combinations of unique vals...'
     print unique_vals_string
-    super_list=[" ".join(i) for i in it.product(*unique_vals_string)]
+    super_list = [" ".join(i) for i in it.product(*unique_vals_string)]
 
     #for items in it.product(*unique_vals_string):
     #    super_list.append(items)
     
     print super_list
 
-    if len(x_col_in)==1:
-        x_vec=[x_col_in[0],x_col_in[0]+1]
+    if len(x_col_in) == 1:
+        x_vec = [x_col_in[0],x_col_in[0] + 1]
     else:
-        x_vec=[x_col_in[0],x_col_in[1]+1]
-    if len(y_col_in)==1:
-        y_vec=[y_col_in[0],y_col_in[0]+1]
+        x_vec = [x_col_in[0],x_col_in[1] + 1]
+    if len(y_col_in) == 1:
+        y_vec = [y_col_in[0],y_col_in[0] + 1]
     else:
-        y_vec=[y_col_in[0],y_col_in[1]+1]
+        y_vec = [y_col_in[0],y_col_in[1] + 1]
         
     for x_col in np.arange(x_vec[0],x_vec[1]):
         for y_col in np.arange(y_vec[0],y_vec[1]):
 
             #construct holding dictionary
             print 'construct holding dictionary...'
-            values_dictionary={}
+            values_dictionary = {}
             for i in np.arange(len(super_list)):
-                values_dictionary[super_list[i]]=[[],[]]
+                values_dictionary[super_list[i]] = [[],[]]
             print values_dictionary.keys()
             #add data to holding dictionary
             print 'add data to holding dictionary...'
             for row in np.arange(row_count):
-                key=''
+                key = ''
                 for s_index in s_col:
-                    key+=str(all_data[row,s_index])+' '
+                    key+=str(all_data[row,s_index]) + ' '
             
-                key=key[:-1]
+                key = key[:-1]
                 #print key
                 values_dictionary[key][0].append(all_data[row,x_col])
                 values_dictionary[key][1].append(all_data[row,y_col])
@@ -134,11 +148,11 @@ def FAF_plotter(csv_file,x_col_in,y_col_in,s_col,yaxis=[],xaxis=[]):
             #    for j in np.arange(len(unique_vals[i])):
             #        print str(i)+','+str(j)
             #        unique_vals_string_no_Z.append(str(unique_vals[i][j]))
-            unique_vals_string_no_Z=[]
+            unique_vals_string_no_Z = []
             for i in np.arange(1,len(unique_vals_string)):
                 unique_vals_string_no_Z.append(unique_vals_string[i])
             print unique_vals_string_no_Z
-            super_list_no_Z=[" ".join(i) for i in it.product(*unique_vals_string_no_Z)]
+            super_list_no_Z = [" ".join(i) for i in it.product(*unique_vals_string_no_Z)]
             #for items in it.product(*unique_vals_string_no_Z):
             #    super_list_no_Z.append(items)
             print super_list_no_Z
@@ -146,33 +160,35 @@ def FAF_plotter(csv_file,x_col_in,y_col_in,s_col,yaxis=[],xaxis=[]):
                 plt.figure(1)
                 for z_val in unique_vals_string[0]:
                     #z_val_str=str(z_val)
-                    key=z_val+' '+i
+                    key = z_val + ' ' + i
                     print key
-                    plt.plot(values_dictionary[z_val+' '+i][0],values_dictionary[z_val+' '+i][1],label=z_val,alpha=0.5,marker='.',linestyle = 'None',ms=4)
+                    plt.plot(values_dictionary[z_val + ' ' + i][0],values_dictionary[z_val + ' ' + i][1],label=z_val,alpha=0.5,marker='.',linestyle = 'None',ms=4)
                 plt.title(i)
                 #plt.legend(loc='best')
                 axes = plt.gca()
 
-                if len(yaxis)==2:
-                    ymin=yaxis[0]
-                    ymax=yaxis[1]
+                if len(yaxis) == 2:
+                    ymin = yaxis[0]
+                    ymax = yaxis[1]
                     axes.set_ylim([ymin,ymax])
 
-                if len(xaxis)==2:
-                    xmin=xaxis[0]
-                    xmax=xaxis[1]
+                if len(xaxis) == 2:
+                    xmin = xaxis[0]
+                    xmax = xaxis[1]
                     axes.set_xlim([xmin,xmax])
-
+                plt.xlabel(headers[x_col])
+                plt.ylabel(headers[y_col])
         
                 #plt.show()
                 print "Saving..."
-                plt.savefig(i+"--"+str(x_col)+"-"+str(y_col)+"-"+str(s_col)+'.jpg', format='jpg', dpi=200)
+                plt.savefig(headers[y_col]+" vs "+headers[x_col]+"--"+i + '.jpg', format='jpg', dpi=200)
                 plt.clf()
 
 
 
 
-    #Cause I don't know how to make nested empy list, append everything to one list
+    #Cause I don't know how to make nested empy list, append everything to one
+    #list
     #nest=[]
     #info=[]
     #for i in unique_vals[0]:
