@@ -463,6 +463,8 @@ def logistic_regression_prep(csv_file,x_cols,row_keep=[[0]], tst_size=0.000,mark
     else:
         data=pd.read_csv(csv_file, header=0)
 
+    data = data[data.applymap(np.isreal).any(1)]
+
     for keeper_list in row_keep:
         if len(keeper_list)==2:
             data=data.loc[data[keeper_list[0]].isin(keeper_list[1])]
@@ -486,13 +488,80 @@ def logistic_regression_prep(csv_file,x_cols,row_keep=[[0]], tst_size=0.000,mark
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=tst_size, random_state=0)
     y_train.astype('int')
+    y_test.astype('int')
     
     return [X_train,y_train,X_test,y_test]
 
+def cg_dataframe_filter(dataframe_input,formulation,recipe,modification):
+    df=copy.copy(dataframe_input)
 
-def logistic_regression_model(X_train,y_train, printer=False,tester_switch=False,xTst=[],yTst=[]):
+    #KEEP ROWS THAT MATCH THE FORMULATION OR BLANK
+    df=df.loc[df['Formulation'].str.contains(formulation)]
+    
+    #KEEP ROWS THAT MATCH THE RECIPE
+    df=df.loc[df['Ink'].isin([recipe[0]])]
+    df=df.loc[df['Binder'].isin([recipe[1]])]
+    df=df.loc[df['Solvent'].isin([recipe[2]])]
+
+    #KEEP ROWS THAT MATCH THE MODIFICATION
+
+    df=df.loc[df['Mod'].str.contains(modification)]
+    return df
+
+def logistic_regression_prep_cg(dataframe_input,dataframe_blank,formulation,recipe,modification,ROI,ROI_max,combine_scan_data=True):
+    df=copy.copy(dataframe_input)
+
+    #KEEP ROWS THAT MATCH THE FORMULATION OR BLANK
+    df=df.loc[df['Formulation'].str.contains(formulation)]
+    
+    #KEEP ROWS THAT MATCH THE RECIPE
+    df=df.loc[df['Ink'].isin([recipe[0]])]
+    df=df.loc[df['Binder'].isin([recipe[1]])]
+    df=df.loc[df['Solvent'].isin([recipe[2]])]
+
+    #KEEP ROWS THAT MATCH THE MODIFICATION
+
+    df=df.loc[df['Mod'].str.contains(modification)]
+    
+    if combine_scan_data:
+        #PULL OUT THE DATA YOU WANT
+        print_list=[]
+        blank_list=[]
+        for index in range(ROI_max):
+            col_caller='ROI_'+str(ROI)+'_scan_'+str(index)
+            print_list.extend(df[col_caller].tolist())
+            blank_list.extend(dataframe_blank[col_caller].tolist())
+
+        print_y_val=len(print_list)*[1]
+        blank_y_val=len(blank_list)*[0]
+
+        x_col_list=[]
+        x_col_list.extend(blank_list)
+        x_col_list.extend(print_list)
+
+        y_col_list=[]
+        y_col_list.extend(print_y_val)
+        y_col_list.extend(blank_y_val)
+
+        y_mean=np.mean(print_list)
+        x_mean=np.mean(blank_list)
+        print x_mean,
+        print ",",
+        #print len(x_col_list)
+        #print len(y_col_list)
+
+        #x_col_df=pd.DataFrame({'ROI_'+str(ROI):x_col_list})
+        x_col_df=pd.DataFrame({'ROI':x_col_list})
+        y_col_df=pd.DataFrame({'Mark':y_col_list})
+
+
+    
+    return [x_col_df,y_col_df]
+
+
+def logistic_regression_model(X_train,y_train, printer=False,tester_switch=False,xTst=[],yTst=[],overfitting_analysis=False,confidence_table=False):
    
-    classifier = LogisticRegression(solver='newton-cg', random_state = 0,fit_intercept=True,class_weight=None)
+    classifier = LogisticRegression(solver='newton-cg', random_state = 0,fit_intercept=True,class_weight="balanced")
 
     classifier.fit(X_train, y_train)
 
@@ -501,27 +570,27 @@ def logistic_regression_model(X_train,y_train, printer=False,tester_switch=False
         y_train=yTst
 
     y_pred = classifier.predict(X_train)
-    
-    from sklearn.model_selection import cross_validate
-    from sklearn.metrics import recall_score,f1_score,log_loss,roc_auc_score
-    from sklearn.metrics import mean_squared_error
-    scoring=['recall','neg_mean_squared_error','f1','neg_log_loss','roc_auc']
-    scores=cross_validate(classifier,X_train,y_train,scoring=scoring,cv=10,return_train_score=False)
-    print np.average(scores['test_recall']),
-    print ",",
-    print np.average(scores['test_neg_mean_squared_error']),
-    print ",",
-    print np.average(scores['test_f1']),
-    print ",",
-    print np.average(scores['test_neg_log_loss']),
-    print ",",
-    print np.average(scores['test_roc_auc']),
+    if overfitting_analysis:
+        from sklearn.model_selection import cross_validate
+        from sklearn.metrics import recall_score,f1_score,log_loss,roc_auc_score
+        from sklearn.metrics import mean_squared_error
+        scoring=['recall','neg_mean_squared_error','f1','neg_log_loss','roc_auc']
+        scores=cross_validate(classifier,X_train,y_train,scoring=scoring,cv=10,return_train_score=False)
+        print np.average(scores['test_recall']),
+        print ",",
+        print np.average(scores['test_neg_mean_squared_error']),
+        print ",",
+        print np.average(scores['test_f1']),
+        print ",",
+        print np.average(scores['test_neg_log_loss']),
+        print ",",
+        print np.average(scores['test_roc_auc']),
     
 
 
-    from sklearn.metrics import classification_report
-    report=classification_report(y_train,y_pred,digits=4)
-    print report
+        from sklearn.metrics import classification_report
+        report=classification_report(y_train,y_pred,digits=4)
+        print report
 
     from sklearn.metrics import confusion_matrix
     confusion_matrix = confusion_matrix(y_train, y_pred) 
@@ -530,17 +599,21 @@ def logistic_regression_model(X_train,y_train, printer=False,tester_switch=False
     fp=confusion_matrix[0,1]
     tp=confusion_matrix[1,1]
     fn=confusion_matrix[1,0]
-    tpr=tp/float(tp+fn)
-    tnr=tn/float(tn+fp)
+    tpr=float(tp)/float(tp+fn)
+    tnr=float(tn)/float(tn+fp)
+    sensitivity=float(tp)/float(tp+fn)
+    specificity=float(tn)/float(tn+fp)
     fpr=fp/float(fp+tn)
     #truth=tpr-(1-tnr)
-    truth=tpr-fpr
+    J=sensitivity+specificity-1
+    truth=J
     
-    if printer:
-        print 'Truth: ' + str(truth)
-        print 'TPP: '+str(tpr)
-        print 'fpr: '+str(fpr)
+    #if printer:
+    #    print 'Truth: ' + str(truth)
+    #    print 'TPP: '+str(tpr)
+    #    print 'fpr: '+str(fpr)
 
+    if confidence_table:
         for row in range(0,len(X_train.index)):
             mark_perc= classifier.predict_proba(X_train.iloc[[row]])[0,1]
             LUX= X_train.iloc[[row]].values[0,14]
@@ -570,8 +643,9 @@ def logistic_regression_model(X_train,y_train, printer=False,tester_switch=False
         print classifier.coef_
         print classifier.intercept_
 
+    if printer:
         print(str(data.shape[0])+', {:.5f}'.format(classifier.score(X_train, y_train)))+","+str(truth)+ "," + str(tpr) + "," + str(fpr) + "," + str(tp) + "," + str(fn) + "," + str(tn) + "," + str(fp)
-    return [truth,tpr,fpr,classifier.coef_,classifier.intercept_]
+    return [J,sensitivity,specificity,classifier.coef_,classifier.intercept_]
 
 def sm_logistic_regression_model(X_train,y_train, printer=False,tester_switch=False,xTst=[],yTst=[]):
    
@@ -584,10 +658,11 @@ def sm_logistic_regression_model(X_train,y_train, printer=False,tester_switch=Fa
     coeffs=result.params.values
 
     #print coeffs
+    if printer:
+        print "space"
+        print result.summary()
 
-    #print result.summary()
-
-    #print result.pred_table(0.5)
+        print result.pred_table(0.5)
     
     
     
@@ -595,31 +670,36 @@ def sm_logistic_regression_model(X_train,y_train, printer=False,tester_switch=Fa
     
     pred_train=sm_logistic_model_tester(prediction_train,y_train)
     #print pred_train
-
-
-    xTst=sm_tool.add_constant(xTst)
-    prediction_test=result.predict(xTst)
+    if not len(xTst)==0:
+        xTst=sm_tool.add_constant(xTst)
+        prediction_test=result.predict(xTst)
     
-    pred_test=sm_logistic_model_tester(prediction_test,yTst)
-    #print len(prediction_train)
-    #print len(prediction_test)
+        pred_test=sm_logistic_model_tester(prediction_test,yTst)
+        if printer:
+
+            print len(prediction_train)
+            print len(prediction_test)
 
    
-    #print pred_test
-    #print pred_train[0],
-    #print ";",
-    #print pred_test[0],
-    #print ";",
-    #print pred_test[1],
-    #print ";",
-    #print pred_test[2],
-    #print ";",
-    #print pred_train[1],
-    #print ";",
-    #print pred_train[2]
-    #print prediction
+        #print pred_test
+        print min([pred_train[0],pred_test[0]]),
+        print "]",
+        print pred_train[0],
+        print "]",
+        print pred_test[0],
+        print "]",
+        print pred_test[1],
+        print "]",
+        print pred_test[2],
+        print "]",
+        print pred_train[1],
+        print "]",
+        print pred_train[2]
+        #print prediction
 
-    return [pred_train[0],pred_test[0],pred_test[1],pred_test[2],pred_train[1],pred_train[2]]
+        return [pred_train[0],pred_test[0],pred_test[1],pred_test[2],pred_train[1],pred_train[2]]
+    else:
+        return[pred_train[0],pred_train[1],pred_train[2]]
 
 def sm_logistic_model_tester(mark_perc_vec,y_train):
     y_train_list=y_train.values.tolist()

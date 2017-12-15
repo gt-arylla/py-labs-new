@@ -1,31 +1,38 @@
 #Run Functions
+print "importing..."
 import cv2
 import numpy as np
+print 'plt import'
 import matplotlib.pyplot as plt
+print 'other import1'
 import fun
 import copy
 import plotter
 import csv_magic
+print 'other import2'
 import sys
 import os
 import csv
+print 'other import3'
 from glob import glob
 import time
 import copy
+print 'other import4'
 import pandas as pd
 import itertools as it
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LogisticRegressionCV
+print 'other import5'
 from sklearn.svm import LinearSVC
 from sklearn.cross_validation import train_test_split
 from sklearn import metrics
 
 print 'running...'
 
-if (1): ##FAF plotting
+if (0): ##FAF plotting
     #Define Paths
     directory="G://Developer//csvExports//"
-    tn=5
+    tn=4
     if tn==0:
         csv_name="171103_SatCctCb_ps7_combo.csv"
         csv_file=directory+csv_name
@@ -60,15 +67,18 @@ if (1): ##FAF plotting
     if tn==4:
         directory="G://Google Drive//Datasets//"
         csv_name="171123_TriPhotoTest_train_demo.csv"
+        csv_name="171130_TriPhotoTest_NM1_NM2_P_M_R_2.csv"
+        csv_name="171130_TriPhotoTest_NM1_NM2_AP_M_R.csv"
+        csv_name="171207_WbExpTest_NM1_NM2_P_M_R.csv"
         #csv_name="171103_SuperData_ps6and7_HueOt_center.csv"
         csv_file=directory+csv_name
        # plotter.FAF_plotter(csv_file,[382],[297],[334,332],yaxis=[100,125],xaxis=[4000,9000])
        # plotter.FAF_plotter(csv_file,[337],[382],[333,332],yaxis=[4000,9000],xaxis=[-10,110])
        # plotter.FAF_plotter(csv_file,[337],[297],[334,332],yaxis=[100,125],xaxis=[-10,110])
         #for y_col in [0,1,39,96,205,261,341,387,388,390,392,394,395,453]:
-        for x in [74,75,76]:
-            for y in [23,47,48,61]:
-                plotter.FAF_plotter(csv_file,[x],[y],[78])
+        for x in [102,103]:
+            for y in [[66,71]]:
+                plotter.FAF_plotter(csv_file,[x],[66,71],[1,2,3])
     if tn==5:
         directory="G://Developer//csvExports//"
         csv_name="171129_SuperDuperSet_difference.csv"
@@ -224,6 +234,8 @@ if(0): #EXIF data for all files in tree
     start_dir='C://Users//gttho//Offline//Arylla Temp Photos//New Wash-20171115T223049Z-001//New Wash//'
     start_dir='G://Google Drive//Original Images//Embroidery//171115 Trifecta_patch_9_full_set//2.0'
     start_dir='G://Google Drive//Original Images//Embroidery//171122 TriPhoto Test'
+    start_dir='G://Google Drive//Original Images//Embroidery//_Complete Photo Sets//Mi.50_v1app'
+    start_dir='G://Google Drive//Original Images//CanadaGoose//171214 PhotoDump2'
     pattern   = "*.jpg"
 
     for dir,_,_ in os.walk(start_dir):
@@ -249,20 +261,88 @@ if(0): #EXIF data for all files in tree
             file=file.replace('M2hc//Text',',24,')
        
 
-            print file+UC_new
+            print UC_new
         except:
             print 'Failed to print: '+file
 if(0): #Logistic Regression
-    tn=821
+    tn=1;
+    if tn==1: #NO TRAIN
+        directory='G://Developer//csvExports//'
+        csv_file=directory+'171213 CG Data Prelim.csv'
+        x_cols=[790,791,770,807]
+        row_keep=[[0]]
+        for x_cols in [[0,3],[1,3],[2,3]]:
+            printer = False
+            x_train,y_train,x_test,y_test=fun.logistic_regression_prep(csv_file,x_cols,row_keep)
+            #print x_train
+            #print y_train
+            result=fun.logistic_regression_model(x_train,y_train,printer,False)
+                    
+            print result
+                    #result=fun.logistic_regression_model(x_train,y_train,printer)
     csv_export='python_export_data.csv'
     #os.remove(csv_export)
     if tn==11: #basic analysis
-        csv_file='171114 Trifecta_patch_9_full_set.csv'
-        x_cols=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,17]
-        row_keep=[['PhotoSet',[0]],[' Count',[0]]]
+        directory='G://Google Drive//Datasets//'
+        csv_file=directory+'171130_TriPhotoTest_NM1_NM2_AP_M_R_train.csv'
+        csv_file_test=directory+'171130_TriPhotoTest_NM1_NM2_AP_M_R_test.csv'
+        x_cols=[753,777,778,807]
+        x_cols=[173,439,450,807]
+        x_cols=[790,791,770,807]
+        row_keep=[['PhotoSet',[101,103]]]
+        #row_keep=[[0]]
         printer = True
-        x_train,y_train=fun.logistic_regression_prep(csv_file,x_cols,row_keep)
+        x_train,y_train,bad,stuff=fun.logistic_regression_prep(csv_file,x_cols,row_keep)
+        x_test,y_test,bad,stuff=fun.logistic_regression_prep(csv_file_test,x_cols,row_keep)
+        print x_train
+        print y_train
+        print x_test
+        print y_test
+        result=fun.sm_logistic_regression_model(x_train,y_train,False,True,x_test,y_test)
+        print result
         result=fun.logistic_regression_model(x_train,y_train,printer)
+    if tn==110: #basic analysis
+        directory='G://Google Drive//Datasets//'
+        csv_file=directory+'171130_TriPhotoTest_NM1_NM2_AP_M_R_train.csv'
+        csv_file=directory+'171207_WbExpTest_NM1_NM2_P_M_R_train.csv'
+        #csv_file=directory+'171207_WbExpTest_NM1_NM2_P_M_R.csv'
+        csv_file_test=directory+'171130_TriPhotoTest_NM1_NM2_AP_M_R_test.csv'
+        csv_file_test=directory+'171207_WbExpTest_NM1_NM2_P_M_R_test.csv'
+        x_cols=[753,777,778,807]
+        x_cols=[173,439,450,807]
+        x_cols=[790,791,770,807]
+        row_keep_vec1=[['PhotoSet',[101,103]],['PhotoSet',[102,104]]]
+        #row_keep_vec1=[['PhotoSet',[102,104]]]
+        row_keep_vec2=[[['ExpBias',[-1.3]],['WB_Lock',[1]]],[['ExpBias',[-6]],['WB_Lock',[0]]],[['ExpBias',[-6]],['WB_Lock',[1]]]]
+        for row_keep1 in row_keep_vec1:
+            for row_keep2 in row_keep_vec2:
+                for cr_ring in [0,1,2,3,4]:
+                    for cb_ring in [0,1,2,3,4]:
+                        for hue_ring in [0]:
+                            #cr_ring=0;
+                            #cb_ring=0;
+                            #hue_ring=4;
+                            x_cols=[584+cr_ring,595+cb_ring,807]
+                            x_cols=[62+cr_ring,67+cb_ring,105]
+                            print [cr_ring,cb_ring,hue_ring],
+                            #row_keep=[['PhotoSet',[101,103]]]
+                            row_keep3=copy.copy(row_keep2)
+                            row_keep3.append(row_keep1)
+                            row_keep=row_keep3
+                            print row_keep,
+                            #row_keep=[['PhotoSet',[102,104]]]
+                            #row_keep=[[0]]
+                            printer = False
+                            x_train,y_train,x_test,y_test=fun.logistic_regression_prep(csv_file,x_cols,row_keep)
+                            x_test,y_test,bad,stuff=fun.logistic_regression_prep(csv_file_test,x_cols,row_keep)
+                            #print x_train
+                            #print y_train
+                            #print x_test
+                            #print y_test
+                            result=fun.sm_logistic_regression_model(x_train,y_train,printer,True,x_test,y_test)
+                    
+                    #print result
+                    #result=fun.logistic_regression_model(x_train,y_train,printer)
     if tn==13: #analysis with different x_col
         csv_file='171120_Flash_noFlash_Logit_Analysis.csv'
         x_cols_list=[[1,2,3,4,5,6,7,8,9,10,11,12,13,32],[15,16,17,18,19,20,21,22,23,24,25,26,27,28,32],[1,2,3,4,5,6,7,8,9,10,11,12,13,15,16,17,18,19,20,21,22,23,24,25,26,27,28,32],[2,3,6,32],[17,18,21,32],[2,3,6,17,18,21,32]]
@@ -429,34 +509,48 @@ if(0): #Logistic Regression
                 #    for val2 in val:
                 #        print str(val2)+",",
     if tn==821: #compare training pics with testing pics using sm
+        directory='G://Google Drive//Datasets//'
         csv_file='SuperDuperSet_train.csv'
+        csv_file=directory+'171210_ExpWb_InitialPhotoset_rings.csv'
         dataframe_in_train=pd.read_csv(csv_file,header=0)
         csv_file='SuperDuperSet_test.csv'
+        csv_file=directory+'171210_ExpWb_InitialPhotoset_rings.csv'
         dataframe_in_test=pd.read_csv(csv_file,header=0)
         data_cols=[38,258,423,478,533,643,698,808,863,918,973,1083,2458,2523,2578,2798,2963,3018,3073,3183,3238,3348,3403,3458,3513,3623]
+        data_cols=[10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51]
         row_keep=[[0]]
         #for keep_list in val_keep_list_list:
-        for iter in range(10):
-            print iter
+        #for iter in range(10):
+        for row_keep in [['PhotoSet',[101,103]],['PhotoSet',[102,104]],['PhotoSet',[101,105]],['PhotoSet',[102,106]],['PhotoSet',[101,107]],['PhotoSet',[102,108]],['PhotoSet',[101,109]],['PhotoSet',[102,110]]]:
+            iter=1
+            row_keep=[row_keep]
             for val in it.combinations(data_cols,iter):
             #for x_cols in x_cols_list:
                 dataframe_in_test_copy=copy.copy(dataframe_in_test)
                 dataframe_in_train_copy=copy.copy(dataframe_in_train)
                 x_cols=list(val)
-                x_cols.append(4963)
+                #x_cols.append(4963)
+                x_cols.append(55)
                 x_cols=sorted(x_cols)
-                row_keep=[[0]]
+                #row_keep=[[0]]
+                
                 x_train,y_train,x_test,y_test=fun.logistic_regression_prep(csv_file,x_cols,row_keep,dataframe_checker=True,dataframe_input=dataframe_in_train_copy)
-                x_train2,y_train2,x_test2,y_test2=fun.logistic_regression_prep(csv_file,x_cols,row_keep,dataframe_checker=True,dataframe_input=dataframe_in_test_copy)
+                #x_train,y_train,x_test,y_test=fun.logistic_regression_prep(csv_file,x_cols,row_keep,dataframe_checker=True,dataframe_input=dataframe_in_train_copy)
+                #x_train2,y_train2,x_test2,y_test2=fun.logistic_regression_prep(csv_file,x_cols,row_keep,dataframe_checker=True,dataframe_input=dataframe_in_test_copy)
                 #print "data_done"
                 try:
                 #if True:
-                    result=fun.sm_logistic_regression_model(x_train,y_train,printer=False,xTst=x_train2,yTst=y_train2)
+                    result=fun.sm_logistic_regression_model(x_train,y_train)
+                    print row_keep,
+                    print ",",
+                    print x_cols,
+                    print ",",
+                    print result
                     #print "anal_done"
-                    result.extend(x_cols)
-                    with open(r'python_export_data_'+str(iter)+'superData.csv', 'ab') as f:
-                        writer = csv.writer(f)
-                        writer.writerow(result)
+                    #result.extend(x_cols)
+                    #with open(r'python_export_data_'+str(iter)+'superData.csv', 'ab') as f:
+                    #    writer = csv.writer(f)
+                    #    writer.writerow(result)
                 except:
                     print "Failed x_col: ",
                     print x_cols
@@ -507,6 +601,110 @@ if(0): #Logistic Regression
         x_train,y_train,x_test,y_test=fun.logistic_regression_prep(csv_file,x_cols)
         result=fun.logistic_regression_model(x_train,y_train,printer=False)
         print str(result[0])+","+str(result[1])+","+str(result[2])
+if(1): #CanadaGoose Logistic Regression
+    files=[]
+    start_dir='C://Users//gttho//Documents//Visual Studio 2017//Projects//PythonApplication1//PythonApplication1//csv_import'
+    pattern   = "*.csv"
+
+    for dir,_,_ in os.walk(start_dir):
+        files.extend(glob(os.path.join(dir,pattern))) 
+    for file in files:
+        filename=file.rpartition("/")[2]
+        #Import csv to dataframe only once
+        df=pd.read_csv(file,header=0)
+        
+        #remove NAN values from df
+        column_where_numbers_start=2;
+        header_list=df.columns.values.tolist()
+        #FIRST, CONVERT COLUMNS TO FLOATS
+        for index in range(column_where_numbers_start,len(header_list)): #ONLY OPERATE ON COLUMNS PAST COLUMN 5
+            df[header_list[index]] = df[header_list[index]].apply(pd.to_numeric,errors='coerce')
+        #THEN REMOVE NAN VALUES
+        df=df.dropna(subset = header_list[column_where_numbers_start:])
+
+        #Make Dataframe of Blanks
+        df_blank=df.loc[df['Formulation'].str.contains('blank|Blank')]
+
+        ###############_FORMULATOINS_####################
+        formulation_superlist=[]
+        #Add formulations in the format [FORMULATION,[[INK,BINDER,SOLVENT]]] or [[FORMULATION,[[INK,BINDER,SOLVENT],[INK2,BINDER2,SOLVENT2]]]
+        #formulation_superlist.append([['P.FM1 - 50/50-C - PM'],[[3.5,66.5,30],[3,67,30]]])
+        #formulation_superlist.append([['S.FM1 - 50/50-C - PM'],[[0.5,75.5,25],[1,72,27]]])
+        formulation_superlist.append([['BR Formulation'],[[50,10,10],[50,10,11],[50,10,20]]])
+        formulation_superlist.append([['P.FM1 - 50/50-B - PM'],[[10,65,25],[6.5,67,26.5]]])
+        formulation_superlist.append([['P.FM1 - 50/50-C - PM'],[[10,65,25]]])
+        formulation_superlist.append([['S.FM1 - 50/50-B - PM'],[[1.25,73,25.75],[1.5,73.5,25]]])
+        formulation_superlist.append([['S.FM1 - 50/50-C - PM'],[[0.5,70.5,29],[0.5,74.5,25],[0.5,76.5,23]]])
+        #[FORMULATION,RECIPE]->[FORMULATION,[INK,BINDER,SOLVENT]]->[FORMULATION,[[INK,BINDER,SOLVENT],[INK2,BINDER2,SOLVENT2]]]
+
+        mod_list=[]
+        mod_list.append('W0')
+        mod_list.append('W1')
+        mod_list.append('W2')
+        mod_list.append('W3')
+        mod_list.append('D0')
+        mod_list.append('D1')
+        mod_list.append('D2')
+        mod_list.append('D3')
+
+        ROI_list=range(3)
+        #x_col_list=[] #these should be COLUMN HEADERS
+        #x_col_list.append()
+
+        ROI_max=10;
+
+        for formulation_list in formulation_superlist: #elements with the same formulation are clustered together
+            for recipe in formulation_list[1]: #elements with different recipes are run
+                for mod in mod_list:
+                    ROI_result=[]
+                    ROI_avg_result=[]
+                    try:
+                        for ROI in ROI_list:
+                            df_input=copy.copy(df)
+                            df_blank_input=copy.copy(df_blank)
+                            formulation=formulation_list[0][0]
+                        
+                            [x_train,y_train]=fun.logistic_regression_prep_cg(df_input,df_blank_input,formulation,recipe,mod,ROI,ROI_max)
+                            ROI_avg_result.append(y_train.Mark.mean())
+                            result=fun.logistic_regression_model(x_train,y_train)
+                            ROI_result.append(result[0])
+                        print filename,
+                        print ",",
+                        print formulation_list[0][0],
+                        print ",",
+                        print recipe[0],
+                        print ",",
+                        print recipe[1],
+                        print ",",
+                        print recipe[2],
+                        print ",",
+                        print mod,
+                        print ",",
+                        print ROI_result[0],
+                        print ",",
+                        print ROI_result[1],
+                        print ",",
+                        print ROI_result[2]
+                    except:
+                        skipped=True
+                        #print 'SKIPPED: ',
+                        #print filename,
+                        #print ",",
+                        #print formulation_list[0][0],
+                        #print ",",
+                        #print recipe[0],
+                        #print ",",
+                        #print recipe[1],
+                        #print ",",
+                        #print recipe[2],
+                        #print ",",
+                        #print mod
+                        
+                            
+
+
+
+
 
 if(0): #csv import and sort
     csv_file="G://Developer//csvExports//InitialCP Sweep//Combo_data.csv"
