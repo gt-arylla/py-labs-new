@@ -508,51 +508,210 @@ def cg_dataframe_filter(dataframe_input,formulation,recipe,modification):
     df=df.loc[df['Mod'].str.contains(modification)]
     return df
 
-def logistic_regression_prep_cg(dataframe_input,dataframe_blank,formulation,recipe,modification,ROI,ROI_max,combine_scan_data=True):
+def cg_combine_print_blank(dataframe_print,dataframe_blank):
+    dfp=copy.copy(dataframe_print)
+    dfb=copy.copy(dataframe_blank)
+    pLength = dfp.shape[0]
+    bLength = dfb.shape[0]
+    #print pLength
+    #print bLength
+    print_mark_series=pd.Series(np.ones(pLength))
+    blank_mark_series=pd.Series(np.zeros(bLength))
+    dfp=dfp.assign(Mark=print_mark_series.values)
+    dfb=dfb.assign(Mark=blank_mark_series.values)
+    df_fin=pd.concat([dfp,dfb],ignore_index=True)
+    return df_fin
+
+def cg_redundancy_modeler(dataframe_input):
+    #gonna sweep over bloody everything, and figure out the J value in each case, then save cases where J value is real good
+    ROI0_thresh_rng=np.linspace(0,3)
+    ROI1_thresh_rng=np.linspace(0,3)
+    ROI2_thresh_rng=np.linspace(0,3)
+    ROI0_dec_rng=np.linspace(-0.05,0.95,11)
+    ROI1_dec_rng=np.linspace(-0.05,0.95,11)
+    ROI2_dec_rng=np.linspace(-0.05,0.95,11)
+    redundancy_range=[0.5,1.5,2.5]
+    ROI_thresh_rng_list=[ROI0_thresh_rng,ROI1_thresh_rng,ROI2_thresh_rng]
+    ROI_dec_rng_list=[ROI0_dec_rng,ROI1_dec_rng,ROI2_dec_rng]
+    scan_size=10
+
+    header_list=list(dataframe_input)
+    ROI_starter_list=["ROI_0_scan_0","ROI_1_scan_0","ROI_2_scan_0","Mark"]
+    ROI_starter_index_list=[0,0,0,0]
+    for header_index in range(len(header_list)):
+        for header_string_index in range(len(ROI_starter_list)):
+            if header_list[header_index]==ROI_starter_list[header_string_index]:
+                ROI_starter_index_list[header_string_index]=header_index+1
+
+    #print ROI_starter_index_list
+
+    #first find optimal thresholds for each ROI
+    best_roi_thresh=len(ROI_thresh_rng_list)*[-1]
+    best_dec_thresh=len(ROI_thresh_rng_list)*[-1]
+    best_J=len(ROI_thresh_rng_list)*[-1]
+    for ROI_index in range(len(ROI_thresh_rng_list)):
+        for ROI_thresh in ROI_thresh_rng_list[ROI_index]:
+            #make two new lists - blank confidence and print confidence
+            print_confidence=[]
+            blank_confidence=[]
+            for row in dataframe_input.itertuples():
+                #print row
+                #print type(row)
+                read_count=0
+                for scan_index in range(scan_size):
+                    #col_caller='ROI_'+str(ROI_index)+'_scan_'+str(scan_index)
+                    
+                    if row[ROI_starter_index_list[ROI_index]+scan_index]>ROI_thresh:
+                        read_count+=1
+                confidence_value=float(read_count)/float(scan_size)
+                row_marker=row[ROI_starter_index_list[3]]
+                #print row_marker
+                if row_marker==1:
+                    print_confidence.append(confidence_value)
+                elif row_marker==0:
+                    blank_confidence.append(confidence_value)
+                else:
+                    print "***********MARKER MISSING ERROR*********"
+            ## now that the confidence lists are done, we get ROI accuracy using dec_rng
+            
+            for ROI_dec in ROI_dec_rng_list[ROI_index]:
+                print_binary_list=np.zeros(len(print_confidence))
+                blank_binary_list=np.zeros(len(blank_confidence))
+
+                #set to 1 if value is greater than threshold
+                print_binary_list[print_confidence>ROI_dec]=1
+                blank_binary_list[blank_confidence>ROI_dec]=1
+
+
+
+                sensitivity=np.mean(print_binary_list)
+                specificity=1-np.mean(blank_binary_list)
+                J=sensitivity+specificity-1
+
+                if J>best_J[ROI_index]:
+                    best_J[ROI_index]=J
+                    best_roi_thresh[ROI_index]=ROI_thresh
+                    best_dec_thresh[ROI_index]=ROI_dec
+                    #print ROI_index,
+                    #print ",",
+                    #print best_J[ROI_index],
+                    #print ",",
+                    #print sensitivity,
+                    #print ",",
+                    #print specificity,
+                    #print ",",
+                    #print best_roi_thresh[ROI_index],
+                    #print ",",
+                    #print best_dec_thresh[ROI_index]
+    #print best_J
+    #print best_dec_thresh
+    #print best_roi_thresh
+
+    #now figure out the best level of redundancy
+    print_sum=[]
+    blank_sum=[]
+    for row in dataframe_input.itertuples():
+        sum=0
+        for ROI_index in range(len(ROI_thresh_rng_list)):
+            ROI_thresh=best_roi_thresh[ROI_index]
+            dec_thresh=best_dec_thresh[ROI_index]
+            read_count=0
+            for scan_index in range(scan_size):
+                #col_caller='ROI_'+str(ROI_index)+'_scan_'+str(scan_index)
+                    
+                if row[ROI_starter_index_list[ROI_index]+scan_index]>ROI_thresh:
+                    read_count+=1
+            confidence_value=float(read_count)/float(scan_size)
+            if confidence_value>dec_thresh:
+                sum+=1
+        row_marker=row[ROI_starter_index_list[3]]
+        #print row_marker
+        if row_marker==1:
+            print_sum.append(sum)
+        elif row_marker==0:
+            blank_sum.append(sum)
+        else:
+            print "***********MARKER MISSING ERROR*********"
+    #print print_sum
+    #print blank_sum
+    ## now that the confidence lists are done, we get ROI accuracy using dec_rng
+    best_redundancy=-1
+    best_J=-1
+    for redundancy in redundancy_range:
+        print_binary_list=np.zeros(len(print_sum))
+        blank_binary_list=np.zeros(len(blank_sum))
+
+        #print redundancy
+        #print print_sum
+        #print print_binary_list
+        #print blank_binary_list
+        #set to 1 if value is greater than threshold
+        for print_index in range(len(print_sum)):
+            if print_sum[print_index]>redundancy:
+                print_binary_list[print_index]=1
+
+        for blank_index in range(len(blank_sum)):
+            if blank_sum[blank_index]>redundancy:
+                blank_binary_list[blank_index]=1
+
+        #    print_binary_list[print_sum>redundancy]=1
+        #blank_binary_list[blank_sum>redundancy]=1
+
+        #print print_binary_list
+        #print blank_binary_list
+
+        sensitivity=np.mean(print_binary_list)
+        specificity=1-np.mean(blank_binary_list)
+        J=sensitivity+specificity-1
+
+        #print redundancy,
+        #print ",",
+        #print J,
+        #print ",",
+        #print sensitivity,
+        #print ",",
+        #print specificity
+
+        if J>best_J:
+            best_J=J
+            best_redundancy=redundancy
+
+
+    #print "*********END*********"
+    return [best_J,best_roi_thresh,best_dec_thresh,best_redundancy]
+
+def logistic_regression_prep_cg(dataframe_input,dataframe_blank,ROI,ROI_max,combine_scan_data=True):
     df=copy.copy(dataframe_input)
 
-    #KEEP ROWS THAT MATCH THE FORMULATION OR BLANK
-    df=df.loc[df['Formulation'].str.contains(formulation)]
-    
-    #KEEP ROWS THAT MATCH THE RECIPE
-    df=df.loc[df['Ink'].isin([recipe[0]])]
-    df=df.loc[df['Binder'].isin([recipe[1]])]
-    df=df.loc[df['Solvent'].isin([recipe[2]])]
+    #PULL OUT THE DATA YOU WANT
+    print_list=[]
+    blank_list=[]
+    for index in range(ROI_max):
+        col_caller='ROI_'+str(ROI)+'_scan_'+str(index)
+        print_list.extend(df[col_caller].tolist())
+        blank_list.extend(dataframe_blank[col_caller].tolist())
 
-    #KEEP ROWS THAT MATCH THE MODIFICATION
+    print_y_val=len(print_list)*[1]
+    blank_y_val=len(blank_list)*[0]
 
-    df=df.loc[df['Mod'].str.contains(modification)]
-    
-    if combine_scan_data:
-        #PULL OUT THE DATA YOU WANT
-        print_list=[]
-        blank_list=[]
-        for index in range(ROI_max):
-            col_caller='ROI_'+str(ROI)+'_scan_'+str(index)
-            print_list.extend(df[col_caller].tolist())
-            blank_list.extend(dataframe_blank[col_caller].tolist())
+    x_col_list=[]
+    x_col_list.extend(blank_list)
+    x_col_list.extend(print_list)
 
-        print_y_val=len(print_list)*[1]
-        blank_y_val=len(blank_list)*[0]
+    y_col_list=[]
+    y_col_list.extend(print_y_val)
+    y_col_list.extend(blank_y_val)
 
-        x_col_list=[]
-        x_col_list.extend(blank_list)
-        x_col_list.extend(print_list)
+    y_mean=np.mean(print_list)
+    x_mean=np.mean(blank_list)
+    print x_mean,
+    print ",",
+    #print len(x_col_list)
+    #print len(y_col_list)
 
-        y_col_list=[]
-        y_col_list.extend(print_y_val)
-        y_col_list.extend(blank_y_val)
-
-        y_mean=np.mean(print_list)
-        x_mean=np.mean(blank_list)
-        print x_mean,
-        print ",",
-        #print len(x_col_list)
-        #print len(y_col_list)
-
-        #x_col_df=pd.DataFrame({'ROI_'+str(ROI):x_col_list})
-        x_col_df=pd.DataFrame({'ROI':x_col_list})
-        y_col_df=pd.DataFrame({'Mark':y_col_list})
+    #x_col_df=pd.DataFrame({'ROI_'+str(ROI):x_col_list})
+    x_col_df=pd.DataFrame({'ROI':x_col_list})
+    y_col_df=pd.DataFrame({'Mark':y_col_list})
 
 
     
