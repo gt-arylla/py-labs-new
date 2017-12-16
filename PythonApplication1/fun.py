@@ -504,9 +504,31 @@ def cg_dataframe_filter(dataframe_input,formulation,recipe,modification):
     df=df.loc[df['Solvent'].isin([recipe[2]])]
 
     #KEEP ROWS THAT MATCH THE MODIFICATION
-
-    df=df.loc[df['Mod'].str.contains(modification)]
+    if not modification=='skip':
+        df=df.loc[df['Mod'].str.contains(modification)]
     return df
+
+def cg_scan_range_finder(dataframe_input,ROI_cols,ROI_size):
+    df=copy.copy(dataframe_input)
+    df_print,df_blank=[x for _, x in df.groupby(df['Mark'] <0.5) ]
+
+    df_range=[df_blank,df_print]
+    max_min_export=[]
+    for df_index in range(len(df_range)):
+        value_holder=[]
+        for ROI in range(ROI_size):
+            for scan in range(ROI_cols):
+                col_caller='ROI_'+str(ROI)+'_scan_'+str(scan)
+                if df_index==0:
+                    
+                    value_holder.append(df_range[df_index][col_caller].max())
+                elif df_index==1:
+                    value_holder.append(df_range[df_index][col_caller].min())
+        if df_index==0:
+            max_min_export.append(np.max(value_holder))
+        elif df_index==1:
+            max_min_export.append(np.min(value_holder))
+    return max_min_export
 
 def cg_combine_print_blank(dataframe_print,dataframe_blank):
     dfp=copy.copy(dataframe_print)
@@ -523,10 +545,12 @@ def cg_combine_print_blank(dataframe_print,dataframe_blank):
     return df_fin
 
 def cg_redundancy_modeler(dataframe_input):
+    scan_range=cg_scan_range_finder(dataframe_input,10,3)
     #gonna sweep over bloody everything, and figure out the J value in each case, then save cases where J value is real good
-    ROI0_thresh_rng=np.linspace(0,3)
-    ROI1_thresh_rng=np.linspace(0,3)
-    ROI2_thresh_rng=np.linspace(0,3)
+    scan_n=20;
+    ROI0_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
+    ROI1_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
+    ROI2_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
     ROI0_dec_rng=np.linspace(-0.05,0.95,11)
     ROI1_dec_rng=np.linspace(-0.05,0.95,11)
     ROI2_dec_rng=np.linspace(-0.05,0.95,11)
@@ -637,6 +661,8 @@ def cg_redundancy_modeler(dataframe_input):
     ## now that the confidence lists are done, we get ROI accuracy using dec_rng
     best_redundancy=-1
     best_J=-1
+    best_sensitivity=-1
+    best_specificity=-1
     for redundancy in redundancy_range:
         print_binary_list=np.zeros(len(print_sum))
         blank_binary_list=np.zeros(len(blank_sum))
@@ -675,10 +701,12 @@ def cg_redundancy_modeler(dataframe_input):
         if J>best_J:
             best_J=J
             best_redundancy=redundancy
+            best_sensitivity=sensitivity
+            best_specificity=specificity
 
 
     #print "*********END*********"
-    return [best_J,best_roi_thresh,best_dec_thresh,best_redundancy]
+    return [[best_J,best_sensitivity,best_specificity,len(print_sum),len(blank_sum)],best_roi_thresh,best_dec_thresh,best_redundancy]
 
 def logistic_regression_prep_cg(dataframe_input,dataframe_blank,ROI,ROI_max,combine_scan_data=True):
     df=copy.copy(dataframe_input)
