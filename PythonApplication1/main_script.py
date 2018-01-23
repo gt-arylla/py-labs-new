@@ -90,6 +90,9 @@ if (0): ##FAF plotting
         #for y_col in [0,1,39,96,205,261,341,387,388,390,392,394,395,453]:
         for x in [45,46]:
             plotter.FAF_plotter(csv_file,[x],[1,44],[47])
+if (0): #cotsu DataFrame Plotting
+    csv_file="G://Google Drive//Datasets//180122_cOtsu_till_App36.csv"
+    plotter.cotsu_plotter(csv_file)
 if(0): #csv multi file to single file
     #define function inputs
     directory="C://Users//gttho//Documents//Visual Studio 2017//Projects//PythonApplication1//PythonApplication1//Resources//csv_import//"
@@ -235,15 +238,21 @@ if(0): #EXIF data for all files in tree
     start_dir='G://Google Drive//Original Images//Embroidery//171115 Trifecta_patch_9_full_set//2.0'
     start_dir='G://Google Drive//Original Images//Embroidery//171122 TriPhoto Test'
     start_dir='G://Google Drive//Original Images//Embroidery//_Complete Photo Sets//Mi.50_v1app'
-    start_dir='G://Google Drive//Original Images//CanadaGoose//171214 PhotoDump2'
+    start_dir='G://Google Drive//Original Images//CanadaGoose//171216 - Perry Manual Organization//Blank'
+    start_dir='G://Google Drive//Original Images//CanadaGoose//171217 - StressTest'
+    start_dir='G://Google Drive//Original Images//Embroidery//180116 New_Model_Prelim'
+    start_dir='G://Google Drive//Original Images//Embroidery//180117 App35 Test'
+    start_dir='G://Google Drive//Color_regression//images//v2app//Mi.50'
+
+
     pattern   = "*.jpg"
 
     for dir,_,_ in os.walk(start_dir):
         files.extend(glob(os.path.join(dir,pattern))) 
     for file in files:
-        #print file,
+        print file,
         try:
-            UC=fun.print_exif_UC(file)
+            UC=fun.print_exif_DT(file)
             UC_new=UC.replace(':',',')
             file=file.replace('Blank//Logo',',11,')
             file=file.replace('Blank//Text',',12,')
@@ -259,6 +268,8 @@ if(0): #EXIF data for all files in tree
             file=file.replace('M1hc//Text',',22,')
             file=file.replace('M2hc//Logo',',23,')
             file=file.replace('M2hc//Text',',24,')
+
+
        
 
             print UC_new
@@ -602,13 +613,20 @@ if(0): #Logistic Regression
         result=fun.logistic_regression_model(x_train,y_train,printer=False)
         print str(result[0])+","+str(result[1])+","+str(result[2])
 if(1): #CanadaGoose Logistic Regression
+    #0 - logistic regression
+    #1 - threshold modeling
+    #2 - threshold model testing
+    #3 - mean finder
+    #4 - threshold modeling v2
+    test_index=4
     files=[]
     start_dir='C://Users//gttho//Documents//Visual Studio 2017//Projects//PythonApplication1//PythonApplication1//csv_import'
     pattern   = "*.csv"
-
+    print 'prog1'
     for dir,_,_ in os.walk(start_dir):
         files.extend(glob(os.path.join(dir,pattern))) 
     for file in files:
+        print 'prog2'
         filename=file.rpartition("/")[2]
         #Import csv to dataframe only once
         df=pd.read_csv(file,header=0)
@@ -630,22 +648,51 @@ if(1): #CanadaGoose Logistic Regression
         #Add formulations in the format [FORMULATION,[[INK,BINDER,SOLVENT]]] or [[FORMULATION,[[INK,BINDER,SOLVENT],[INK2,BINDER2,SOLVENT2]]]
         #formulation_superlist.append([['P.FM1 - 50/50-C - PM'],[[3.5,66.5,30],[3,67,30]]])
         #formulation_superlist.append([['S.FM1 - 50/50-C - PM'],[[0.5,75.5,25],[1,72,27]]])
-        formulation_superlist.append([['BR Formulation'],[[50,10,10],[50,10,11],[50,10,20]]])
-        formulation_superlist.append([['P.FM1 - 50/50-B - PM'],[[10,65,25],[6.5,67,26.5]]])
-        formulation_superlist.append([['P.FM1 - 50/50-C - PM'],[[10,65,25]]])
-        formulation_superlist.append([['S.FM1 - 50/50-B - PM'],[[1.25,73,25.75],[1.5,73.5,25]]])
-        formulation_superlist.append([['S.FM1 - 50/50-C - PM'],[[0.5,70.5,29],[0.5,74.5,25],[0.5,76.5,23]]])
+
+        #formulation_superlist.append([['BR Formulation'],[[50,10,10],[50,10,11],[50,10,20]]])
+        #formulation_superlist.append([['P.FM1 - 50/50-B - PM'],[[10,65,25],[6.5,67,26.5]]])
+        #formulation_superlist.append([['P.FM1 - 50/50-C - PM'],[[10,65,25]]])
+        #formulation_superlist.append([['S.FM1 - 50/50-B - PM'],[[1.25,73,25.75],[1.5,73.5,25]]])
+        #formulation_superlist.append([['S.FM1 - 50/50-C - PM'],[[0.5,70.5,29],[0.5,74.5,25],[0.5,76.5,23]]])
+        
+        #formulation_superlist.append([['BR Formulation'],[[50,10,10]]])
+
+        #formulation_superlist.append([['S.FM1 - 50/50-B - PM'],[[1.25,73,25.75]]])
+
+        #formulation_superlist.append([['Ink'],[[750,0,0]]])
+        formulation_superlist.append([['Ink'],[[750,1,0]]])
+        formulation_superlist.append([['Ink'],[[750,2,0]]])
+
         #[FORMULATION,RECIPE]->[FORMULATION,[INK,BINDER,SOLVENT]]->[FORMULATION,[[INK,BINDER,SOLVENT],[INK2,BINDER2,SOLVENT2]]]
 
         mod_list=[]
-        mod_list.append('W0')
-        mod_list.append('W1')
-        mod_list.append('W2')
-        mod_list.append('W3')
-        mod_list.append('D0')
-        mod_list.append('D1')
-        mod_list.append('D2')
-        mod_list.append('D3')
+        #mod_list.append('W0')
+        #mod_list.append('W1')
+        #mod_list.append('W2')
+        #mod_list.append('W3')
+        #mod_list.append('W4')
+        #mod_list.append('D0')
+        #mod_list.append('D1')
+        #mod_list.append('D2')
+        #mod_list.append('D3')
+        #mod_list.append('CG')
+        #mod_list.append('DW0')
+        #mod_list.append('DW1')
+        #mod_list.append('DW2')
+        #mod_list.append('WD0')
+        #mod_list.append('WD1')
+        #mod_list.append('WD2')
+        #mod_list.append('M0')
+        #mod_list=['skip']
+
+        mod_list.append("WSB")
+        mod_list.append("WWB")
+        #mod_list.append('1coat')
+       # mod_list.append('2coat')
+
+        #mod_list.append('1')
+        #mod_list.append('2')
+        #mod_list.append('3')
 
         ROI_list=range(3)
         #x_col_list=[] #these should be COLUMN HEADERS
@@ -658,35 +705,158 @@ if(1): #CanadaGoose Logistic Regression
                 for mod in mod_list:
                     ROI_result=[]
                     ROI_avg_result=[]
-                    try:
-                        for ROI in ROI_list:
+                    #try:
+                    if True:
+                        if test_index==0:
+                            for ROI in ROI_list:
+                                df_input=copy.copy(df)
+                                df_blank_input=copy.copy(df_blank)
+                                formulation=formulation_list[0][0]
+                                df_input=fun.cg_dataframe_filter(df_input,formulation,recipe,mod)
+                                df_fin=fun.cg_combine_print_blank(df_input,df_blank)
+                                #print df_fin
+                                df_fin.head()
+                                [x_train,y_train]=fun.logistic_regression_prep_cg(df_input,df_blank_input,ROI,ROI_max)
+                                ROI_avg_result.append(y_train.Mark.mean())
+                                if test_index==0:
+                                    result=fun.logistic_regression_model(x_train,y_train)
+                                
+                                ROI_result.append(result[0])
+                            print filename,
+                            print ",",
+                            print formulation_list[0][0],
+                            print ",",
+                            print recipe[0],
+                            print ",",
+                            print recipe[1],
+                            print ",",
+                            print recipe[2],
+                            print ",",
+                            print mod,
+                            print ",",
+                            print ROI_result[0],
+                            print ",",
+                            print ROI_result[1],
+                            print ",",
+                            print ROI_result[2]
+                        if test_index==1 or test_index==4:
                             df_input=copy.copy(df)
                             df_blank_input=copy.copy(df_blank)
                             formulation=formulation_list[0][0]
-                        
-                            [x_train,y_train]=fun.logistic_regression_prep_cg(df_input,df_blank_input,formulation,recipe,mod,ROI,ROI_max)
-                            ROI_avg_result.append(y_train.Mark.mean())
-                            result=fun.logistic_regression_model(x_train,y_train)
-                            ROI_result.append(result[0])
-                        print filename,
-                        print ",",
-                        print formulation_list[0][0],
-                        print ",",
-                        print recipe[0],
-                        print ",",
-                        print recipe[1],
-                        print ",",
-                        print recipe[2],
-                        print ",",
-                        print mod,
-                        print ",",
-                        print ROI_result[0],
-                        print ",",
-                        print ROI_result[1],
-                        print ",",
-                        print ROI_result[2]
-                    except:
-                        skipped=True
+                            df_input=fun.cg_dataframe_filter(df_input,formulation,recipe,mod)
+                            df_fin=fun.cg_combine_print_blank(df_input,df_blank)
+                            #print df_fin
+                            if test_index==1:
+                                result=fun.cg_redundancy_modeler(df_fin)
+                            elif test_index==4:
+                                result=fun.cg_redundancy_modeler_v2(df_fin)
+                                
+
+                            print filename,
+                            print ",",
+                            print formulation_list[0][0],
+                            print ",",
+                            print str(recipe[0])+"-"+str(recipe[1])+"-"+str(recipe[2]),
+                            print ",",
+                            #print recipe[1],
+                            #print ",",
+                            #print recipe[2],
+                            #print ",",
+                            print mod,
+                            print ",",
+                            print result[0],
+                            print ",",
+                            print result[1],
+                            print ",",
+                            print result[2],
+                            print ",",
+                            print result[3]
+                        if test_index==2:
+                            df_input=copy.copy(df)
+                            df_blank_input=copy.copy(df_blank)
+                            formulation=formulation_list[0][0]
+                            df_input=fun.cg_dataframe_filter(df_input,formulation,recipe,mod)
+                            df_fin=fun.cg_combine_print_blank(df_input,df_blank)
+
+                            #SFM-237
+                            best_roi_thresh=[0.189261947,0.189261947,0.304590368]
+                            best_dec_thresh=[0.65,0.75,0.65]
+                            best_redundancy=1.5
+
+                            #BR-237
+                            best_roi_thresh=[0.337868789,0.602583263,0.426106947]
+                            best_dec_thresh=[0.65,0.65,0.65]
+                            best_redundancy=0.5
+
+                             #BR-2347
+                            best_roi_thresh=[0.44042734,0.651658701,0.68196173152578421]
+                            best_dec_thresh=[0.55,0.55,0.65]
+                            best_redundancy=0.5
+
+                            #BR-2347
+                            best_roi_thresh=[0.4564061669324827, 0.65470494417862846, 0.56751727804359386]
+                            best_dec_thresh=[0.55,0.65,0.65]
+                            best_redundancy=0.5
+
+                            #BR-2347-fin
+                            best_roi_thresh=[0.419723551,0.669856459,0.57761828814] 
+                            best_dec_thresh=[0.75,0.65,0.75]
+                            best_redundancy=0.5
+
+
+                            result=fun.cg_redundancy_tester(df_fin,best_roi_thresh,best_dec_thresh,best_redundancy,print_failures=False)
+                            print filename,
+                            print ",",
+                            print formulation_list[0][0],
+                            print ",",
+                            print str(recipe[0])+"-"+str(recipe[1])+"-"+str(recipe[2]),
+                            print ",",
+                            print mod,
+                            print ",",
+                            print result[0],
+                            print ",",
+                            print result[1],
+                            print ",",
+                            print result[2],
+                            print ",",
+                            print result[3],
+                            print ",",
+                            print result[4]
+                        if test_index==3:
+                            df_input=copy.copy(df)
+                            df_blank_input=copy.copy(df_blank)
+                            formulation=formulation_list[0][0]
+                            df_input=fun.cg_dataframe_filter(df_input,formulation,recipe,mod)
+                            df_fin=fun.cg_combine_print_blank(df_input,df_blank)
+
+                           
+
+                            result=fun.cg_white_mean_finder(df_fin)
+                            print filename,
+                            print ",",
+                            print formulation_list[0][0],
+                            print ",",
+                            print str(recipe[0])+"-"+str(recipe[1])+"-"+str(recipe[2]),
+                            print ",",
+                            print mod,
+                            print ",",
+                            print result[0][0],
+                            print ",",
+                            print result[0][1],
+                            print ",",
+                            print result[0][2],
+                            print ",",
+                            print result[0][3],
+                            print ",",
+                            print result[1][0],
+                            print ",",
+                            print result[1][1],
+                            print ",",
+                            print result[1][2],
+                            print ",",
+                            print result[1][3]
+                    #except:
+                     #   skipped=True
                         #print 'SKIPPED: ',
                         #print filename,
                         #print ",",
