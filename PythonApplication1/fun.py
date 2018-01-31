@@ -503,17 +503,25 @@ def cg_dataframe_filter(dataframe_input,formulation,recipe,modification):
     df=copy.copy(dataframe_input)
 
     #KEEP ROWS THAT MATCH THE FORMULATION OR BLANK
-    df=df.loc[df['Formulation'].str.contains(formulation)]
+    if not formulation=='skip':
+        df=df.loc[df['Formulation'].str.contains(formulation)]
     
     #KEEP ROWS THAT MATCH THE RECIPE
     if not recipe[0]=='skip':
         df=df.loc[df['Ink'].isin([recipe[0]])]
+    if not recipe[1]=='skip':
         df=df.loc[df['Binder'].isin([recipe[1]])]
+    if not recipe[2]=='skip':
         df=df.loc[df['Solvent'].isin([recipe[2]])]
 
     #KEEP ROWS THAT MATCH THE MODIFICATION
     if not modification=='skip':
-        df=df.loc[df['Mod'].str.contains(modification)]
+        #make lowercase and uppercase options
+        lc_mod=modification.lower()
+        uc_mod=modification.upper()
+        df_uc=df.loc[df['Mod'].str.contains(lc_mod)]
+        df_lc=df.loc[df['Mod'].str.contains(uc_mod)]
+        df=pd.concat([df_uc,df_lc])
     return df
 
 def cg_scan_range_finder(dataframe_input,ROI_cols,ROI_size):
@@ -553,8 +561,8 @@ def cg_combine_print_blank(dataframe_print,dataframe_blank):
     df_fin=pd.concat([dfp,dfb],ignore_index=True)
     return df_fin
 
-def cg_white_mean_finder(dataframe_input):
-    list_data_holder=cg_dataframe_to_list(dataframe_input)
+def cg_white_mean_finder(dataframe_input,scan_size=10):
+    list_data_holder=cg_dataframe_to_list(dataframe_input,scan_size)
     ROI_blank=[]
     ROI_print=[]
     for row_index in range(len(list_data_holder)):
@@ -596,8 +604,8 @@ def cg_white_mean_finder(dataframe_input):
     ROI_blank_mean=np.mean([ROI0_blank_mean,ROI1_blank_mean,ROI2_blank_mean])
     return [[ROI_print_mean,ROI0_print_mean,ROI1_print_mean,ROI2_print_mean],[ROI_blank_mean,ROI0_blank_mean,ROI1_blank_mean,ROI2_blank_mean]]
 
-def cg_redundancy_tester(dataframe_input,best_roi_thresh,best_dec_thresh,best_redundancy,print_failures=False):
-    list_data_holder=cg_dataframe_to_list(dataframe_input)
+def cg_redundancy_tester(dataframe_input,best_roi_thresh,best_dec_thresh,best_redundancy,print_failures=False,scan_size=10):
+    list_data_holder=cg_dataframe_to_list(dataframe_input,scan_size)
     true_blank_guess_list=[]
     true_print_guess_list=[]
     for row_index in range(len(list_data_holder)):
@@ -631,9 +639,75 @@ def cg_redundancy_tester(dataframe_input,best_roi_thresh,best_dec_thresh,best_re
 
     return [J, sensitivity, specificity, n_print, n_blank]
 
-def cg_dataframe_to_list(dataframe_input):
+def cg_redundancy_tester_detail(dataframe_input,best_roi_thresh,best_dec_thresh,best_redundancy,scan_size=10,print_failures=False): #Prints out original dataframe, as well as binary guess for each ROI, and sucess/failure per guess
+    #Reset row index of dataframe so that data can be grabbed easily
+    dataframe_input=dataframe_input.reset_index(drop=True)
+    #Convert to list for speed
+    list_data_holder=cg_dataframe_to_list(dataframe_input,scan_size)
+    true_blank_guess_list=[]
+    true_print_guess_list=[]
+    roi_guess_list=[[],[],[]] #only built for 3 ROIs
+    roi_accuracy_list=[[],[],[]]
+    for row_index in range(len(list_data_holder)):
+        #for header_val in ['Formulation','Mod','Ink','Binder','Solvent','DateTime','Mark']:
+        #    print dataframe_input[header_val][row_index],
+        #    print ',',
+
+        sum_count=0
+        for ROI_index in range(len(best_roi_thresh)):
+            read_count=0
+            for scan_index in range(len(list_data_holder[row_index][0][ROI_index])): 
+                if list_data_holder[row_index][0][ROI_index][scan_index]>best_roi_thresh[ROI_index]:
+                    read_count+=1
+            confidence_value=float(read_count)/float(len(list_data_holder[row_index][0][ROI_index]))
+            if confidence_value>best_dec_thresh[ROI_index]:
+                sum_count+=1
+                if list_data_holder[row_index][1]==1:
+                    roi_accuracy_list[ROI_index].append(1)
+                else:
+                    roi_accuracy_list[ROI_index].append(0)
+                #print '1,',
+            else:
+                if list_data_holder[row_index][1]==1:
+                    roi_accuracy_list[ROI_index].append(0)
+                else:
+                    roi_accuracy_list[ROI_index].append(1)
+                #print '0,',
+
+        if sum_count>best_redundancy:
+            guess_val=1
+        else:
+            guess_val=0
+
+        #if guess_val==list_data_holder[row_index][1]:
+        #    print '1'
+        #else:
+        #    print '0'
+
+        if list_data_holder[row_index][1]==0:
+            true_blank_guess_list.append(guess_val)
+        elif list_data_holder[row_index][1]==1:
+            true_print_guess_list.append(guess_val)
+        else:
+            print "************MARK ERROR********"
+        if print_failures:
+            if not guess_val==list_data_holder[row_index][1]:
+                print dataframe_input.iloc[[row_index]]
+    sensitivity=np.mean(true_print_guess_list)
+    specificity=1-np.mean(true_blank_guess_list)
+    J=sensitivity+specificity-1
+    n_blank=len(true_blank_guess_list)
+    n_print=len(true_print_guess_list)
+
+    for lst in roi_accuracy_list:
+        print np.average(lst),
+        print ",",
+
+    return [J, sensitivity, specificity, n_print, n_blank]
+
+def cg_dataframe_to_list(dataframe_input,scan_size):
     header_list=list(dataframe_input)
-    scan_size=10
+    #scan_size=10
     ROI_starter_list=["ROI_0_scan_0","ROI_1_scan_0","ROI_2_scan_0","Mark"]
     ROI_starter_index_list=[0,0,0,0]
     for header_index in range(len(header_list)):
@@ -643,7 +717,7 @@ def cg_dataframe_to_list(dataframe_input):
 
     #print ROI_starter_index_list
     
-    #move values from dataframe to list: [[[[ROI1][ROI2][ROI3]]],[Mark]]
+    #move values from dataframe to list: [[[ROI1][ROI2][ROI3]],[Mark]]
     list_data_holder=[]
     for row in dataframe_input.itertuples():
         #print row
@@ -659,8 +733,8 @@ def cg_dataframe_to_list(dataframe_input):
     return list_data_holder
     
 
-def cg_redundancy_modeler(dataframe_input):
-    scan_range=cg_scan_range_finder(dataframe_input,10,3)
+def cg_redundancy_modeler(dataframe_input,scan_size=10):
+    scan_range=cg_scan_range_finder(dataframe_input,scan_size,3)
     #gonna sweep over bloody everything, and figure out the J value in each case, then save cases where J value is real good
     scan_n=20;
     ROI0_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
@@ -672,7 +746,7 @@ def cg_redundancy_modeler(dataframe_input):
     redundancy_range=[0.5,1.5,2.5]
     ROI_thresh_rng_list=[ROI0_thresh_rng,ROI1_thresh_rng,ROI2_thresh_rng]
     ROI_dec_rng_list=[ROI0_dec_rng,ROI1_dec_rng,ROI2_dec_rng]
-    scan_size=10
+    
 
     header_list=list(dataframe_input)
     ROI_starter_list=["ROI_0_scan_0","ROI_1_scan_0","ROI_2_scan_0","Mark"]
@@ -836,8 +910,8 @@ def cg_redundancy_modeler(dataframe_input):
     #print "*********END*********"
     return [[best_J,best_sensitivity,best_specificity,len(print_sum),len(blank_sum)],best_roi_thresh,best_dec_thresh,best_redundancy]
 
-def cg_redundancy_modeler_v2(dataframe_input):
-    scan_range=cg_scan_range_finder(dataframe_input,10,3)
+def cg_redundancy_modeler_v2(dataframe_input,scan_size=10):
+    scan_range=cg_scan_range_finder(dataframe_input,scan_size,3)
     #gonna sweep over bloody everything, and figure out the J value in each case, then save cases where J value is real good
     scan_n=20;
     #print scan_range[0]+3
@@ -851,7 +925,6 @@ def cg_redundancy_modeler_v2(dataframe_input):
     redundancy_range=[0.5,1.5,2.5]
     ROI_thresh_rng_list=[ROI0_thresh_rng,ROI1_thresh_rng,ROI2_thresh_rng]
     ROI_dec_rng_list=[ROI0_dec_rng,ROI1_dec_rng,ROI2_dec_rng]
-    scan_size=10
 
     header_list=list(dataframe_input)
     ROI_starter_list=["ROI_0_scan_0","ROI_1_scan_0","ROI_2_scan_0","Mark"]
@@ -1099,7 +1172,6 @@ def cg_redundancy_modeler_v2(dataframe_input):
 
     #print "*********END*********"
     return [[best_J,best_sensitivity,best_specificity,len(print_sum),len(blank_sum)],best_roi_thresh,best_dec_thresh,best_redundancy]
-
 
 def logistic_regression_prep_cg(dataframe_input,dataframe_blank,ROI,ROI_max,combine_scan_data=True):
     df=copy.copy(dataframe_input)
