@@ -494,7 +494,7 @@ def logistic_regression_prep(csv_file,x_cols,row_keep=[[0]], tst_size=0.000,mark
 
 def adapted_J(sensitivity,specificity,n_print=0,n_CP=0):
     sen_weight=1
-    spec_weight=3
+    spec_weight=1
     FN_weight=1
     CP_weight=2
     n_FN=(1-sensitivity)*n_print-n_CP
@@ -504,7 +504,7 @@ def adapted_J(sensitivity,specificity,n_print=0,n_CP=0):
         sen_mod=1-(((n_FN*FN_weight)/float(n_print))+((n_CP*CP_weight)/float(n_print)))/float(FN_weight+CP_weight)
 
     J=2*(sen_weight*sensitivity+spec_weight*specificity)/float(sen_weight+spec_weight)-1
-    J=(sen_weight*sensitivity+spec_weight*specificity)/float(sen_weight+spec_weight)
+    #J=(sen_weight*sensitivity+spec_weight*specificity)/float(sen_weight+spec_weight)
     return J
     
 
@@ -1703,6 +1703,57 @@ def sm_logistic_model_tester(mark_perc_vec,y_train):
     J=Sen+Spec-1
     return J,Sen,Spec,tp_counter,tn_counter,fp_counter,fn_counter
 
+def threshold_finder(input_data, input_mark,steps=100):   
+    #print input_data
+    #print input_mark
+    if not len(input_data)==len(input_mark):
+        raise ValueError('Input mark and data are not of equal size')
+    sweep_start=np.percentile(input_data,10)
+    sweep_end=np.percentile(input_data,90)
+    sweep=np.linspace(sweep_start,sweep_end,steps)
+
+    J_max=0
+    thresh_best=-999
+    sen_best=-999
+    spec_best=-999
+    for thresh in sweep:
+        tp=0
+        fp=0
+        tn=0
+        fn=0
+        for data_index in range(len(input_data)):
+            if input_data[data_index]<thresh:
+                mark_guess=0
+            else:
+                mark_guess=1
+            if input_mark[data_index] == 0:
+                if mark_guess==0:
+                    tn+=1
+                else:
+                    fp+=1
+            else:
+                if mark_guess==0:
+                    fn+=1
+                else:
+                    tp+=1
+        sen=float(tp)/float((tp+fn))
+        spec=float(tn)/float((tn+fp))
+        J=adapted_J(sen,spec)
+        if abs(J)>abs(J_max):
+            J_max=J
+            thresh_best=thresh
+            sen_best=sen
+            spec_best=spec
+            tp_best=tp
+            fp_best=fp
+            tn_best=tn
+            fn_best=fn
+
+    #print [thresh_best,abs(J_max),J_max,sen_best,spec_best,tp_best,fp_best,tn_best,fn_best]
+
+    return [thresh_best,abs(J_max),J_max,sen_best,spec_best]
+
+
 def logistic_model_tester(X_train,y_train,coeffs,intercept):
     x_train_list=X_train.values.tolist()
     y_train_list=y_train.values.tolist()
@@ -1744,6 +1795,99 @@ def logistic_model_tester(X_train,y_train,coeffs,intercept):
     fpr=fp_counter/float(fp_counter+tn_counter)
     truth=tpr-fpr
     return truth,tpr,fpr,tp_counter,tn_counter,fp_counter,fn_counter,accuracy_holder,logistic_result
+
+def pk_modeler(dataframe_input,ring_count):
+    #code will accept a dataframe input and ring count.  It'll then find the optimal threshold for each ring and each ring combination.  The combos I have in mind are pure differences between rows and averaged differences between rows
+
+    #The format for the ring avg column headers are 'Rx' where x is the ring index.  The format for ring count column headers are 'RCx' where x is the ring index
+    #for each test, the result will be saved in a dataframe
+
+    mark_list=list(dataframe_input["Mark"])
+    count_print=np.sum(mark_list)
+    count_blank=len(mark_list)-count_print
+
+    thresh_iterators=100
+
+    data=pd.DataFrame(columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B"])
+
+    print "Analysis Started"
+
+    #part 1 is simply running through the rings
+    for row_index in range(ring_count):
+        data_index="R"+str(row_index)
+        data_input=list(dataframe_input[data_index])
+        thresh,J_abs,J,sen,spec=threshold_finder(data_input,mark_list,thresh_iterators)
+        test_name=data_index
+        adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B"])
+        data=data.append(adder_df)
+
+    print "Part 1 Done"
+
+    #part 2 is finding the difference between all the columns
+    for start_index in range(ring_count):
+        for end_index in range(ring_count):
+            if end_index>start_index:
+                pos_data_index="R"+str(end_index)
+                pos_data=list(dataframe_input[pos_data_index])
+                neg_data_index="R"+str(start_index)
+                neg_data=list(dataframe_input[neg_data_index])
+                diff_data=list(np.array(pos_data)-np.array(neg_data))
+                thresh,J_abs,J,sen,spec=threshold_finder(data_input,mark_list,thresh_iterators)
+                test_name=pos_data_index+"_minus_"+neg_data_index
+                adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                data=data.append(adder_df)
+
+    print "Part 2 Done"
+
+    ##part 3 is doing a weighted average between all combinations of consecutive columns
+    #neg_index=0
+    #for start_range_index in range(1,ring_count-1):
+    #    for number_of_columns in range(2,ring_count-start_range_index+2):
+    #        for start_range_fin in range(start_range_index,ring_count-number_of_columns+1):
+    #            data_list=[]
+    #            weight_list=[]
+    #            for col in range(number_of_columns):
+    #                data_name="R"+str(col+start_range_fin)
+    #                data_list.append(list(dataframe_input[data_name]))
+    #                weight_name="RC"+str(col+start_range_fin)
+    #                weight_list.append(list(dataframe_input[weight_name]))
+    #            avg_col=weighted_average(data_list,weight_list)
+
+    #            neg_data_index="R"+str(neg_index)
+    #            neg_data=list(dataframe_input[neg_data_index])
+
+    #            diff_data=list(np.array(avg_col)-np.array(neg_data))
+    #            thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
+    #            test_name="R"+str(start_range_fin)+"_to_R"+str(start_range_fin+number_of_columns-1)+"__minus__"+"R"+str(neg_index)
+    #            adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+    #            data=data.append(adder_df)
+
+    #data.to_csv("dataframe_export2.csv")
+
+    #print data
+    return data
+
+def pk_dataframe_filter(dataframe_input,formulation,recipe,modification):
+    df=copy.copy(dataframe_input)
+
+    #KEEP ROWS THAT MATCH THE FORMULATION OR BLANK
+    #if not formulation=='skip':
+    #    df=df.loc[df['Formulation'].str.contains(formulation)]
+    print "prog1"
+    #KEEP ROWS THAT MATCH THE RECIPE
+    if not recipe[0]=='skip':
+        df=df.loc[df['Shoe'].isin([recipe[0]])]
+    if not recipe[1]=='skip':
+        df=df.loc[df['Brand'].isin([recipe[1]])]
+    if not recipe[2]=='skip':
+        df=df.loc[df['Location'].isin([recipe[2]])]
+    print "prog2"
+    #KEEP ROWS THAT MATCH THE MODIFICATION
+    if not modification=='skip':
+        #make lowercase and uppercase options
+        df=df.loc[df['AP'].isin([modification])]
+
+    return df
 
 def print_exif_UC(image_path):
     img=PIL.Image.open(image_path)
@@ -1799,3 +1943,20 @@ def import_and_sort_csv(csv_file,return_number,sort_index):
         print super_list[i]
 
     return 0
+
+def weighted_average(input_data, input_weights):
+    #data should be a list of lists.
+    if not len(input_data)==len(input_weights):
+        raise ValueError('Input mark and data are not of equal size')
+    print input_data
+    print input_weights
+    export_data=[]
+    for row in range(len(input_data[0])):
+        data_list=[]
+        weight_list=[]
+        for col in range(len(input_data)):
+            data_list.append(input_data[col][row])
+            weight_list.append(input_weights[col][row])
+        export_avg=np.average(data_list,weights=weight_list)
+        export_data.append(export_avg)
+    return export_avg
