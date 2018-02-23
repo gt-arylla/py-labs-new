@@ -7,6 +7,7 @@ import matplotlib.figure as pltfig
 import os
 import winsound
 import sys
+from glob import glob
 import time
 import piexif
 import piexif.helper
@@ -23,29 +24,53 @@ user_comment='test_comment'
 
 directory_move="G://Google Drive//Original Images//Pumped Kicks//180207 Algo_Test//Blank"
 
-directory_start="G://Google Drive//Original Images//Pumped Kicks//180207 Algo_Test//"
+directory_start="G://Google Drive//Original Images//Pumped Kicks//180221 New_Tags_120mS_80mS_AP1"
 adder_string=["50mS","75mS","100mS"]
-#adder_string=[""]
+adder_string=[""]
 for adder in adder_string:
-    directory=directory_start+adder
-    pat, dirs, files = os.walk(directory).next()
-    numfil=len(files)
-    total_counter=22*numfil #there are 22 colorspaces
+    all_file_switch=1
+
+    if not all_file_switch:
+        directory=directory_start+adder
+        pat, dirs, files = os.walk(directory).next()
+        numfil=len(files)
+        total_counter=22*numfil #there are 22 colorspaces
+        files_to_scan=os.listdir(directory)
+
+    ##Scan ALL Files in Tree, rather than specific tree
+    
+    if(all_file_switch):
+        files = []
+        start_dir=directory_start
+
+        pattern = "*.jpg"
+        
+        for dir,_,_ in os.walk(start_dir):
+            
+            files.extend(glob(os.path.join(dir,pattern))) 
+        files_to_scan=files
+    
 
     ##############__________PREP HOLDING ARRAYS_______############3
-    coeffs=np.zeros((total_counter,5))
     date='dummy'
     counter1=0 #use for the total counter, to input values into the coeffs array
     finder_counter=0
-    for filename in os.listdir(directory):
+
+    
+
+    for filename in files:
         #if (filename[-4:].lower()=='.jpg') and (filename[:9]=='PE_Legacy'):
         #print filename
     
         if (filename[-4:].lower()=='.jpg'):
-            try:
-            #if True:
+            #try:
+            if True:
                 #grab EXIF data
-                filname=os.path.join(directory, filename)
+                if all_file_switch:
+                    filname=filename
+                else:
+                    filname=os.path.join(directory, filename)
+                print filname
                 exif_dict=piexif.load(filname)
                 user_comment = piexif.helper.UserComment.load(exif_dict["Exif"][piexif.ExifIFD.UserComment])
                 user_comment_prime=copy.copy(user_comment)
@@ -74,17 +99,20 @@ for adder in adder_string:
 
 
                 ############ Search for text in EXIF ############
-                search_string="Solvent:c"
-                if search_string in user_comment:
-                    finder_counter+=1
-                    print filename,
-                    print "  FOUND:  ",
-                    print search_string
+                if(0):
+                    search_string="Solvent:c"
+                    if search_string in user_comment:
+                        finder_counter+=1
+                        print filename,
+                        print "  FOUND:  ",
+                        print search_string
+                    print "Finder counter: ",
+                    print finder_counter
 
                 ############CONVERT TEXT A TO TEXT B ##########
                 #convert Count value
                 if (0):
-                    user_comment=string.replace(user_comment,'Dtamp','Stamp')
+                    user_comment=string.replace(user_comment,'Formulation:Prints','Formulation:80mS')
 
                 ############Fancy Convert (date, commas, convert to number)#############
                 #if counter1%3==0:
@@ -108,9 +136,11 @@ for adder in adder_string:
 
                 ###########Direct Add#################
                 if(0):
-                    user_comment+=',Ink:0,Binder:2,Solvent:0,Formulation:Ink,Mod:bsb'
+                    user_comment='AP:AP1,'+user_comment
                     print user_comment
+                    
 
+               
                 ###########MOVE BASED ON EXIF###########
                 if (0):
                     #uc_lower=user_comment.lower()
@@ -124,6 +154,8 @@ for adder in adder_string:
                             shutil.move(os.path.join(directory,filename),os.path.join(directory_move,filename))
                             print "moved"
                 
+
+
                 ###########MOVE BASED ON FILE NAME###########
                 if (0):
                     filename_lower=filename.lower()
@@ -136,6 +168,29 @@ for adder in adder_string:
                             shutil.move(os.path.join(directory,filename),os.path.join(directory_move,filename))
                             print "moved"
 
+
+                ###########CHANGE EXIF BASED ON FILE PATH############
+                if(0):
+                    filname_mod=filname.replace('//',"\\")
+                    filname_list=filname_mod.split("\\")
+                    del filname_list[-1]  #Deletes the filename from the list
+                    filname_list.reverse() #reverses the order so that the suff you care about is in the beginning
+
+                    key_list=['Location','Brand','Shoe','Formulation']
+
+                    #key_list=['Location']
+                    uc_new=''
+                    for key_iter in range(len(key_list)):
+                        uc_new+=key_list[key_iter]+":"+filname_list[key_iter]+","
+
+                    overwrite_switch=1
+                    if overwrite_switch:
+                        user_comment=uc_new
+                    else:
+                        user_comment=uc_new+user_comment
+
+
+
                 ##############OVERWRITE ALL USER DATA#############
                 if(0):
                     print user_comment
@@ -143,7 +198,7 @@ for adder in adder_string:
                     user_comment='Ink:0,Binder:'+str(t_diff_hours)+',Solvent:'+str(int(round(t_diff_hours)))+',Formulation:Ink,Modified:'+adder
 
                 ###############RENAME FILE BASED ON EXIF############
-                if(1):
+                if(0):
                     #ps_list=['Ink','Blank']
             
                     #append_value=''
@@ -173,10 +228,9 @@ for adder in adder_string:
                     #new_filename=filname[:-12]+'_'+append_value+'_'+filname[-12:-4]+'.jpg'
                     os.rename(filname,new_filename)
 
-                #print user_comment
+               # print user_comment
                 print counter1
-                print "Finder counter: ",
-                print finder_counter
+                
 
                 #Only modify EXIF if a change has been applied
                 if not user_comment==user_comment_prime:
@@ -185,6 +239,7 @@ for adder in adder_string:
                     exif_bytes = piexif.dump(exif_dict)
                     piexif.insert(exif_bytes,filname)
                     counter1+=1
-            except:
-                print "************************************skipper************************************"
-                null=1
+                    print "New Exif: "+user_comment
+            #except:
+            #    print "************************************skipper************************************"
+            #    null=1
