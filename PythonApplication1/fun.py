@@ -18,6 +18,18 @@ from sklearn.svm import LinearSVC
 from sklearn.cross_validation import train_test_split
 from sklearn import metrics
 
+def dropNAN(input_df,column_where_numbers_start):
+    df=input_df
+    #remove NAN values from df
+    column_where_numbers_start=8;
+    header_list=df.columns.values.tolist()
+    #FIRST, CONVERT COLUMNS TO FLOATS
+    for index in range(column_where_numbers_start,len(header_list)): #ONLY OPERATE ON COLUMNS PAST COLUMN x
+        df[header_list[index]] = df[header_list[index]].apply(pd.to_numeric,errors='coerce')
+    #THEN REMOVE NAN VALUES
+    df=df.dropna(subset = header_list[column_where_numbers_start:])
+    return df
+
 #converts nan to binary where nan values are 0 and non-nan values are 1
 def nanTObin(input_mat,flipper=False):
     output_mat = np.ones(input_mat.shape)
@@ -506,7 +518,28 @@ def adapted_J(sensitivity,specificity,n_print=0,n_CP=0):
     J=2*(sen_weight*sensitivity+spec_weight*specificity)/float(sen_weight+spec_weight)-1
     #J=(sen_weight*sensitivity+spec_weight*specificity)/float(sen_weight+spec_weight)
     return J
-    
+   
+def J_from_vectors(guess_list,input_mark):
+    tp=0
+    fp=0
+    tn=0
+    fn=0
+    for data_index in range(len(guess_list)):
+        mark_guess=guess_list[data_index]
+        if input_mark[data_index] == 0:
+            if mark_guess==0:
+                tn+=1
+            else:
+                fp+=1
+        else:
+            if mark_guess==0:
+                fn+=1
+            else:
+                tp+=1
+    sen=float(tp)/float((tp+fn))
+    spec=float(tn)/float((tn+fp))
+    J=adapted_J(sen,spec)
+    return J,sen,spec
 
 def cg_dataframe_filter(dataframe_input,formulation,recipe,modification):
     df=copy.copy(dataframe_input)
@@ -1182,7 +1215,7 @@ def cg_redundancy_modeler_v2(dataframe_input,scan_size=10):
     #print "*********END*********"
     return [[best_J,best_sensitivity,best_specificity,len(print_sum),len(blank_sum)],best_roi_thresh,best_dec_thresh,best_redundancy]
 
-def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3,):
+def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     scan_range=cg_scan_range_finder(dataframe_input,scan_size,3)
     #gonna sweep over bloody everything, and figure out the J value in each case, then save cases where J value is real good
     scan_n=20;
@@ -1317,15 +1350,15 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3,):
     scan_n=100
     T_swing=0.5
     D_swing=0.4
-    ROI0_thresh_rng=np.linspace(best_roi_thresh[0]-T_swing,best_roi_thresh[0]+T_swing,scan_n)
-    ROI1_thresh_rng=np.linspace(best_roi_thresh[1]-T_swing,best_roi_thresh[1]+T_swing,scan_n)
-    ROI2_thresh_rng=np.linspace(best_roi_thresh[2]-T_swing,best_roi_thresh[2]+T_swing,scan_n)
-    ROI0_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[0]-D_swing]),np.min([0.95,best_dec_thresh[0]+D_swing])+0.1,0.1)
-    ROI1_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[1]-D_swing]),np.min([0.95,best_dec_thresh[1]+D_swing])+0.1,0.1)
-    ROI2_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[2]-D_swing]),np.min([0.95,best_dec_thresh[2]+D_swing])+0.1,0.1)
-    #print ROI0_dec_rng
-    ROI_thresh_rng_list=[ROI0_thresh_rng,ROI1_thresh_rng,ROI2_thresh_rng]
-    ROI_dec_rng_list=[ROI0_dec_rng,ROI1_dec_rng,ROI2_dec_rng]
+    #ROI0_thresh_rng=np.linspace(best_roi_thresh[0]-T_swing,best_roi_thresh[0]+T_swing,scan_n)
+    #ROI1_thresh_rng=np.linspace(best_roi_thresh[1]-T_swing,best_roi_thresh[1]+T_swing,scan_n)
+    #ROI2_thresh_rng=np.linspace(best_roi_thresh[2]-T_swing,best_roi_thresh[2]+T_swing,scan_n)
+    #ROI0_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[0]-D_swing]),np.min([0.95,best_dec_thresh[0]+D_swing])+0.1,0.1)
+    #ROI1_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[1]-D_swing]),np.min([0.95,best_dec_thresh[1]+D_swing])+0.1,0.1)
+    #ROI2_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[2]-D_swing]),np.min([0.95,best_dec_thresh[2]+D_swing])+0.1,0.1)
+    ##print ROI0_dec_rng
+    #ROI_thresh_rng_list=[ROI0_thresh_rng,ROI1_thresh_rng,ROI2_thresh_rng]
+    #ROI_dec_rng_list=[ROI0_dec_rng,ROI1_dec_rng,ROI2_dec_rng]
 
     #New code that can accomidate n number of ROIs
     ROI_thresh_rng_list=[]
@@ -1710,6 +1743,54 @@ def threshold_finder(input_data, input_mark,steps=100):
         raise ValueError('Input mark and data are not of equal size')
     sweep_start=np.percentile(input_data,10)
     sweep_end=np.percentile(input_data,90)
+
+
+    #only sweep over data where blank and print sets overlap
+    blank_print_range=[[],[]]
+   
+    for iter in range(len(input_data)):
+        blank_print_switch= int(input_mark[iter])
+        #print blank_print_switch
+        #print blank_print_range[blank_print_switch]
+        if not blank_print_range[blank_print_switch]: #range is empty
+            temp_list=[input_data[iter],input_data[iter]]
+            blank_print_range[blank_print_switch]=temp_list
+            #blank_print_range[blank_print_switch][0]=input_data[iter]
+            #blank_print_range[blank_print_switch][1]=input_data[iter]
+        else:
+            if input_data[iter]<blank_print_range[blank_print_switch][0]:
+                blank_print_range[blank_print_switch][0]=input_data[iter]
+            if input_data[iter]>blank_print_range[blank_print_switch][1]:
+                blank_print_range[blank_print_switch][1]=input_data[iter]
+    
+    #print "BP Range: "
+    #print blank_print_range
+
+    if blank_print_range[0][1]<blank_print_range[1][0]: #NO OVERLAP
+        steps=1
+        middle_value=np.average([blank_print_range[0][1],blank_print_range[1][0]])
+        sweep_start=middle_value
+        sweep_end=middle_value+1 #doesn't matter what this is, but don't want it to equal the start value because that will mess up the min_step_check later
+    elif blank_print_range[0][0]>blank_print_range[1][1]: #NO OVERLAP
+        steps=1
+        middle_value=np.average([blank_print_range[0][0],blank_print_range[1][1]])
+        sweep_start=middle_value
+        sweep_end=middle_value+1 #doesn't matter what this is, but don't want it to equal the start value because that will mess up the min_step_check later
+    else:
+        sweep_start=np.max([blank_print_range[0][0],blank_print_range[1][0]])
+        sweep_end=np.min([blank_print_range[0][1],blank_print_range[1][1]])
+    
+    #check if step is too small
+    min_step=0.05
+    if (sweep_end-sweep_start)/float(steps)<min_step:
+        steps=int((sweep_end-sweep_start)/float(min_step))
+
+    #print sweep_start,
+    #print ",",
+    #print sweep_end,
+    #print ",",
+    #print steps
+
     sweep=np.linspace(sweep_start,sweep_end,steps)
 
     J_max=0
@@ -1753,6 +1834,48 @@ def threshold_finder(input_data, input_mark,steps=100):
 
     return [thresh_best,abs(J_max),J_max,sen_best,spec_best]
 
+def threshold_tester(input_data, input_mark,thresh):   
+    #print input_data
+    #print input_mark
+    if not len(input_data)==len(input_mark):
+        raise ValueError('Input mark and data are not of equal size')
+
+    accuracy_list=[]
+    guess_holder=[]
+    
+    tp=0
+    fp=0
+    tn=0
+    fn=0
+    for data_index in range(len(input_data)):
+        if input_data[data_index]<thresh:
+            mark_guess=0
+            guess_holder.append(0)
+        else:
+            mark_guess=1
+            guess_holder.append(1)
+        if input_mark[data_index] == 0:
+            if mark_guess==0:
+                tn+=1
+                accuracy_list.append(1)
+            else:
+                fp+=1
+                accuracy_list.append(0)
+        else:
+            if mark_guess==0:
+                fn+=1
+                accuracy_list.append(0)
+            else:
+                tp+=1
+                accuracy_list.append(1)
+    sen=float(tp)/float((tp+fn))
+    spec=float(tn)/float((tn+fp))
+    J=adapted_J(sen,spec)
+
+
+    #print [thresh_best,abs(J_max),J_max,sen_best,spec_best,tp_best,fp_best,tn_best,fn_best]
+
+    return J,guess_holder,accuracy_list
 
 def logistic_model_tester(X_train,y_train,coeffs,intercept):
     x_train_list=X_train.values.tolist()
@@ -1796,7 +1919,16 @@ def logistic_model_tester(X_train,y_train,coeffs,intercept):
     truth=tpr-fpr
     return truth,tpr,fpr,tp_counter,tn_counter,fp_counter,fn_counter,accuracy_holder,logistic_result
 
-def pk_modeler(dataframe_input,ring_count):
+
+def path_filter(dataframe_input,path):
+    df=copy.copy(dataframe_input)
+
+    if not path=='skip':
+        df=df.loc[df['Path'].str.contains(path)]
+
+    return df
+
+def pk_modeler(dataframe_input,ring_count,test_type=[1]):
     #code will accept a dataframe input and ring count.  It'll then find the optimal threshold for each ring and each ring combination.  The combos I have in mind are pure differences between rows and averaged differences between rows
 
     #The format for the ring avg column headers are 'Rx' where x is the ring index.  The format for ring count column headers are 'RCx' where x is the ring index
@@ -1810,70 +1942,116 @@ def pk_modeler(dataframe_input,ring_count):
 
     data=pd.DataFrame(columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B"])
 
-    print "Analysis Started"
+    #print "Analysis Started"
 
     #part 1 is simply running through the rings
-    for row_index in range(ring_count):
-        data_index="R"+str(row_index)
-        data_input=list(dataframe_input[data_index])
-        thresh,J_abs,J,sen,spec=threshold_finder(data_input,mark_list,thresh_iterators)
-        test_name=data_index
-        adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B"])
-        data=data.append(adder_df)
+    if 1 in test_type:
+        for row_index in range(ring_count):
+            data_index="R"+str(row_index)
+            data_input=list(dataframe_input[data_index])
+            thresh,J_abs,J,sen,spec=threshold_finder(data_input,mark_list,thresh_iterators)
+            test_name=data_index
+            adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B"])
+            data=data.append(adder_df)
 
-    print "Part 1 Done"
+    #print "Part 1 Done"
 
-    #part 2 is finding the difference between all the columns
-    for start_index in range(ring_count):
-        for end_index in range(ring_count):
-            if end_index>start_index:
+    ##part 2 is finding the difference between all the columns
+    if 2 in test_type:
+        for start_index in range(ring_count):
+            for end_index in range(ring_count):
+                if end_index>start_index:
+                    pos_data_index="R"+str(end_index)
+                    pos_data=list(dataframe_input[pos_data_index])
+                    neg_data_index="R"+str(start_index)
+                    neg_data=list(dataframe_input[neg_data_index])
+                    diff_data=list(np.array(pos_data)-np.array(neg_data))
+                    thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
+                    test_name=pos_data_index+"_minus_"+neg_data_index
+                    adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                    data=data.append(adder_df)
+
+    #print "Part 2 Done"
+
+    ###part 3 is doing a weighted average between all combinations of consecutive columns
+    if 3 in test_type:    
+        neg_index=0
+        for start_range_index in range(1,ring_count-1):
+            for number_of_columns in range(2,ring_count-start_range_index+2):
+                for start_range_fin in range(start_range_index,ring_count-number_of_columns+1):
+                    data_list=[]
+                    weight_list=[]
+                    for col in range(number_of_columns):
+                        data_name="R"+str(col+start_range_fin)
+                        data_list.append(list(dataframe_input[data_name]))
+                        weight_name="RC"+str(col+start_range_fin)
+                        weight_list.append(list(dataframe_input[weight_name]))
+                    avg_col=weighted_average(data_list,weight_list)
+
+                    neg_data_index="R"+str(neg_index)
+                    neg_data=list(dataframe_input[neg_data_index])
+
+                    diff_data=list(np.array(avg_col)-np.array(neg_data))
+                    thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
+                    test_name="R"+str(start_range_fin)+"_to_R"+str(start_range_fin+number_of_columns-1)+"__minus__"+"R"+str(neg_index)
+                    adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                    data=data.append(adder_df)
+
+    #part 4 is finding the difference between all the columns.  By default compares R and RC columns
+    if 4 in test_type:    
+        for start_index in range(ring_count):
+            for end_index in range(ring_count):
                 pos_data_index="R"+str(end_index)
                 pos_data=list(dataframe_input[pos_data_index])
-                neg_data_index="R"+str(start_index)
+                neg_data_index="RC"+str(start_index)
                 neg_data=list(dataframe_input[neg_data_index])
                 diff_data=list(np.array(pos_data)-np.array(neg_data))
-                thresh,J_abs,J,sen,spec=threshold_finder(data_input,mark_list,thresh_iterators)
+                thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
                 test_name=pos_data_index+"_minus_"+neg_data_index
                 adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
                 data=data.append(adder_df)
 
-    print "Part 2 Done"
 
-    ##part 3 is doing a weighted average between all combinations of consecutive columns
-    #neg_index=0
-    #for start_range_index in range(1,ring_count-1):
-    #    for number_of_columns in range(2,ring_count-start_range_index+2):
-    #        for start_range_fin in range(start_range_index,ring_count-number_of_columns+1):
-    #            data_list=[]
-    #            weight_list=[]
-    #            for col in range(number_of_columns):
-    #                data_name="R"+str(col+start_range_fin)
-    #                data_list.append(list(dataframe_input[data_name]))
-    #                weight_name="RC"+str(col+start_range_fin)
-    #                weight_list.append(list(dataframe_input[weight_name]))
-    #            avg_col=weighted_average(data_list,weight_list)
-
-    #            neg_data_index="R"+str(neg_index)
-    #            neg_data=list(dataframe_input[neg_data_index])
-
-    #            diff_data=list(np.array(avg_col)-np.array(neg_data))
-    #            thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
-    #            test_name="R"+str(start_range_fin)+"_to_R"+str(start_range_fin+number_of_columns-1)+"__minus__"+"R"+str(neg_index)
-    #            adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
-    #            data=data.append(adder_df)
-
+    if 5 in test_type:
+        for start_index in range(ring_count):
+            for end_index in range(ring_count):
+                if end_index>start_index:
+                    bin_count=55
+                    for bin_count_start in range(bin_count):
+                        for bin_count_end in range(bin_count):       
+                            pos_data_index="R"+str(end_index)+"b"+str(bin_count_end)
+                            pos_data=list(dataframe_input[pos_data_index])
+                            neg_data_index="R"+str(start_index)+"b"+str(bin_count_start)
+                            neg_data=list(dataframe_input[neg_data_index])
+                            diff_data=list(np.array(pos_data)-np.array(neg_data))
+                            thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
+                            test_name=pos_data_index+"_minus_"+neg_data_index
+                            adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                            data=data.append(adder_df)
+    if 6 in test_type:
+        for row_index in range(ring_count):
+            bin_count=55
+            for bin in range(bin_count):
+                data_index="R"+str(row_index)+"b"+str(bin)
+                #print data_index
+                data_input=list(dataframe_input[data_index])
+                thresh,J_abs,J,sen,spec=threshold_finder(data_input,mark_list,thresh_iterators)
+                test_name=data_index
+                adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B"])
+                data=data.append(adder_df)
     #data.to_csv("dataframe_export2.csv")
 
     #print data
     return data
 
+
 def pk_dataframe_filter(dataframe_input,formulation,recipe,modification):
     df=copy.copy(dataframe_input)
 
     #KEEP ROWS THAT MATCH THE FORMULATION OR BLANK
-    #if not formulation=='skip':
-    #    df=df.loc[df['Formulation'].str.contains(formulation)]
-    print "prog1"
+    if not formulation=='skip':
+        df=df.loc[df['Formulation'].str.contains(formulation)]
+    #print "prog1"
     #KEEP ROWS THAT MATCH THE RECIPE
     if not recipe[0]=='skip':
         df=df.loc[df['Shoe'].isin([recipe[0]])]
@@ -1881,13 +2059,72 @@ def pk_dataframe_filter(dataframe_input,formulation,recipe,modification):
         df=df.loc[df['Brand'].isin([recipe[1]])]
     if not recipe[2]=='skip':
         df=df.loc[df['Location'].isin([recipe[2]])]
-    print "prog2"
+    #print "prog2"
     #KEEP ROWS THAT MATCH THE MODIFICATION
     if not modification=='skip':
         #make lowercase and uppercase options
         df=df.loc[df['AP'].isin([modification])]
 
     return df
+
+def pk_redundancy_tester(dataframe_input,threshold_dictionary):
+    #The first step is to convert the threshold_dictionary to a vector of vectors, each of which are 1 or 0, based on comparing the guess to the Mark
+    mark_list=list(dataframe_input["Mark"])
+    count_print=np.sum(mark_list)
+    count_blank=len(mark_list)-count_print
+    guess_matrix=[]
+    key_list=[]
+
+    for key in threshold_dictionary:
+        key_list.append(key)
+        if 'minus' in key:
+            col_list=key.split("_")
+            col_positive=col_list[0]
+            col_negative=col_list[2]
+            positive_data=list(dataframe_input[col_positive])
+            negative_data=list(dataframe_input[col_negative])
+            diff_data=list(np.array(positive_data)-np.array(negative_data))
+            thresh=threshold_dictionary[key]
+            J,guess_vector,accuracy_vector=threshold_tester(diff_data,mark_list,thresh)
+            guess_matrix.append(guess_vector)
+        else:
+            data=list(dataframe_input[key])
+            thresh=threshold_dictionary[key]
+            J,guess_vector,accuracy_vector=threshold_tester(data,mark_list,thresh)
+            guess_matrix.append(guess_vector)
+
+    #iterate through accuracy_matrix with various levels of redundancy
+    redundancy_list=np.linspace(0.5,len(guess_matrix)-0.5,len(guess_matrix))
+    max_J=0
+    best_sen=0
+    best_spec=0
+    best_red=0
+    for redundancy in redundancy_list:
+        redundancy_guess_list=[]
+        for row in range(len(guess_matrix[0])):
+            true_guess_sum=0
+            for col in range(len(guess_matrix)):
+                true_guess_sum+=guess_matrix[col][row]
+            if true_guess_sum>redundancy:
+                redundancy_guess_list.append(1)
+            else:
+                redundancy_guess_list.append(0)
+        #Calculate sen, spec, and J
+        J,sen,spec=J_from_vectors(redundancy_guess_list,mark_list)
+        print J,
+        print ",",
+        print sen,
+        print ",",
+        print spec
+        print sensation
+        if J>max_J:
+            max_J=J
+            best_sen=sen
+            best_spec=spec
+            best_red=redundancy
+
+    return max_J,best_sen,best_spec,count_blank,count_print,best_red
+
 
 def print_exif_UC(image_path):
     img=PIL.Image.open(image_path)
@@ -1948,8 +2185,8 @@ def weighted_average(input_data, input_weights):
     #data should be a list of lists.
     if not len(input_data)==len(input_weights):
         raise ValueError('Input mark and data are not of equal size')
-    print input_data
-    print input_weights
+    #print input_data
+    #print input_weights
     export_data=[]
     for row in range(len(input_data[0])):
         data_list=[]
@@ -1957,6 +2194,31 @@ def weighted_average(input_data, input_weights):
         for col in range(len(input_data)):
             data_list.append(input_data[col][row])
             weight_list.append(input_weights[col][row])
-        export_avg=np.average(data_list,weights=weight_list)
+        #print data_list
+        #print weight_list
+        #print len(data_list)
+        #print len(weight_list)
+        if np.sum(weight_list)==0:
+            export_avg=np.average(data_list)
+        else:
+            export_avg=np.average(data_list,weights=weight_list)
         export_data.append(export_avg)
     return export_avg
+
+def set_column_sequence(dataframe, seq, front=True): #https://stackoverflow.com/questions/12329853/how-to-rearrange-pandas-column-sequence/23741704
+    '''Takes a dataframe and a subsequence of its columns,
+       returns dataframe with seq as first columns if "front" is True,
+       and seq as last columns if "front" is False.
+    '''
+    cols = seq[:] # copy so we don't mutate seq
+    for x in dataframe.columns:
+        if x not in cols:
+            if front: #we want "seq" to be in the front
+                #so append current column to the end of the list
+                cols.append(x)
+            else:
+                #we want "seq" to be last, so insert this
+                #column in the front of the new column list
+                #"cols" we are building:
+                cols.insert(0, x)
+    return dataframe[cols]
