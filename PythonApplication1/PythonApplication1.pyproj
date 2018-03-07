@@ -21,16 +21,31 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="csv_magic.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="fun.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="main_script.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="mask_development.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="plotter.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PythonApplication1.py" />
+    <Compile Include="regress.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="regress2_copy.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="regress3.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="useful_things.py">
       <SubType>Code</SubType>
     </Compile>
