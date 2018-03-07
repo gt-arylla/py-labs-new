@@ -10,6 +10,13 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+#Export files
+*.csv
+*.jpg
+*.pyperf
+*.pyproj
+*.ipynb
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -310,3 +317,4 @@ __pycache__/
 /PythonApplication1/1.0 1.0.jpg
 /PythonApplication1/1.0 0.0.jpg
 /PythonApplication1/1.0 -1.0.jpg
+/PythonApplication1/NewAppPredSet
