@@ -17,11 +17,12 @@ from sklearn.linear_model import LogisticRegressionCV
 from sklearn.svm import LinearSVC
 from sklearn.cross_validation import train_test_split
 from sklearn import metrics
+import shutil
 
 def dropNAN(input_df,column_where_numbers_start):
     df=input_df
     #remove NAN values from df
-    column_where_numbers_start=8;
+    #column_where_numbers_start=8;
     header_list=df.columns.values.tolist()
     #FIRST, CONVERT COLUMNS TO FLOATS
     for index in range(column_where_numbers_start,len(header_list)): #ONLY OPERATE ON COLUMNS PAST COLUMN x
@@ -506,7 +507,7 @@ def logistic_regression_prep(csv_file,x_cols,row_keep=[[0]], tst_size=0.000,mark
 
 def adapted_J(sensitivity,specificity,n_print=0,n_CP=0):
     sen_weight=1
-    spec_weight=1
+    spec_weight=3
     FN_weight=1
     CP_weight=2
     n_FN=(1-sensitivity)*n_print-n_CP
@@ -586,7 +587,7 @@ def cg_scan_range_finder(dataframe_input,ROI_cols,ROI_size):
     #        max_min_export.append(np.max(value_holder))
     #    elif df_index==1:
     #        max_min_export.append(np.min(value_holder))
-    max_min_export=[2,-1]
+    max_min_export=[-5,15]
     return max_min_export
 
 def cg_combine_print_blank(dataframe_print,dataframe_blank):
@@ -1218,7 +1219,7 @@ def cg_redundancy_modeler_v2(dataframe_input,scan_size=10):
 def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     scan_range=cg_scan_range_finder(dataframe_input,scan_size,3)
     #gonna sweep over bloody everything, and figure out the J value in each case, then save cases where J value is real good
-    scan_n=20;
+    scan_n=100;
     #print scan_range[0]+3
     #print scan_range[1]-3
     ROI0_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
@@ -1928,6 +1929,22 @@ def path_filter(dataframe_input,path):
 
     return df
 
+def arbitrary_exclude(dataframe_input,column,str):
+    df=copy.copy(dataframe_input)
+
+    if not str=='skip':
+        df = df[~df[column].isin([str])]
+
+    return df
+
+def arbitrary_filter(dataframe_input,column,str):
+    df=copy.copy(dataframe_input)
+
+    if not str=='skip':
+        df=df.loc[df[column].str.contains(str)]
+
+    return df
+
 def pk_modeler(dataframe_input,ring_count,test_type=[1]):
     #code will accept a dataframe input and ring count.  It'll then find the optimal threshold for each ring and each ring combination.  The combos I have in mind are pure differences between rows and averaged differences between rows
 
@@ -2054,7 +2071,7 @@ def pk_dataframe_filter(dataframe_input,formulation,recipe,modification):
     #print "prog1"
     #KEEP ROWS THAT MATCH THE RECIPE
     if not recipe[0]=='skip':
-        df=df.loc[df['Shoe'].isin([recipe[0]])]
+        df=df.loc[df['Size'].isin([recipe[0]])]
     if not recipe[1]=='skip':
         df=df.loc[df['Brand'].isin([recipe[1]])]
     if not recipe[2]=='skip':
@@ -2067,16 +2084,20 @@ def pk_dataframe_filter(dataframe_input,formulation,recipe,modification):
 
     return df
 
-def pk_redundancy_tester(dataframe_input,threshold_dictionary):
+def pk_redundancy_checker(dataframe_input,threshold_dictionary,red_value,test_type=[1]):
     #The first step is to convert the threshold_dictionary to a vector of vectors, each of which are 1 or 0, based on comparing the guess to the Mark
     mark_list=list(dataframe_input["Mark"])
+    path_list=list(dataframe_input["Path"])
     count_print=np.sum(mark_list)
     count_blank=len(mark_list)-count_print
     guess_matrix=[]
+    diff_matrix=[]
     key_list=[]
+    #print threshold_dictionary
 
     for key in threshold_dictionary:
         key_list.append(key)
+        #print key
         if 'minus' in key:
             col_list=key.split("_")
             col_positive=col_list[0]
@@ -2086,44 +2107,233 @@ def pk_redundancy_tester(dataframe_input,threshold_dictionary):
             diff_data=list(np.array(positive_data)-np.array(negative_data))
             thresh=threshold_dictionary[key]
             J,guess_vector,accuracy_vector=threshold_tester(diff_data,mark_list,thresh)
+            diff_vector=list(np.array(diff_data)-thresh)
             guess_matrix.append(guess_vector)
+            diff_matrix.append(diff_vector)
         else:
             data=list(dataframe_input[key])
             thresh=threshold_dictionary[key]
             J,guess_vector,accuracy_vector=threshold_tester(data,mark_list,thresh)
+            diff_vector=list(np.array(data)-thresh)
             guess_matrix.append(guess_vector)
+            diff_matrix.append(diff_vector)
 
     #iterate through accuracy_matrix with various levels of redundancy
-    redundancy_list=np.linspace(0.5,len(guess_matrix)-0.5,len(guess_matrix))
+
+    # Redundancy method
+    guess_matrix_cols=range(len(key_list))
+    redundancy_list=np.linspace(0.5,len(guess_matrix_cols)-0.5,len(guess_matrix_cols))
+            
+    redundancy=red_value
+    redundancy_guess_list=[]
+    for row in range(len(guess_matrix[0])):
+        true_guess_sum=0
+        for col in guess_matrix_cols:
+            true_guess_sum+=guess_matrix[col][row]
+        if true_guess_sum>redundancy:
+            redundancy_guess_list.append(1)
+        else:
+            redundancy_guess_list.append(0)
+    #Calculate sen, spec, and J
+    J,sen,spec=J_from_vectors(redundancy_guess_list,mark_list)
+    #print J,
+    #print ",",
+    #print sen,
+    #print ",",
+    #print spec,
+    #print ",",
+    #print guess_matrix_cols
+    max_J=J
+    best_sen=sen
+    best_spec=spec
+    best_red=redundancy
+    best_guess_mat=guess_matrix_cols
+    best_guess_list=redundancy_guess_list
+
+
+    #if 2 in test_type:
+    #    for iter in range(1,len(key_list)+1):
+    #        #print iter
+    #        for val in it.combinations(range(0,len(key_list)),iter):
+    #            guess_matrix_cols=list(val)
+    #            sum_vector=[]
+    #            for row in range(len(guess_matrix[0])):
+    #                col_sum=0
+    #                for col in guess_matrix_cols:
+    #                    col_sum+=diff_matrix[col][row]
+    #                sum_vector.append(col_sum)
+    #            #Calculate sen, spec, and J
+    #            thresh,J_abs,J,sen,spec=threshold_finder(sum_vector,mark_list,20)
+    #            print J,
+    #            print ",",
+    #            print sen,
+    #            print ",",
+    #            print spec,
+    #            print ",",
+    #            print thresh,
+    #            print ",",
+    #            print guess_matrix_cols
+    #            if J>max_J:
+    #                max_J=J
+    #                best_sen=sen
+    #                best_spec=spec
+    #                best_red=thresh
+    #                best_guess_mat=guess_matrix_cols
+    #                J,guess_vector,accuracy_vector=threshold_tester(sum_vector,mark_list,thresh)
+    #                best_guess_list=guess_vector
+                        
+  #  print best_guess_mat
+
+    #save the winning columns and thresholds
+    best_guess_mat2=[]
+    for iter in best_guess_mat:
+        key=key_list[iter]
+        value=threshold_dictionary[key]
+        best_guess_mat2.append([key,value])
+
+    fail_pic_list=[]
+    for iter in range(len(best_guess_list)):
+        if not best_guess_list[iter]==mark_list[iter]:
+            fail_pic_list.append(path_list[iter])
+            #print path_list[iter]
+
+    #for fail_pic_dir in fail_pic_list:
+    #    fix_path=fail_pic_dir.replace('\\',"//")
+    #    shutil.copy2(fail_pic_dir,'bad_pics')
+
+    return max_J,best_sen,best_spec,count_blank,count_print,best_red,best_guess_mat2,fail_pic_list
+
+def pk_redundancy_tester(dataframe_input,threshold_dictionary,test_type=[1]):
+    #The first step is to convert the threshold_dictionary to a vector of vectors, each of which are 1 or 0, based on comparing the guess to the Mark
+    mark_list=list(dataframe_input["Mark"])
+    path_list=list(dataframe_input["Path"])
+    count_print=np.sum(mark_list)
+    count_blank=len(mark_list)-count_print
+    guess_matrix=[]
+    diff_matrix=[]
+    key_list=[]
+    #print threshold_dictionary
+
+    for key in threshold_dictionary:
+        key_list.append(key)
+        #print key
+        if 'minus' in key:
+            col_list=key.split("_")
+            col_positive=col_list[0]
+            col_negative=col_list[2]
+            positive_data=list(dataframe_input[col_positive])
+            negative_data=list(dataframe_input[col_negative])
+            diff_data=list(np.array(positive_data)-np.array(negative_data))
+            thresh=threshold_dictionary[key]
+            J,guess_vector,accuracy_vector=threshold_tester(diff_data,mark_list,thresh)
+            diff_vector=list(np.array(diff_data)-thresh)
+            guess_matrix.append(guess_vector)
+            diff_matrix.append(diff_vector)
+        else:
+            data=list(dataframe_input[key])
+            thresh=threshold_dictionary[key]
+            J,guess_vector,accuracy_vector=threshold_tester(data,mark_list,thresh)
+            diff_vector=list(np.array(data)-thresh)
+            guess_matrix.append(guess_vector)
+            diff_matrix.append(diff_vector)
+
+    #iterate through accuracy_matrix with various levels of redundancy
+
+    # Redundancy method
     max_J=0
     best_sen=0
     best_spec=0
     best_red=0
-    for redundancy in redundancy_list:
-        redundancy_guess_list=[]
-        for row in range(len(guess_matrix[0])):
-            true_guess_sum=0
-            for col in range(len(guess_matrix)):
-                true_guess_sum+=guess_matrix[col][row]
-            if true_guess_sum>redundancy:
-                redundancy_guess_list.append(1)
-            else:
-                redundancy_guess_list.append(0)
-        #Calculate sen, spec, and J
-        J,sen,spec=J_from_vectors(redundancy_guess_list,mark_list)
-        print J,
-        print ",",
-        print sen,
-        print ",",
-        print spec
-        print sensation
-        if J>max_J:
-            max_J=J
-            best_sen=sen
-            best_spec=spec
-            best_red=redundancy
+    best_guess_mat=[]
+    best_guess_list=[]
+    #print key_list
+    if 1 in test_type:
+      #  for iter in range(1,len(key_list)+1):
+        for iter in range(1,4):
+            #print iter
+            for val in it.combinations(range(0,len(key_list)),iter):
+                guess_matrix_cols=list(val)
+                redundancy_list=np.linspace(0.5,len(guess_matrix_cols)-0.5,len(guess_matrix_cols))
+            
+                for redundancy in redundancy_list:
+                    redundancy_guess_list=[]
+                    for row in range(len(guess_matrix[0])):
+                        true_guess_sum=0
+                        for col in guess_matrix_cols:
+                            true_guess_sum+=guess_matrix[col][row]
+                        if true_guess_sum>redundancy:
+                            redundancy_guess_list.append(1)
+                        else:
+                            redundancy_guess_list.append(0)
+                    #Calculate sen, spec, and J
+                    J,sen,spec=J_from_vectors(redundancy_guess_list,mark_list)
+                    #print J,
+                    #print ",",
+                    #print sen,
+                    #print ",",
+                    #print spec,
+                    #print ",",
+                    #print guess_matrix_cols
+                    if J>max_J:
+                        max_J=J
+                        best_sen=sen
+                        best_spec=spec
+                        best_red=redundancy
+                        best_guess_mat=guess_matrix_cols
+                        best_guess_list=redundancy_guess_list
+    if 2 in test_type:
+        for iter in range(1,len(key_list)+1):
+            #print iter
+            for val in it.combinations(range(0,len(key_list)),iter):
+                guess_matrix_cols=list(val)
+                sum_vector=[]
+                for row in range(len(guess_matrix[0])):
+                    col_sum=0
+                    for col in guess_matrix_cols:
+                        col_sum+=diff_matrix[col][row]
+                    sum_vector.append(col_sum)
+                #Calculate sen, spec, and J
+                thresh,J_abs,J,sen,spec=threshold_finder(sum_vector,mark_list,20)
+                print J,
+                print ",",
+                print sen,
+                print ",",
+                print spec,
+                print ",",
+                print thresh,
+                print ",",
+                print guess_matrix_cols
+                if J>max_J:
+                    max_J=J
+                    best_sen=sen
+                    best_spec=spec
+                    best_red=thresh
+                    best_guess_mat=guess_matrix_cols
+                    J,guess_vector,accuracy_vector=threshold_tester(sum_vector,mark_list,thresh)
+                    best_guess_list=guess_vector
+                        
+    #print best_guess_mat
 
-    return max_J,best_sen,best_spec,count_blank,count_print,best_red
+    #save the winning columns and thresholds
+    best_guess_mat2={}
+    for iter in best_guess_mat:
+        
+        key=key_list[iter]
+        value=threshold_dictionary[key]
+        best_guess_mat2[key]=value
+        #best_guess_mat2.append([key,value])
+
+    fail_pic_list=[]
+    for iter in range(len(best_guess_list)):
+        if not best_guess_list[iter]==mark_list[iter]:
+            fail_pic_list.append(path_list[iter])
+            #print path_list[iter]
+
+    #for fail_pic_dir in fail_pic_list:
+    #    fix_path=fail_pic_dir.replace('\\',"//")
+    #    shutil.copy2(fail_pic_dir,'bad_pics')
+
+    return max_J,best_sen,best_spec,count_blank,count_print,best_red,best_guess_mat2,fail_pic_list
 
 
 def print_exif_UC(image_path):
