@@ -24,7 +24,8 @@ user_comment='test_comment'
 
 directory_move="G://Google Drive//Original Images//Pumped Kicks//180207 Algo_Test//Blank"
 
-directory_start="G://Google Drive//Original Images//Pumped Kicks//180221 New_Tags_120mS_80mS_AP1"
+directory_start="C://Users//gttho//Documents//Visual Studio 2017//Projects//PythonApplication1//PythonApplication1//bad_pics"
+directory_start="C://Users//gttho//Offline//Arylla Temp Photos//180304 No_Flash_Full_Set"
 adder_string=["50mS","75mS","100mS"]
 adder_string=[""]
 for adder in adder_string:
@@ -112,7 +113,7 @@ for adder in adder_string:
                 ############CONVERT TEXT A TO TEXT B ##########
                 #convert Count value
                 if (0):
-                    user_comment=string.replace(user_comment,'Formulation:Prints','Formulation:80mS')
+                    user_comment=string.replace(user_comment,'Blank','Print')
 
                 ############Fancy Convert (date, commas, convert to number)#############
                 #if counter1%3==0:
@@ -136,7 +137,7 @@ for adder in adder_string:
 
                 ###########Direct Add#################
                 if(0):
-                    user_comment='AP:AP1,'+user_comment
+                    user_comment='Colour:Black,Brand:Adidas,'+user_comment
                     print user_comment
                     
 
@@ -170,13 +171,13 @@ for adder in adder_string:
 
 
                 ###########CHANGE EXIF BASED ON FILE PATH############
-                if(0):
+                if(1):
                     filname_mod=filname.replace('//',"\\")
                     filname_list=filname_mod.split("\\")
                     del filname_list[-1]  #Deletes the filename from the list
                     filname_list.reverse() #reverses the order so that the suff you care about is in the beginning
 
-                    key_list=['Location','Brand','Shoe','Formulation']
+                    key_list=['Location','Brand','Formulation']
 
                     #key_list=['Location']
                     uc_new=''
@@ -194,19 +195,19 @@ for adder in adder_string:
                 ##############OVERWRITE ALL USER DATA#############
                 if(0):
                     print user_comment
-                    #user_comment='Ink:0,Binder:0,Solvent:0,Formulation:Blank,Modified:M0'
-                    user_comment='Ink:0,Binder:'+str(t_diff_hours)+',Solvent:'+str(int(round(t_diff_hours)))+',Formulation:Ink,Modified:'+adder
+                    user_comment='AP:AP0,Exposure Bias:EV0,Size:0.50 inch,Location:LIH,Colour:Black,Brand:Jordans,Formulation:Blank,LUX:l100,'
+                   # user_comment='Ink:0,Binder:'+str(t_diff_hours)+',Solvent:'+str(int(round(t_diff_hours)))+',Formulation:Ink,Modified:'+adder
 
                 ###############RENAME FILE BASED ON EXIF############
                 if(0):
-                    #ps_list=['Ink','Blank']
+                    ps_list=['Print','Blank']
             
-                    #append_value=''
-                    #print user_comment
-                    #for ps_string in ps_list:
-                    #    ps_checker=ps_string
-                    #    if ps_checker in user_comment:
-                    #        append_value+=ps_string
+                    append_value=''
+                    print user_comment
+                    for ps_string in ps_list:
+                        ps_checker=ps_string
+                        if ps_checker in user_comment:
+                            append_value+=ps_string
             
                     #ps_list=['Binder:2','Binder:1']
 
@@ -221,11 +222,13 @@ for adder in adder_string:
                     #date=date.replace(" ",'')
                     #append_value=date
                    
-                    uc_noColon=user_comment.replace(":","-")
-                    append_value=uc_noColon
+                    #uc_noColon=user_comment.replace(":","-")
+                    #uc_noColon=uc_noColon.replace("/","")
+                    #append_value=uc_noColon
 
                     new_filename=filname[:-4]+'_'+append_value+'.jpg'
                     #new_filename=filname[:-12]+'_'+append_value+'_'+filname[-12:-4]+'.jpg'
+                    print new_filename
                     os.rename(filname,new_filename)
 
                # print user_comment
