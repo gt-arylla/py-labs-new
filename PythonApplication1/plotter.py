@@ -1,8 +1,10 @@
 import cv2
 import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
 import csv
 import itertools as it
+import scipy
 
 
 #Plot data from input CSV, organized according to the FAF C++ code
@@ -164,7 +166,7 @@ def FAF_plotter(csv_file,x_col_in,y_col_in,s_col,yaxis=[],xaxis=[]):
                     print key
                     plt.plot(values_dictionary[z_val + ' ' + i][0],values_dictionary[z_val + ' ' + i][1],label=z_val,alpha=0.5,marker='.',linestyle = 'None',ms=4)
                 plt.title(i)
-                #plt.legend(loc='best')
+                plt.legend(loc='best')
                 axes = plt.gca()
 
                 if len(yaxis) == 2:
@@ -206,3 +208,87 @@ def FAF_plotter(csv_file,x_col_in,y_col_in,s_col,yaxis=[],xaxis=[]):
     #            if all_data[row,s_col[i]]==val
 
     return
+
+def cotsu_plotter(csv_file):
+    df=pd.read_csv("G://Google Drive//Datasets//180122_cOtsu_till_App36.csv",header=0)
+    df['PhotoSet']=df['PhotoSet'].astype(str)
+
+    df_train=df.loc[df['Category'].str.contains("Train1")]
+    df_test=df.loc[df['Category'].str.contains("Test1|Test3")==True]
+    df_train_101=df_train.loc[df['PhotoSet'].str.contains("101")]
+    df_train_102=df_train.loc[df['PhotoSet'].str.contains("102")]
+    df_test_101=df_test.loc[df['PhotoSet'].str.contains("101")]
+    df_test_102=df_test.loc[df['PhotoSet'].str.contains("102")]
+
+    bins=["WH_White","WH_Black","LG_White","LG_Black","MG_White","MG_Black","DG_White","DG_Black","BK_White","BK_Black","R_White","R_Black","O_White","O_Black","Y_White","Y_Black","SG_White","SG_Black","G_White","G_Black","TU_White","TU_Black","CY_White","CY_Black","AZ_White","AZ_Black","B_White","B_Black","PU_White","PU_Black","MA_White","MA_Black","PI_White","PI_Black","BC_White","BC_Black"]
+
+    for bin in bins:
+        for PhotoSet in [101,102]:
+            if PhotoSet==101:
+                data_test=df_test_101[bin]
+                data_train=df_train_101[bin]
+            if PhotoSet==102:
+                data_test=df_test_102[bin]
+                data_train=df_train_102[bin]
+            #f,p=scipy.stats.f_oneway(data_test,data_train)
+            t,p2=scipy.stats.ttest_ind(data_test,data_train)
+            print "Bin, PhotoSet, f, p:"+bin +","+str(PhotoSet)+","+str(t)+","+str(p2)+","+str(max(data_test))+','+str(max(data_train))
+            #if PhotoSet==101:
+            #    plt.subplot(121)
+            #if PhotoSet==102:
+            #    plt.subplot(122)
+            #plt.hist([data_test,data_train],10,alpha=0.3,normed=1,histtype='stepfilled')
+            #plt.title(bin+" "+str(PhotoSet))
+            #plt.legend(['test','train'])
+            #plt.xlabel("p=%s" %p2)
+            
+            #if PhotoSet==102:
+            #    #plt.show()
+                
+            #    plt.savefig(bin+".jpg")
+            #    plt.clf()
+def pivot_histogram(csv_file,header,data):
+    df=pd.read_csv(csv_file,header=0)
+
+    print df
+
+    del df['DateTime']
+    #del df['Is_White']
+    #del df['Is_Square']
+
+    print df
+
+    #pivot_table=df.pivot(df,index='Key',columns='Tag',values='Match')
+
+    #dfs2 = [rows for _, rows in df.groupby('Category')]
+    dfs2=[df]
+    for internal_df in dfs2:
+        dfs=[rows for _, rows in internal_df.groupby('Category')]
+        data_cols=['Match','Duration']
+        count=1
+        titl=""
+        for data_col in data_cols:
+
+            dfs_data=[]
+            legend_list=[]
+            for internal_df in dfs:
+                #print internal_df[data_col].mean
+                dfs_data.append(internal_df[data_col])
+                legend_list.append(internal_df.iloc[1,0])
+            #print pivot_table
+            titl=internal_df.iloc[1,1]+" "+data_col
+            plt.subplot(len(data_cols),1,count)
+            plt.hist(dfs_data,100,alpha=0.3,normed=1,histtype='stepfilled')
+            plt.title(titl)
+            #plt.xlim([0,255])
+            plt.legend(legend_list)
+            count+=1
+       
+        for internal_df in dfs:
+            print internal_df.iloc[1,0]
+            print internal_df.iloc[1,1]
+            print internal_df.describe()
+        plt.show()
+        plt.savefig(titl+".jpg")
+        plt.clf()
+    
