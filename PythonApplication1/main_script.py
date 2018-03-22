@@ -663,7 +663,7 @@ if(1): #CanadaGoose Logistic Regression
             #print df_b
             df=df.append(df_b);
 
-        df=fun.set_column_sequence(df,['Path','Formulation','AP','Shoe','Brand','Location','Size','Colour','LUX','DateTime'])
+        df=fun.set_column_sequence(df,['path','formulation','ap','shoe','brand','location','size','colour','lux','datetime'])
        # print df
 
        # df=fun.path_filter(df,"Solid_Square_80mS_100mS")
@@ -692,7 +692,7 @@ if(1): #CanadaGoose Logistic Regression
         #print df
 
         #Make Dataframe of Blanks
-        df_blank=df.loc[df['Formulation'].str.contains('blank|Blank')]
+        df_blank=df.loc[df['formulation'].str.contains('blank|Blank')]
 
         #df_blank=df.loc[df['Path'].str.contains('blank|Blank')]
 
@@ -918,7 +918,7 @@ if(1): #CanadaGoose Logistic Regression
                                     df_blank_input=fun.cg_dataframe_filter(df_blank_input,'Blank',['skip',recipe[1],'skip'],mod)
                                 #df_blank_input=fun.cg_dataframe_filter(df_blank_input,'Blank',['skip',blank_recipe,'skip'],mod)
                                 #print df_blank.iloc[:,0:5]
-                                df_input=fun.arbitrary_exclude(df_input,'Formulation','Blank')
+                                df_input=fun.arbitrary_exclude(df_input,'formulation','blank')
                                 df_fin=fun.cg_combine_print_blank(df_input,df_blank_input)
                                 #print df_fin
                                 #print df_fin
@@ -971,7 +971,7 @@ if(1): #CanadaGoose Logistic Regression
                                 #print recipe
                                 #print df_blank.iloc[:,0:5]
                             
-                                df_blank_input=fun.cg_dataframe_filter(df_blank_input,'Blank',['skip',recipe[1],'skip'],mod)
+                                df_blank_input=fun.cg_dataframe_filter(df_blank_input,'blank',['skip',recipe[1],'skip'],mod)
                             
                                 #print df_blank.iloc[:,0:5]
                                 df_fin=fun.cg_combine_print_blank(df_input,df_blank_input)
@@ -1222,8 +1222,8 @@ if(1): #CanadaGoose Logistic Regression
 
                                 df_input=fun.pk_dataframe_filter(df_input,formulation,recipe,mod)
                                 size_filter='skip'
-                                df_input=fun.arbitrary_filter(df_input,'Size',size_filter)
-                                df_input=fun.arbitrary_exclude(df_input,'Formulation','Blank')
+                                df_input=fun.arbitrary_filter(df_input,'size',size_filter)
+                                df_input=fun.arbitrary_exclude(df_input,'formulation','blank')
                                 #df_input=fun.arbitrary_exclude(df_input,'PW_check','Fail')
                                 #df_input=fun.arbitrary_exclude(df_input,'MatchCheck','Fail')
 
@@ -1264,7 +1264,7 @@ if(1): #CanadaGoose Logistic Regression
 
                                 df_list=[]
                                 for pFilter in ['180304','180303','180302']:
-                                    df_list.append(fun.arbitrary_filter(df_fin,'Path',pFilter))
+                                    df_list.append(fun.arbitrary_filter(df_fin,'path',pFilter))
                                 df_fin = pd.concat(df_list)
 
 

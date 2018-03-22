@@ -567,17 +567,17 @@ def cg_dataframe_filter(dataframe_input,formulation,recipe,modification):
         df=pd.concat([df_uc,df_lc])
     return df
 
-def cg_scan_range_finder(dataframe_input,ROI_cols,ROI_size):
+def cg_scan_range_finder(dataframe_input,roi_cols,roi_size):
     df=copy.copy(dataframe_input)
-    #df_print,df_blank=[x for _, x in df.groupby(df['Mark'] <0.5) ]
+    #df_print,df_blank=[x for _, x in df.groupby(df['mark'] <0.5) ]
 
     #df_range=[df_blank,df_print]
     #max_min_export=[]
     #for df_index in range(len(df_range)):
     #    value_holder=[]
-    #    for ROI in range(ROI_size):
-    #        for scan in range(ROI_cols):
-    #            col_caller='ROI_'+str(ROI)+'_scan_'+str(scan)
+    #    for roi in range(roi_size):
+    #        for scan in range(roi_cols):
+    #            col_caller='roi_'+str(roi)+'_scan_'+str(scan)
     #            if df_index==0:
                     
     #                value_holder.append(df_range[df_index][col_caller].max())
@@ -599,53 +599,53 @@ def cg_combine_print_blank(dataframe_print,dataframe_blank):
     #print bLength
     print_mark_series=pd.Series(np.ones(pLength))
     blank_mark_series=pd.Series(np.zeros(bLength))
-    dfp=dfp.assign(Mark=print_mark_series.values)
-    dfb=dfb.assign(Mark=blank_mark_series.values)
+    dfp=dfp.assign(mark=print_mark_series.values)
+    dfb=dfb.assign(mark=blank_mark_series.values)
     df_fin=pd.concat([dfp,dfb],ignore_index=True)
     return df_fin
 
 def cg_white_mean_finder(dataframe_input,scan_size=10):
     list_data_holder=cg_dataframe_to_list(dataframe_input,scan_size)
-    ROI_blank=[]
-    ROI_print=[]
+    roi_blank=[]
+    roi_print=[]
     for row_index in range(len(list_data_holder)):
         sum_count=0
-        ROI_holder=[]
-        for ROI_index in range(3):
+        roi_holder=[]
+        for roi_index in range(3):
             white_holder=[]
-            for scan_index in range(len(list_data_holder[row_index][0][ROI_index])): 
-                white_holder.append(list_data_holder[row_index][0][ROI_index][scan_index])
-            ROI_mean=np.mean(white_holder)
-            ROI_holder.append(ROI_mean)   
+            for scan_index in range(len(list_data_holder[row_index][0][roi_index])): 
+                white_holder.append(list_data_holder[row_index][0][roi_index][scan_index])
+            roi_mean=np.mean(white_holder)
+            roi_holder.append(roi_mean)   
         if list_data_holder[row_index][1]==0:
-            ROI_blank.append(ROI_holder)
+            roi_blank.append(roi_holder)
         elif list_data_holder[row_index][1]==1:
-            ROI_print.append(ROI_holder)
+            roi_print.append(roi_holder)
         else:
             print "************MARK ERROR********"
-    ROI0_blank=[]
-    ROI1_blank=[]
-    ROI2_blank=[]
-    ROI0_print=[]
-    ROI1_print=[]
-    ROI2_print=[]
-    for ROI_blank_single in ROI_blank:
-        ROI0_blank.append(ROI_blank_single[0])
-        ROI1_blank.append(ROI_blank_single[1])
-        ROI2_blank.append(ROI_blank_single[2])
-    for ROI_print_single in ROI_print:
-        ROI0_print.append(ROI_print_single[0])
-        ROI1_print.append(ROI_print_single[1])
-        ROI2_print.append(ROI_print_single[2])
-    ROI0_blank_mean=np.mean(ROI0_blank)
-    ROI1_blank_mean=np.mean(ROI1_blank)
-    ROI2_blank_mean=np.mean(ROI2_blank)
-    ROI0_print_mean=np.mean(ROI0_print)
-    ROI1_print_mean=np.mean(ROI1_print)
-    ROI2_print_mean=np.mean(ROI2_print)    
-    ROI_print_mean=np.mean([ROI0_print_mean,ROI1_print_mean,ROI2_print_mean])
-    ROI_blank_mean=np.mean([ROI0_blank_mean,ROI1_blank_mean,ROI2_blank_mean])
-    return [[ROI_print_mean,ROI0_print_mean,ROI1_print_mean,ROI2_print_mean],[ROI_blank_mean,ROI0_blank_mean,ROI1_blank_mean,ROI2_blank_mean]]
+    roi0_blank=[]
+    roi1_blank=[]
+    roi2_blank=[]
+    roi0_print=[]
+    roi1_print=[]
+    roi2_print=[]
+    for roi_blank_single in roi_blank:
+        roi0_blank.append(roi_blank_single[0])
+        roi1_blank.append(roi_blank_single[1])
+        roi2_blank.append(roi_blank_single[2])
+    for roi_print_single in roi_print:
+        roi0_print.append(roi_print_single[0])
+        roi1_print.append(roi_print_single[1])
+        roi2_print.append(roi_print_single[2])
+    roi0_blank_mean=np.mean(roi0_blank)
+    roi1_blank_mean=np.mean(roi1_blank)
+    roi2_blank_mean=np.mean(roi2_blank)
+    roi0_print_mean=np.mean(roi0_print)
+    roi1_print_mean=np.mean(roi1_print)
+    roi2_print_mean=np.mean(roi2_print)    
+    roi_print_mean=np.mean([roi0_print_mean,roi1_print_mean,roi2_print_mean])
+    roi_blank_mean=np.mean([roi0_blank_mean,roi1_blank_mean,roi2_blank_mean])
+    return [[roi_print_mean,roi0_print_mean,roi1_print_mean,roi2_print_mean],[roi_blank_mean,roi0_blank_mean,roi1_blank_mean,roi2_blank_mean]]
 
 def cg_redundancy_tester(dataframe_input,best_roi_thresh,best_dec_thresh,best_redundancy,print_failures=False,scan_size=10):
     list_data_holder=cg_dataframe_to_list(dataframe_input,scan_size)
@@ -653,13 +653,13 @@ def cg_redundancy_tester(dataframe_input,best_roi_thresh,best_dec_thresh,best_re
     true_print_guess_list=[]
     for row_index in range(len(list_data_holder)):
         sum_count=0
-        for ROI_index in range(len(best_roi_thresh)):
+        for roi_index in range(len(best_roi_thresh)):
             read_count=0
-            for scan_index in range(len(list_data_holder[row_index][0][ROI_index])): 
-                if list_data_holder[row_index][0][ROI_index][scan_index]>best_roi_thresh[ROI_index]:
+            for scan_index in range(len(list_data_holder[row_index][0][roi_index])): 
+                if list_data_holder[row_index][0][roi_index][scan_index]>best_roi_thresh[roi_index]:
                     read_count+=1
-            confidence_value=float(read_count)/float(len(list_data_holder[row_index][0][ROI_index]))
-            if confidence_value>best_dec_thresh[ROI_index]:
+            confidence_value=float(read_count)/float(len(list_data_holder[row_index][0][roi_index]))
+            if confidence_value>best_dec_thresh[roi_index]:
                 sum_count+=1
         if sum_count>best_redundancy:
             guess_val=1
@@ -682,39 +682,39 @@ def cg_redundancy_tester(dataframe_input,best_roi_thresh,best_dec_thresh,best_re
 
     return [J, sensitivity, specificity, n_print, n_blank]
 
-def cg_redundancy_tester_detail(dataframe_input,best_roi_thresh,best_dec_thresh,best_redundancy,scan_size=10,print_failures=False): #Prints out original dataframe, as well as binary guess for each ROI, and sucess/failure per guess
+def cg_redundancy_tester_detail(dataframe_input,best_roi_thresh,best_dec_thresh,best_redundancy,scan_size=10,print_failures=False): #Prints out original dataframe, as well as binary guess for each roi, and sucess/failure per guess
     #Reset row index of dataframe so that data can be grabbed easily
     dataframe_input=dataframe_input.reset_index(drop=True)
     #Convert to list for speed
     list_data_holder=cg_dataframe_to_list(dataframe_input,scan_size)
     true_blank_guess_list=[]
     true_print_guess_list=[]
-    roi_guess_list=[[],[],[]] #only built for 3 ROIs
+    roi_guess_list=[[],[],[]] #only built for 3 rois
     roi_accuracy_list=[[],[],[]]
     for row_index in range(len(list_data_holder)):
-        #for header_val in ['Formulation','Mod','Ink','Binder','Solvent','DateTime','Mark']:
+        #for header_val in ['Formulation','Mod','Ink','Binder','Solvent','DateTime','mark']:
         #    print dataframe_input[header_val][row_index],
         #    print ',',
 
         sum_count=0
-        for ROI_index in range(len(best_roi_thresh)):
+        for roi_index in range(len(best_roi_thresh)):
             read_count=0
-            for scan_index in range(len(list_data_holder[row_index][0][ROI_index])): 
-                if list_data_holder[row_index][0][ROI_index][scan_index]>best_roi_thresh[ROI_index]:
+            for scan_index in range(len(list_data_holder[row_index][0][roi_index])): 
+                if list_data_holder[row_index][0][roi_index][scan_index]>best_roi_thresh[roi_index]:
                     read_count+=1
-            confidence_value=float(read_count)/float(len(list_data_holder[row_index][0][ROI_index]))
-            if confidence_value>best_dec_thresh[ROI_index]:
+            confidence_value=float(read_count)/float(len(list_data_holder[row_index][0][roi_index]))
+            if confidence_value>best_dec_thresh[roi_index]:
                 sum_count+=1
                 if list_data_holder[row_index][1]==1:
-                    roi_accuracy_list[ROI_index].append(1)
+                    roi_accuracy_list[roi_index].append(1)
                 else:
-                    roi_accuracy_list[ROI_index].append(0)
+                    roi_accuracy_list[roi_index].append(0)
                 #print '1,',
             else:
                 if list_data_holder[row_index][1]==1:
-                    roi_accuracy_list[ROI_index].append(0)
+                    roi_accuracy_list[roi_index].append(0)
                 else:
-                    roi_accuracy_list[ROI_index].append(1)
+                    roi_accuracy_list[roi_index].append(1)
                 #print '0,',
 
         if sum_count>best_redundancy:
@@ -751,26 +751,26 @@ def cg_redundancy_tester_detail(dataframe_input,best_roi_thresh,best_dec_thresh,
 def cg_dataframe_to_list(dataframe_input,scan_size):
     header_list=list(dataframe_input)
     #scan_size=10
-    ROI_starter_list=["ROI_0_scan_0","ROI_1_scan_0","ROI_2_scan_0","Mark"]
-    ROI_starter_index_list=[0,0,0,0]
+    roi_starter_list=["roi_0_scan_0","roi_1_scan_0","roi_2_scan_0","mark"]
+    roi_starter_index_list=[0,0,0,0]
     for header_index in range(len(header_list)):
-        for header_string_index in range(len(ROI_starter_list)):
-            if header_list[header_index]==ROI_starter_list[header_string_index]:
-                ROI_starter_index_list[header_string_index]=header_index+1
+        for header_string_index in range(len(roi_starter_list)):
+            if header_list[header_index]==roi_starter_list[header_string_index]:
+                roi_starter_index_list[header_string_index]=header_index+1
 
-    #print ROI_starter_index_list
+    #print roi_starter_index_list
     
-    #move values from dataframe to list: [[[ROI1][ROI2][ROI3]],[Mark]]
+    #move values from dataframe to list: [[[roi1][roi2][roi3]],[mark]]
     list_data_holder=[]
     for row in dataframe_input.itertuples():
         #print row
-        ROI_list_holder=[]
-        for ROI_index in range(len(ROI_starter_list)-1):
-            ROI_indi_holder=[]
+        roi_list_holder=[]
+        for roi_index in range(len(roi_starter_list)-1):
+            roi_indi_holder=[]
             for scan_index in range(scan_size):
-                ROI_indi_holder.append(row[ROI_starter_index_list[ROI_index]+scan_index])
-            ROI_list_holder.append(ROI_indi_holder)
-        row_tuple=[ROI_list_holder,row[ROI_starter_index_list[3]]]
+                roi_indi_holder.append(row[roi_starter_index_list[roi_index]+scan_index])
+            roi_list_holder.append(roi_indi_holder)
+        row_tuple=[roi_list_holder,row[roi_starter_index_list[3]]]
         list_data_holder.append(row_tuple)
 
     return list_data_holder
@@ -780,46 +780,46 @@ def cg_redundancy_modeler(dataframe_input,scan_size=10):
     scan_range=cg_scan_range_finder(dataframe_input,scan_size,3)
     #gonna sweep over bloody everything, and figure out the J value in each case, then save cases where J value is real good
     scan_n=20;
-    ROI0_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
-    ROI1_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
-    ROI2_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
-    ROI0_dec_rng=np.linspace(-0.05,0.95,11)
-    ROI1_dec_rng=np.linspace(-0.05,0.95,11)
-    ROI2_dec_rng=np.linspace(-0.05,0.95,11) 
+    roi0_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
+    roi1_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
+    roi2_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
+    roi0_dec_rng=np.linspace(-0.05,0.95,11)
+    roi1_dec_rng=np.linspace(-0.05,0.95,11)
+    roi2_dec_rng=np.linspace(-0.05,0.95,11) 
     redundancy_range=[0.5,1.5,2.5]
-    ROI_thresh_rng_list=[ROI0_thresh_rng,ROI1_thresh_rng,ROI2_thresh_rng]
-    ROI_dec_rng_list=[ROI0_dec_rng,ROI1_dec_rng,ROI2_dec_rng]
+    roi_thresh_rng_list=[roi0_thresh_rng,roi1_thresh_rng,roi2_thresh_rng]
+    roi_dec_rng_list=[roi0_dec_rng,roi1_dec_rng,roi2_dec_rng]
     
 
     header_list=list(dataframe_input)
-    ROI_starter_list=["ROI_0_scan_0","ROI_1_scan_0","ROI_2_scan_0","Mark"]
-    ROI_starter_index_list=[0,0,0,0]
+    roi_starter_list=["roi_0_scan_0","roi_1_scan_0","roi_2_scan_0","mark"]
+    roi_starter_index_list=[0,0,0,0]
     for header_index in range(len(header_list)):
-        for header_string_index in range(len(ROI_starter_list)):
-            if header_list[header_index]==ROI_starter_list[header_string_index]:
-                ROI_starter_index_list[header_string_index]=header_index+1
+        for header_string_index in range(len(roi_starter_list)):
+            if header_list[header_index]==roi_starter_list[header_string_index]:
+                roi_starter_index_list[header_string_index]=header_index+1
 
-    #print ROI_starter_index_list
+    #print roi_starter_index_list
     
-    #move values from dataframe to list: [[[[ROI1][ROI2][ROI3]]],[Mark]]
+    #move values from dataframe to list: [[[[roi1][roi2][roi3]]],[mark]]
     list_data_holder=[]
     for row in dataframe_input.itertuples():
-        ROI_list_holder=[]
-        for ROI_index in range(len(ROI_thresh_rng_list)):
-            ROI_indi_holder=[]
+        roi_list_holder=[]
+        for roi_index in range(len(roi_thresh_rng_list)):
+            roi_indi_holder=[]
             for scan_index in range(scan_size):
-                ROI_indi_holder.append(row[ROI_starter_index_list[ROI_index]+scan_index])
-            ROI_list_holder.append(ROI_indi_holder)
-        row_tuple=[ROI_list_holder,row[ROI_starter_index_list[3]]]
+                roi_indi_holder.append(row[roi_starter_index_list[roi_index]+scan_index])
+            roi_list_holder.append(roi_indi_holder)
+        row_tuple=[roi_list_holder,row[roi_starter_index_list[3]]]
         list_data_holder.append(row_tuple)
 
     #print list_data_holder
-    #first find optimal thresholds for each ROI
-    best_roi_thresh=len(ROI_thresh_rng_list)*[-1]
-    best_dec_thresh=len(ROI_thresh_rng_list)*[-1]
-    best_J=len(ROI_thresh_rng_list)*[-1]
-    for ROI_index in range(len(ROI_thresh_rng_list)):
-        for ROI_thresh in ROI_thresh_rng_list[ROI_index]:
+    #first find optimal thresholds for each roi
+    best_roi_thresh=len(roi_thresh_rng_list)*[-1]
+    best_dec_thresh=len(roi_thresh_rng_list)*[-1]
+    best_J=len(roi_thresh_rng_list)*[-1]
+    for roi_index in range(len(roi_thresh_rng_list)):
+        for roi_thresh in roi_thresh_rng_list[roi_index]:
             #make two new lists - blank confidence and print confidence
             print_confidence=[]
             blank_confidence=[]
@@ -827,10 +827,10 @@ def cg_redundancy_modeler(dataframe_input,scan_size=10):
                 #print row
                 #print type(row)
                 read_count=0
-                for scan_index in range(len(list_data_holder[row_index][0][ROI_index])):
-                    #col_caller='ROI_'+str(ROI_index)+'_scan_'+str(scan_index)
+                for scan_index in range(len(list_data_holder[row_index][0][roi_index])):
+                    #col_caller='roi_'+str(roi_index)+'_scan_'+str(scan_index)
                     
-                    if list_data_holder[row_index][0][ROI_index][scan_index]>ROI_thresh:
+                    if list_data_holder[row_index][0][roi_index][scan_index]>roi_thresh:
                         read_count+=1
                 confidence_value=float(read_count)/float(scan_size)
                 row_marker=list_data_holder[row_index][1]
@@ -841,15 +841,15 @@ def cg_redundancy_modeler(dataframe_input,scan_size=10):
                     blank_confidence.append(confidence_value)
                 else:
                     print "***********MARKER MISSING ERROR*********"
-            ## now that the confidence lists are done, we get ROI accuracy using dec_rng
+            ## now that the confidence lists are done, we get roi accuracy using dec_rng
             
-            for ROI_dec in ROI_dec_rng_list[ROI_index]:
+            for roi_dec in roi_dec_rng_list[roi_index]:
                 print_binary_list=np.zeros(len(print_confidence))
                 blank_binary_list=np.zeros(len(blank_confidence))
 
                 #set to 1 if value is greater than threshold
-                print_binary_list[print_confidence>ROI_dec]=1
-                blank_binary_list[blank_confidence>ROI_dec]=1
+                print_binary_list[print_confidence>roi_dec]=1
+                blank_binary_list[blank_confidence>roi_dec]=1
 
 
 
@@ -857,21 +857,21 @@ def cg_redundancy_modeler(dataframe_input,scan_size=10):
                 specificity=1-np.mean(blank_binary_list)
                 J=sensitivity+specificity-1
 
-                if J>best_J[ROI_index]:
-                    best_J[ROI_index]=J
-                    best_roi_thresh[ROI_index]=ROI_thresh
-                    best_dec_thresh[ROI_index]=ROI_dec
-                    #print ROI_index,
+                if J>best_J[roi_index]:
+                    best_J[roi_index]=J
+                    best_roi_thresh[roi_index]=roi_thresh
+                    best_dec_thresh[roi_index]=roi_dec
+                    #print roi_index,
                     #print ",",
-                    #print best_J[ROI_index],
+                    #print best_J[roi_index],
                     #print ",",
                     #print sensitivity,
                     #print ",",
                     #print specificity,
                     #print ",",
-                    #print best_roi_thresh[ROI_index],
+                    #print best_roi_thresh[roi_index],
                     #print ",",
-                    #print best_dec_thresh[ROI_index]
+                    #print best_dec_thresh[roi_index]
     #print best_J
     #print best_dec_thresh
     #print best_roi_thresh
@@ -881,19 +881,19 @@ def cg_redundancy_modeler(dataframe_input,scan_size=10):
     blank_sum=[]
     for row in dataframe_input.itertuples():
         sum=0
-        for ROI_index in range(len(ROI_thresh_rng_list)):
-            ROI_thresh=best_roi_thresh[ROI_index]
-            dec_thresh=best_dec_thresh[ROI_index]
+        for roi_index in range(len(roi_thresh_rng_list)):
+            roi_thresh=best_roi_thresh[roi_index]
+            dec_thresh=best_dec_thresh[roi_index]
             read_count=0
             for scan_index in range(scan_size):
-                #col_caller='ROI_'+str(ROI_index)+'_scan_'+str(scan_index)
+                #col_caller='roi_'+str(roi_index)+'_scan_'+str(scan_index)
                     
-                if row[ROI_starter_index_list[ROI_index]+scan_index]>ROI_thresh:
+                if row[roi_starter_index_list[roi_index]+scan_index]>roi_thresh:
                     read_count+=1
             confidence_value=float(read_count)/float(scan_size)
             if confidence_value>dec_thresh:
                 sum+=1
-        row_marker=row[ROI_starter_index_list[3]]
+        row_marker=row[roi_starter_index_list[3]]
         #print row_marker
         if row_marker==1:
             print_sum.append(sum)
@@ -903,7 +903,7 @@ def cg_redundancy_modeler(dataframe_input,scan_size=10):
             print "***********MARKER MISSING ERROR*********"
     #print print_sum
     #print blank_sum
-    ## now that the confidence lists are done, we get ROI accuracy using dec_rng
+    ## now that the confidence lists are done, we get roi accuracy using dec_rng
     best_redundancy=-1
     best_J=-1
     best_sensitivity=-1
@@ -959,46 +959,46 @@ def cg_redundancy_modeler_v2(dataframe_input,scan_size=10):
     scan_n=20;
     #print scan_range[0]+3
     #print scan_range[1]-3
-    ROI0_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
-    ROI1_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
-    ROI2_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
-    ROI0_dec_rng=np.linspace(-0.05,0.95,11)
-    ROI1_dec_rng=np.linspace(-0.05,0.95,11)
-    ROI2_dec_rng=np.linspace(-0.05,0.95,11) 
+    roi0_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
+    roi1_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
+    roi2_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
+    roi0_dec_rng=np.linspace(-0.05,0.95,11)
+    roi1_dec_rng=np.linspace(-0.05,0.95,11)
+    roi2_dec_rng=np.linspace(-0.05,0.95,11) 
     redundancy_range=[0.5,1.5,2.5]
-    ROI_thresh_rng_list=[ROI0_thresh_rng,ROI1_thresh_rng,ROI2_thresh_rng]
-    ROI_dec_rng_list=[ROI0_dec_rng,ROI1_dec_rng,ROI2_dec_rng]
+    roi_thresh_rng_list=[roi0_thresh_rng,roi1_thresh_rng,roi2_thresh_rng]
+    roi_dec_rng_list=[roi0_dec_rng,roi1_dec_rng,roi2_dec_rng]
 
     header_list=list(dataframe_input)
-    ROI_starter_list=["ROI_0_scan_0","ROI_1_scan_0","ROI_2_scan_0","Mark"]
-    ROI_starter_index_list=[0,0,0,0]
+    roi_starter_list=["roi_0_scan_0","roi_1_scan_0","roi_2_scan_0","mark"]
+    roi_starter_index_list=[0,0,0,0]
     for header_index in range(len(header_list)):
-        for header_string_index in range(len(ROI_starter_list)):
-            if header_list[header_index]==ROI_starter_list[header_string_index]:
-                ROI_starter_index_list[header_string_index]=header_index+1
+        for header_string_index in range(len(roi_starter_list)):
+            if header_list[header_index]==roi_starter_list[header_string_index]:
+                roi_starter_index_list[header_string_index]=header_index+1
 
-    #print ROI_starter_index_list
+    #print roi_starter_index_list
     
-    #move values from dataframe to list: [[[[ROI1][ROI2][ROI3]]],[Mark]]
+    #move values from dataframe to list: [[[[roi1][roi2][roi3]]],[mark]]
     list_data_holder=[]
     for row in dataframe_input.itertuples():
-        ROI_list_holder=[]
-        for ROI_index in range(len(ROI_thresh_rng_list)):
-            ROI_indi_holder=[]
+        roi_list_holder=[]
+        for roi_index in range(len(roi_thresh_rng_list)):
+            roi_indi_holder=[]
             for scan_index in range(scan_size):
-                ROI_indi_holder.append(row[ROI_starter_index_list[ROI_index]+scan_index])
-            ROI_list_holder.append(ROI_indi_holder)
-        row_tuple=[ROI_list_holder,row[ROI_starter_index_list[3]]]
+                roi_indi_holder.append(row[roi_starter_index_list[roi_index]+scan_index])
+            roi_list_holder.append(roi_indi_holder)
+        row_tuple=[roi_list_holder,row[roi_starter_index_list[3]]]
         list_data_holder.append(row_tuple)
 
 
     #print list_data_holder
-    #first find optimal thresholds for each ROI
-    best_roi_thresh=len(ROI_thresh_rng_list)*[-1]
-    best_dec_thresh=len(ROI_thresh_rng_list)*[-1]
-    best_J=len(ROI_thresh_rng_list)*[-1]
-    for ROI_index in range(len(ROI_thresh_rng_list)):
-        for ROI_thresh in ROI_thresh_rng_list[ROI_index]:
+    #first find optimal thresholds for each roi
+    best_roi_thresh=len(roi_thresh_rng_list)*[-1]
+    best_dec_thresh=len(roi_thresh_rng_list)*[-1]
+    best_J=len(roi_thresh_rng_list)*[-1]
+    for roi_index in range(len(roi_thresh_rng_list)):
+        for roi_thresh in roi_thresh_rng_list[roi_index]:
             #make two new lists - blank confidence and print confidence
             print_confidence=[]
             blank_confidence=[]
@@ -1006,10 +1006,10 @@ def cg_redundancy_modeler_v2(dataframe_input,scan_size=10):
                 #print row
                 #print type(row)
                 read_count=0
-                for scan_index in range(len(list_data_holder[row_index][0][ROI_index])):
-                    #col_caller='ROI_'+str(ROI_index)+'_scan_'+str(scan_index)
+                for scan_index in range(len(list_data_holder[row_index][0][roi_index])):
+                    #col_caller='roi_'+str(roi_index)+'_scan_'+str(scan_index)
                     
-                    if list_data_holder[row_index][0][ROI_index][scan_index]>ROI_thresh:
+                    if list_data_holder[row_index][0][roi_index][scan_index]>roi_thresh:
                         read_count+=1
                 confidence_value=float(read_count)/float(scan_size)
                 row_marker=list_data_holder[row_index][1]
@@ -1020,15 +1020,15 @@ def cg_redundancy_modeler_v2(dataframe_input,scan_size=10):
                     blank_confidence.append(confidence_value)
                 else:
                     print "***********MARKER MISSING ERROR*********"
-            ## now that the confidence lists are done, we get ROI accuracy using dec_rng
+            ## now that the confidence lists are done, we get roi accuracy using dec_rng
             
-            for ROI_dec in ROI_dec_rng_list[ROI_index]:
+            for roi_dec in roi_dec_rng_list[roi_index]:
                 print_binary_list=np.zeros(len(print_confidence))
                 blank_binary_list=np.zeros(len(blank_confidence))
 
                 #set to 1 if value is greater than threshold
-                print_binary_list[print_confidence>ROI_dec]=1
-                blank_binary_list[blank_confidence>ROI_dec]=1
+                print_binary_list[print_confidence>roi_dec]=1
+                blank_binary_list[blank_confidence>roi_dec]=1
 
 
 
@@ -1037,20 +1037,20 @@ def cg_redundancy_modeler_v2(dataframe_input,scan_size=10):
                 J=adapted_J(sensitivity,specificity)
                 #J=sensitivity+specificity-1
 
-                if J>best_J[ROI_index]:
+                if J>best_J[roi_index]:
                     T_list=[]
                     D_list=[]
-                    best_J[ROI_index]=J
-                    T_list.append(ROI_thresh)
-                    D_list.append(ROI_dec)
-                    #best_roi_thresh[ROI_index]=ROI_thresh
-                    #best_dec_thresh[ROI_index]=ROI_dec
-                elif J==best_J[ROI_index]:
-                    T_list.append(ROI_thresh)
-                    D_list.append(ROI_dec)
+                    best_J[roi_index]=J
+                    T_list.append(roi_thresh)
+                    D_list.append(roi_dec)
+                    #best_roi_thresh[roi_index]=roi_thresh
+                    #best_dec_thresh[roi_index]=roi_dec
+                elif J==best_J[roi_index]:
+                    T_list.append(roi_thresh)
+                    D_list.append(roi_dec)
         #once all threshold-dec pairs have been tried, take median of each of T_list and D_list vectors
-        best_roi_thresh[ROI_index]=np.median(T_list)
-        best_dec_thresh[ROI_index]=np.median(D_list)
+        best_roi_thresh[roi_index]=np.median(T_list)
+        best_dec_thresh[roi_index]=np.median(D_list)
         #print len(T_list)
         #print len(D_list)
 
@@ -1058,24 +1058,24 @@ def cg_redundancy_modeler_v2(dataframe_input,scan_size=10):
     scan_n=100
     T_swing=0.5
     D_swing=0.4
-    ROI0_thresh_rng=np.linspace(best_roi_thresh[0]-T_swing,best_roi_thresh[0]+T_swing,scan_n)
-    ROI1_thresh_rng=np.linspace(best_roi_thresh[1]-T_swing,best_roi_thresh[1]+T_swing,scan_n)
-    ROI2_thresh_rng=np.linspace(best_roi_thresh[2]-T_swing,best_roi_thresh[2]+T_swing,scan_n)
-    ROI0_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[0]-D_swing]),np.min([0.95,best_dec_thresh[0]+D_swing])+0.1,0.1)
-    ROI1_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[1]-D_swing]),np.min([0.95,best_dec_thresh[1]+D_swing])+0.1,0.1)
-    ROI2_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[2]-D_swing]),np.min([0.95,best_dec_thresh[2]+D_swing])+0.1,0.1)
-    #print ROI0_dec_rng
-    ROI_thresh_rng_list=[ROI0_thresh_rng,ROI1_thresh_rng,ROI2_thresh_rng]
-    ROI_dec_rng_list=[ROI0_dec_rng,ROI1_dec_rng,ROI2_dec_rng]
+    roi0_thresh_rng=np.linspace(best_roi_thresh[0]-T_swing,best_roi_thresh[0]+T_swing,scan_n)
+    roi1_thresh_rng=np.linspace(best_roi_thresh[1]-T_swing,best_roi_thresh[1]+T_swing,scan_n)
+    roi2_thresh_rng=np.linspace(best_roi_thresh[2]-T_swing,best_roi_thresh[2]+T_swing,scan_n)
+    roi0_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[0]-D_swing]),np.min([0.95,best_dec_thresh[0]+D_swing])+0.1,0.1)
+    roi1_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[1]-D_swing]),np.min([0.95,best_dec_thresh[1]+D_swing])+0.1,0.1)
+    roi2_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[2]-D_swing]),np.min([0.95,best_dec_thresh[2]+D_swing])+0.1,0.1)
+    #print roi0_dec_rng
+    roi_thresh_rng_list=[roi0_thresh_rng,roi1_thresh_rng,roi2_thresh_rng]
+    roi_dec_rng_list=[roi0_dec_rng,roi1_dec_rng,roi2_dec_rng]
         #print list_data_holder
-    #first find optimal thresholds for each ROI
-    best_roi_thresh=len(ROI_thresh_rng_list)*[-1]
-    best_dec_thresh=len(ROI_thresh_rng_list)*[-1]
-    #best_J=len(ROI_thresh_rng_list)*[-1]
-    for ROI_index in range(len(ROI_thresh_rng_list)):
+    #first find optimal thresholds for each roi
+    best_roi_thresh=len(roi_thresh_rng_list)*[-1]
+    best_dec_thresh=len(roi_thresh_rng_list)*[-1]
+    #best_J=len(roi_thresh_rng_list)*[-1]
+    for roi_index in range(len(roi_thresh_rng_list)):
         T_list=[]
         D_list=[]
-        for ROI_thresh in ROI_thresh_rng_list[ROI_index]:
+        for roi_thresh in roi_thresh_rng_list[roi_index]:
             #make two new lists - blank confidence and print confidence
             print_confidence=[]
             blank_confidence=[]
@@ -1083,10 +1083,10 @@ def cg_redundancy_modeler_v2(dataframe_input,scan_size=10):
                 #print row
                 #print type(row)
                 read_count=0
-                for scan_index in range(len(list_data_holder[row_index][0][ROI_index])):
-                    #col_caller='ROI_'+str(ROI_index)+'_scan_'+str(scan_index)
+                for scan_index in range(len(list_data_holder[row_index][0][roi_index])):
+                    #col_caller='roi_'+str(roi_index)+'_scan_'+str(scan_index)
                     
-                    if list_data_holder[row_index][0][ROI_index][scan_index]>ROI_thresh:
+                    if list_data_holder[row_index][0][roi_index][scan_index]>roi_thresh:
                         read_count+=1
                 confidence_value=float(read_count)/float(scan_size)
                 row_marker=list_data_holder[row_index][1]
@@ -1097,15 +1097,15 @@ def cg_redundancy_modeler_v2(dataframe_input,scan_size=10):
                     blank_confidence.append(confidence_value)
                 else:
                     print "***********MARKER MISSING ERROR*********"
-            ## now that the confidence lists are done, we get ROI accuracy using dec_rng
+            ## now that the confidence lists are done, we get roi accuracy using dec_rng
             
-            for ROI_dec in ROI_dec_rng_list[ROI_index]:
+            for roi_dec in roi_dec_rng_list[roi_index]:
                 print_binary_list=np.zeros(len(print_confidence))
                 blank_binary_list=np.zeros(len(blank_confidence))
 
                 #set to 1 if value is greater than threshold
-                print_binary_list[print_confidence>ROI_dec]=1
-                blank_binary_list[blank_confidence>ROI_dec]=1
+                print_binary_list[print_confidence>roi_dec]=1
+                blank_binary_list[blank_confidence>roi_dec]=1
 
 
 
@@ -1114,27 +1114,27 @@ def cg_redundancy_modeler_v2(dataframe_input,scan_size=10):
                 J=sensitivity+specificity-1
                 J=adapted_J(sensitivity,specificity)
 
-                if J>best_J[ROI_index]-0.05:
-                    T_list.append(ROI_thresh)
-                    D_list.append(ROI_dec)
+                if J>best_J[roi_index]-0.05:
+                    T_list.append(roi_thresh)
+                    D_list.append(roi_dec)
         #once all threshold-dec pairs have been tried, take median of each of T_list and D_list vectors
-        best_roi_thresh[ROI_index]=np.median(T_list)
-        best_dec_thresh[ROI_index]=np.median(D_list)
+        best_roi_thresh[roi_index]=np.median(T_list)
+        best_dec_thresh[roi_index]=np.median(D_list)
         #print len(T_list)
         #print len(D_list)
 
 
-                    #print ROI_index,
+                    #print roi_index,
                     #print ",",
-                    #print best_J[ROI_index],
+                    #print best_J[roi_index],
                     #print ",",
                     #print sensitivity,
                     #print ",",
                     #print specificity,
                     #print ",",
-                    #print ROI_thresh,
+                    #print roi_thresh,
                     #print ",",
-                    #print ROI_dec
+                    #print roi_dec
     #print best_J
     #print best_dec_thresh
     #print best_roi_thresh
@@ -1144,19 +1144,19 @@ def cg_redundancy_modeler_v2(dataframe_input,scan_size=10):
     blank_sum=[]
     for row in dataframe_input.itertuples():
         sum=0
-        for ROI_index in range(len(ROI_thresh_rng_list)):
-            ROI_thresh=best_roi_thresh[ROI_index]
-            dec_thresh=best_dec_thresh[ROI_index]
+        for roi_index in range(len(roi_thresh_rng_list)):
+            roi_thresh=best_roi_thresh[roi_index]
+            dec_thresh=best_dec_thresh[roi_index]
             read_count=0
             for scan_index in range(scan_size):
-                #col_caller='ROI_'+str(ROI_index)+'_scan_'+str(scan_index)
+                #col_caller='roi_'+str(roi_index)+'_scan_'+str(scan_index)
                     
-                if row[ROI_starter_index_list[ROI_index]+scan_index]>ROI_thresh:
+                if row[roi_starter_index_list[roi_index]+scan_index]>roi_thresh:
                     read_count+=1
             confidence_value=float(read_count)/float(scan_size)
             if confidence_value>dec_thresh:
                 sum+=1
-        row_marker=row[ROI_starter_index_list[3]]
+        row_marker=row[roi_starter_index_list[3]]
         #print row_marker
         if row_marker==1:
             print_sum.append(sum)
@@ -1166,7 +1166,7 @@ def cg_redundancy_modeler_v2(dataframe_input,scan_size=10):
             print "***********MARKER MISSING ERROR*********"
     #print print_sum
     #print blank_sum
-    ## now that the confidence lists are done, we get ROI accuracy using dec_rng
+    ## now that the confidence lists are done, we get roi accuracy using dec_rng
     best_redundancy=-1
     best_J=-1
     best_sensitivity=-1
@@ -1222,58 +1222,58 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     scan_n=100;
     #print scan_range[0]+3
     #print scan_range[1]-3
-    ROI0_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
-    ROI1_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
-    ROI2_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
-    ROI0_dec_rng=np.linspace(-0.05,0.95,11)
-    ROI1_dec_rng=np.linspace(-0.05,0.95,11)
-    ROI2_dec_rng=np.linspace(-0.05,0.95,11) 
+    roi0_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
+    roi1_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
+    roi2_thresh_rng=np.linspace(scan_range[0],scan_range[1],scan_n)
+    roi0_dec_rng=np.linspace(-0.05,0.95,11)
+    roi1_dec_rng=np.linspace(-0.05,0.95,11)
+    roi2_dec_rng=np.linspace(-0.05,0.95,11) 
     redundancy_range=np.linspace(0.5,roi_total-0.5,roi_total)
-    ROI_thresh_rng_list=[ROI0_thresh_rng,ROI1_thresh_rng,ROI2_thresh_rng]
-    ROI_dec_rng_list=[ROI0_dec_rng,ROI1_dec_rng,ROI2_dec_rng]
+    roi_thresh_rng_list=[roi0_thresh_rng,roi1_thresh_rng,roi2_thresh_rng]
+    roi_dec_rng_list=[roi0_dec_rng,roi1_dec_rng,roi2_dec_rng]
 
-    #New code that can accomidate n number of ROIs
-    ROI_thresh_rng_list=[]
-    ROI_thresh_basis=np.linspace(scan_range[0],scan_range[1],scan_n)
-    ROI_dec_rng_list=[]
-    ROI_dec_basis=np.linspace(-0.05,0.95,scan_size+1)
+    #New code that can accomidate n number of rois
+    roi_thresh_rng_list=[]
+    roi_thresh_basis=np.linspace(scan_range[0],scan_range[1],scan_n)
+    roi_dec_rng_list=[]
+    roi_dec_basis=np.linspace(-0.05,0.95,scan_size+1)
 
     for roi_iterator in range(roi_total):
-        ROI_thresh_rng_list.append(ROI_thresh_basis)
-        ROI_dec_rng_list.append(ROI_dec_basis)
+        roi_thresh_rng_list.append(roi_thresh_basis)
+        roi_dec_rng_list.append(roi_dec_basis)
 
 
 
 
     header_list=list(dataframe_input)
-    ROI_starter_list=["ROI_0_scan_0","ROI_1_scan_0","ROI_2_scan_0","Mark"]
-    ROI_starter_list=[]
-    ROI_starter_index_list=[]
+    roi_starter_list=["roi_0_scan_0","roi_1_scan_0","roi_2_scan_0","mark"]
+    roi_starter_list=[]
+    roi_starter_index_list=[]
     for roi_iterator in range(roi_total):
-        ROI_starter_list.append("ROI_"+str(roi_iterator)+"_scan_0")
-        ROI_starter_index_list.append(0)
-    ROI_starter_list.append("Mark")
-    ROI_starter_index_list.append(0)
-    #ROI_starter_index_list=[0,0,0,0]
+        roi_starter_list.append("roi_"+str(roi_iterator)+"_scan_0")
+        roi_starter_index_list.append(0)
+    roi_starter_list.append("mark")
+    roi_starter_index_list.append(0)
+    #roi_starter_index_list=[0,0,0,0]
     for header_index in range(len(header_list)):
-        for header_string_index in range(len(ROI_starter_list)):
-            if header_list[header_index]==ROI_starter_list[header_string_index]:
-                ROI_starter_index_list[header_string_index]=header_index+1
+        for header_string_index in range(len(roi_starter_list)):
+            if header_list[header_index]==roi_starter_list[header_string_index]:
+                roi_starter_index_list[header_string_index]=header_index+1
 
-    #print ROI_starter_index_list
+    #print roi_starter_index_list
     
    
 
-    #move values from dataframe to list: [[[[ROI1][ROI2][ROI3]]],[Mark]]
+    #move values from dataframe to list: [[[[roi1][roi2][roi3]]],[mark]]
     list_data_holder=[]
     for row in dataframe_input.itertuples():
-        ROI_list_holder=[]
-        for ROI_index in range(len(ROI_thresh_rng_list)):
-            ROI_indi_holder=[]
+        roi_list_holder=[]
+        for roi_index in range(len(roi_thresh_rng_list)):
+            roi_indi_holder=[]
             for scan_index in range(scan_size):
-                ROI_indi_holder.append(row[ROI_starter_index_list[ROI_index]+scan_index])
-            ROI_list_holder.append(ROI_indi_holder)
-        row_tuple=[ROI_list_holder,row[ROI_starter_index_list[-1]]]
+                roi_indi_holder.append(row[roi_starter_index_list[roi_index]+scan_index])
+            roi_list_holder.append(roi_indi_holder)
+        row_tuple=[roi_list_holder,row[roi_starter_index_list[-1]]]
         list_data_holder.append(row_tuple)
 
 
@@ -1286,12 +1286,12 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     #    iter_temp+=1
 
 
-    #first find optimal thresholds for each ROI
-    best_roi_thresh=len(ROI_thresh_rng_list)*[-1]
-    best_dec_thresh=len(ROI_thresh_rng_list)*[-1]
-    best_J=len(ROI_thresh_rng_list)*[-1]
-    for ROI_index in range(len(ROI_thresh_rng_list)):
-        for ROI_thresh in ROI_thresh_rng_list[ROI_index]:
+    #first find optimal thresholds for each roi
+    best_roi_thresh=len(roi_thresh_rng_list)*[-1]
+    best_dec_thresh=len(roi_thresh_rng_list)*[-1]
+    best_J=len(roi_thresh_rng_list)*[-1]
+    for roi_index in range(len(roi_thresh_rng_list)):
+        for roi_thresh in roi_thresh_rng_list[roi_index]:
             #make two new lists - blank confidence and print confidence
             print_confidence=[]
             blank_confidence=[]
@@ -1299,10 +1299,10 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
                 #print row
                 #print type(row)
                 read_count=0
-                for scan_index in range(len(list_data_holder[row_index][0][ROI_index])):
-                    #col_caller='ROI_'+str(ROI_index)+'_scan_'+str(scan_index)
+                for scan_index in range(len(list_data_holder[row_index][0][roi_index])):
+                    #col_caller='roi_'+str(roi_index)+'_scan_'+str(scan_index)
                     
-                    if list_data_holder[row_index][0][ROI_index][scan_index]>ROI_thresh:
+                    if list_data_holder[row_index][0][roi_index][scan_index]>roi_thresh:
                         read_count+=1
                 confidence_value=float(read_count)/float(scan_size)
                 row_marker=list_data_holder[row_index][1]
@@ -1313,15 +1313,15 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
                     blank_confidence.append(confidence_value)
                 else:
                     print "***********MARKER MISSING ERROR1*********"
-            ## now that the confidence lists are done, we get ROI accuracy using dec_rng
+            ## now that the confidence lists are done, we get roi accuracy using dec_rng
             
-            for ROI_dec in ROI_dec_rng_list[ROI_index]:
+            for roi_dec in roi_dec_rng_list[roi_index]:
                 print_binary_list=np.zeros(len(print_confidence))
                 blank_binary_list=np.zeros(len(blank_confidence))
 
                 #set to 1 if value is greater than threshold
-                print_binary_list[print_confidence>ROI_dec]=1
-                blank_binary_list[blank_confidence>ROI_dec]=1
+                print_binary_list[print_confidence>roi_dec]=1
+                blank_binary_list[blank_confidence>roi_dec]=1
 
 
 
@@ -1330,20 +1330,20 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
                 J=adapted_J(sensitivity,specificity)
                 #J=sensitivity+specificity-1
 
-                if J>best_J[ROI_index]:
+                if J>best_J[roi_index]:
                     T_list=[]
                     D_list=[]
-                    best_J[ROI_index]=J
-                    T_list.append(ROI_thresh)
-                    D_list.append(ROI_dec)
-                    #best_roi_thresh[ROI_index]=ROI_thresh
-                    #best_dec_thresh[ROI_index]=ROI_dec
-                elif J==best_J[ROI_index]:
-                    T_list.append(ROI_thresh)
-                    D_list.append(ROI_dec)
+                    best_J[roi_index]=J
+                    T_list.append(roi_thresh)
+                    D_list.append(roi_dec)
+                    #best_roi_thresh[roi_index]=roi_thresh
+                    #best_dec_thresh[roi_index]=roi_dec
+                elif J==best_J[roi_index]:
+                    T_list.append(roi_thresh)
+                    D_list.append(roi_dec)
         #once all threshold-dec pairs have been tried, take median of each of T_list and D_list vectors
-        best_roi_thresh[ROI_index]=np.median(T_list)
-        best_dec_thresh[ROI_index]=np.median(D_list)
+        best_roi_thresh[roi_index]=np.median(T_list)
+        best_dec_thresh[roi_index]=np.median(D_list)
         #print len(T_list)
         #print len(D_list)
 
@@ -1351,40 +1351,40 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     scan_n=100
     T_swing=0.5
     D_swing=0.4
-    #ROI0_thresh_rng=np.linspace(best_roi_thresh[0]-T_swing,best_roi_thresh[0]+T_swing,scan_n)
-    #ROI1_thresh_rng=np.linspace(best_roi_thresh[1]-T_swing,best_roi_thresh[1]+T_swing,scan_n)
-    #ROI2_thresh_rng=np.linspace(best_roi_thresh[2]-T_swing,best_roi_thresh[2]+T_swing,scan_n)
-    #ROI0_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[0]-D_swing]),np.min([0.95,best_dec_thresh[0]+D_swing])+0.1,0.1)
-    #ROI1_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[1]-D_swing]),np.min([0.95,best_dec_thresh[1]+D_swing])+0.1,0.1)
-    #ROI2_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[2]-D_swing]),np.min([0.95,best_dec_thresh[2]+D_swing])+0.1,0.1)
-    ##print ROI0_dec_rng
-    #ROI_thresh_rng_list=[ROI0_thresh_rng,ROI1_thresh_rng,ROI2_thresh_rng]
-    #ROI_dec_rng_list=[ROI0_dec_rng,ROI1_dec_rng,ROI2_dec_rng]
+    #roi0_thresh_rng=np.linspace(best_roi_thresh[0]-T_swing,best_roi_thresh[0]+T_swing,scan_n)
+    #roi1_thresh_rng=np.linspace(best_roi_thresh[1]-T_swing,best_roi_thresh[1]+T_swing,scan_n)
+    #roi2_thresh_rng=np.linspace(best_roi_thresh[2]-T_swing,best_roi_thresh[2]+T_swing,scan_n)
+    #roi0_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[0]-D_swing]),np.min([0.95,best_dec_thresh[0]+D_swing])+0.1,0.1)
+    #roi1_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[1]-D_swing]),np.min([0.95,best_dec_thresh[1]+D_swing])+0.1,0.1)
+    #roi2_dec_rng=np.arange(np.max([-0.05,best_dec_thresh[2]-D_swing]),np.min([0.95,best_dec_thresh[2]+D_swing])+0.1,0.1)
+    ##print roi0_dec_rng
+    #roi_thresh_rng_list=[roi0_thresh_rng,roi1_thresh_rng,roi2_thresh_rng]
+    #roi_dec_rng_list=[roi0_dec_rng,roi1_dec_rng,roi2_dec_rng]
 
-    #New code that can accomidate n number of ROIs
-    ROI_thresh_rng_list=[]
-    ROI_thresh_basis=np.linspace(scan_range[0],scan_range[1],scan_n)
-    ROI_dec_rng_list=[]
-    ROI_dec_basis=np.linspace(-0.05,0.95,scan_size+1)
+    #New code that can accomidate n number of rois
+    roi_thresh_rng_list=[]
+    roi_thresh_basis=np.linspace(scan_range[0],scan_range[1],scan_n)
+    roi_dec_rng_list=[]
+    roi_dec_basis=np.linspace(-0.05,0.95,scan_size+1)
 
     for roi_iterator in range(roi_total):
         thresh_list_temp=np.linspace(best_roi_thresh[roi_iterator]-T_swing,best_roi_thresh[roi_iterator]+T_swing,scan_n)
-        ROI_thresh_rng_list.append(thresh_list_temp)
+        roi_thresh_rng_list.append(thresh_list_temp)
         dec_list_temp=np.arange(np.max([-0.05,best_dec_thresh[roi_iterator]-D_swing]),np.min([0.95,best_dec_thresh[roi_iterator]+D_swing])+0.1,0.1)
-        ROI_dec_rng_list.append(dec_list_temp)
+        roi_dec_rng_list.append(dec_list_temp)
 
 
 
 
         #print list_data_holder
-    #first find optimal thresholds for each ROI
-    best_roi_thresh=len(ROI_thresh_rng_list)*[-1]
-    best_dec_thresh=len(ROI_thresh_rng_list)*[-1]
-    #best_J=len(ROI_thresh_rng_list)*[-1]
-    for ROI_index in range(len(ROI_thresh_rng_list)):
+    #first find optimal thresholds for each roi
+    best_roi_thresh=len(roi_thresh_rng_list)*[-1]
+    best_dec_thresh=len(roi_thresh_rng_list)*[-1]
+    #best_J=len(roi_thresh_rng_list)*[-1]
+    for roi_index in range(len(roi_thresh_rng_list)):
         T_list=[]
         D_list=[]
-        for ROI_thresh in ROI_thresh_rng_list[ROI_index]:
+        for roi_thresh in roi_thresh_rng_list[roi_index]:
             #make two new lists - blank confidence and print confidence
             print_confidence=[]
             blank_confidence=[]
@@ -1392,10 +1392,10 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
                 #print row
                 #print type(row)
                 read_count=0
-                for scan_index in range(len(list_data_holder[row_index][0][ROI_index])):
-                    #col_caller='ROI_'+str(ROI_index)+'_scan_'+str(scan_index)
+                for scan_index in range(len(list_data_holder[row_index][0][roi_index])):
+                    #col_caller='roi_'+str(roi_index)+'_scan_'+str(scan_index)
                     
-                    if list_data_holder[row_index][0][ROI_index][scan_index]>ROI_thresh:
+                    if list_data_holder[row_index][0][roi_index][scan_index]>roi_thresh:
                         read_count+=1
                 confidence_value=float(read_count)/float(scan_size)
                 row_marker=list_data_holder[row_index][1]
@@ -1406,15 +1406,15 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
                     blank_confidence.append(confidence_value)
                 else:
                     print "***********MARKER MISSING ERROR2*********"
-            ## now that the confidence lists are done, we get ROI accuracy using dec_rng
+            ## now that the confidence lists are done, we get roi accuracy using dec_rng
             
-            for ROI_dec in ROI_dec_rng_list[ROI_index]:
+            for roi_dec in roi_dec_rng_list[roi_index]:
                 print_binary_list=np.zeros(len(print_confidence))
                 blank_binary_list=np.zeros(len(blank_confidence))
 
                 #set to 1 if value is greater than threshold
-                print_binary_list[print_confidence>ROI_dec]=1
-                blank_binary_list[blank_confidence>ROI_dec]=1
+                print_binary_list[print_confidence>roi_dec]=1
+                blank_binary_list[blank_confidence>roi_dec]=1
 
 
 
@@ -1423,27 +1423,27 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
                 J=sensitivity+specificity-1
                 J=adapted_J(sensitivity,specificity)
 
-                if J>best_J[ROI_index]-0.05:
-                    T_list.append(ROI_thresh)
-                    D_list.append(ROI_dec)
+                if J>best_J[roi_index]-0.05:
+                    T_list.append(roi_thresh)
+                    D_list.append(roi_dec)
         #once all threshold-dec pairs have been tried, take median of each of T_list and D_list vectors
-        best_roi_thresh[ROI_index]=np.median(T_list)
-        best_dec_thresh[ROI_index]=np.median(D_list)
+        best_roi_thresh[roi_index]=np.median(T_list)
+        best_dec_thresh[roi_index]=np.median(D_list)
         #print len(T_list)
         #print len(D_list)
 
 
-                    #print ROI_index,
+                    #print roi_index,
                     #print ",",
-                    #print best_J[ROI_index],
+                    #print best_J[roi_index],
                     #print ",",
                     #print sensitivity,
                     #print ",",
                     #print specificity,
                     #print ",",
-                    #print ROI_thresh,
+                    #print roi_thresh,
                     #print ",",
-                    #print ROI_dec
+                    #print roi_dec
     #print best_J
     #print best_dec_thresh
     #print best_roi_thresh
@@ -1453,19 +1453,19 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     blank_sum=[]
     for row in dataframe_input.itertuples():
         sum=0
-        for ROI_index in range(len(ROI_thresh_rng_list)):
-            ROI_thresh=best_roi_thresh[ROI_index]
-            dec_thresh=best_dec_thresh[ROI_index]
+        for roi_index in range(len(roi_thresh_rng_list)):
+            roi_thresh=best_roi_thresh[roi_index]
+            dec_thresh=best_dec_thresh[roi_index]
             read_count=0
             for scan_index in range(scan_size):
-                #col_caller='ROI_'+str(ROI_index)+'_scan_'+str(scan_index)
+                #col_caller='roi_'+str(roi_index)+'_scan_'+str(scan_index)
                     
-                if row[ROI_starter_index_list[ROI_index]+scan_index]>ROI_thresh:
+                if row[roi_starter_index_list[roi_index]+scan_index]>roi_thresh:
                     read_count+=1
             confidence_value=float(read_count)/float(scan_size)
             if confidence_value>dec_thresh:
                 sum+=1
-        row_marker=row[ROI_starter_index_list[-1]]
+        row_marker=row[roi_starter_index_list[-1]]
         #print row_marker
         if row_marker==1:
             print_sum.append(sum)
@@ -1475,7 +1475,7 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
             print "***********MARKER MISSING ERROR3*********"
     #print print_sum
     #print blank_sum
-    ## now that the confidence lists are done, we get ROI accuracy using dec_rng
+    ## now that the confidence lists are done, we get roi accuracy using dec_rng
     best_redundancy=-1
     best_J=-1
     best_sensitivity=-1
@@ -1525,14 +1525,14 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     #print "*********END*********"
     return [[best_J,best_sensitivity,best_specificity,len(print_sum),len(blank_sum)],best_roi_thresh,best_dec_thresh,best_redundancy]
 
-def logistic_regression_prep_cg(dataframe_input,dataframe_blank,ROI,ROI_max,combine_scan_data=True):
+def logistic_regression_prep_cg(dataframe_input,dataframe_blank,roi,roi_max,combine_scan_data=True):
     df=copy.copy(dataframe_input)
 
     #PULL OUT THE DATA YOU WANT
     print_list=[]
     blank_list=[]
-    for index in range(ROI_max):
-        col_caller='ROI_'+str(ROI)+'_scan_'+str(index)
+    for index in range(roi_max):
+        col_caller='roi_'+str(roi)+'_scan_'+str(index)
         print_list.extend(df[col_caller].tolist())
         blank_list.extend(dataframe_blank[col_caller].tolist())
 
@@ -1554,9 +1554,9 @@ def logistic_regression_prep_cg(dataframe_input,dataframe_blank,ROI,ROI_max,comb
     #print len(x_col_list)
     #print len(y_col_list)
 
-    #x_col_df=pd.DataFrame({'ROI_'+str(ROI):x_col_list})
-    x_col_df=pd.DataFrame({'ROI':x_col_list})
-    y_col_df=pd.DataFrame({'Mark':y_col_list})
+    #x_col_df=pd.DataFrame({'roi_'+str(roi):x_col_list})
+    x_col_df=pd.DataFrame({'roi':x_col_list})
+    y_col_df=pd.DataFrame({'mark':y_col_list})
 
 
     
@@ -1951,7 +1951,7 @@ def pk_modeler(dataframe_input,ring_count,test_type=[1]):
     #The format for the ring avg column headers are 'Rx' where x is the ring index.  The format for ring count column headers are 'RCx' where x is the ring index
     #for each test, the result will be saved in a dataframe
 
-    mark_list=list(dataframe_input["Mark"])
+    mark_list=list(dataframe_input["mark"])
     count_print=np.sum(mark_list)
     count_blank=len(mark_list)-count_print
 
@@ -2085,8 +2085,8 @@ def pk_dataframe_filter(dataframe_input,formulation,recipe,modification):
     return df
 
 def pk_redundancy_checker(dataframe_input,threshold_dictionary,red_value,test_type=[1]):
-    #The first step is to convert the threshold_dictionary to a vector of vectors, each of which are 1 or 0, based on comparing the guess to the Mark
-    mark_list=list(dataframe_input["Mark"])
+    #The first step is to convert the threshold_dictionary to a vector of vectors, each of which are 1 or 0, based on comparing the guess to the mark
+    mark_list=list(dataframe_input["mark"])
     path_list=list(dataframe_input["Path"])
     count_print=np.sum(mark_list)
     count_blank=len(mark_list)-count_print
@@ -2204,8 +2204,8 @@ def pk_redundancy_checker(dataframe_input,threshold_dictionary,red_value,test_ty
     return max_J,best_sen,best_spec,count_blank,count_print,best_red,best_guess_mat2,fail_pic_list
 
 def pk_redundancy_tester(dataframe_input,threshold_dictionary,test_type=[1]):
-    #The first step is to convert the threshold_dictionary to a vector of vectors, each of which are 1 or 0, based on comparing the guess to the Mark
-    mark_list=list(dataframe_input["Mark"])
+    #The first step is to convert the threshold_dictionary to a vector of vectors, each of which are 1 or 0, based on comparing the guess to the mark
+    mark_list=list(dataframe_input["mark"])
     path_list=list(dataframe_input["Path"])
     count_print=np.sum(mark_list)
     count_blank=len(mark_list)-count_print
