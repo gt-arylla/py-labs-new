@@ -1,6 +1,5 @@
 #Identifies the best colorspaces and averages them together
 #####################__________LIBRARIES______________################3
-import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.figure as pltfig
@@ -25,7 +24,7 @@ user_comment='test_comment'
 directory_move="G://Google Drive//Original Images//Pumped Kicks//180207 Algo_Test//Blank"
 
 directory_start="C://Users//gttho//Documents//Visual Studio 2017//Projects//PythonApplication1//PythonApplication1//bad_pics"
-directory_start="C://Users//gttho//Offline//Arylla Temp Photos//180304 No_Flash_Full_Set"
+directory_start="C://Users//gttho//PleasePleasePleaseDeleteMe//180306 TestSetOrg"
 adder_string=["50mS","75mS","100mS"]
 adder_string=[""]
 for adder in adder_string:
@@ -177,7 +176,7 @@ for adder in adder_string:
                     del filname_list[-1]  #Deletes the filename from the list
                     filname_list.reverse() #reverses the order so that the suff you care about is in the beginning
 
-                    key_list=['Location','Brand','Formulation']
+                    key_list=['Bow','Angle','Background','Distance','Flash']
 
                     #key_list=['Location']
                     uc_new=''
