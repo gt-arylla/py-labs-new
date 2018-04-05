@@ -85,6 +85,100 @@ def plotter(input_list):
     plt.show()
     return
 
+def black_white_modeler(dataframe_input,white_count,black_count,test_type=[1],bin_count=55,blackavg_count=1):
+    #code will accept a dataframe input.  It'll then find the optimal threshold for each combination of bin and black/white, according to test_type
+
+    #The format for column headers is 'whitexbiny' or 'blackxbiny' where x is the color index and y is the bin index.
+    #for each test, the result will be saved in a dataframe
+
+    mark_list=list(dataframe_input["mark"])
+    count_print=np.sum(mark_list)
+    count_blank=len(mark_list)-count_print
+
+    thresh_iterators=100
+
+    data=pd.DataFrame(columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B"])
+
+    #print "Analysis Started"
+
+    #part is simply running through all the white rings
+    if 1 in test_type:
+        for white_index in range(white_count):
+            for bin_index in range(bin_count):
+                data_index="white"+str(white_index)+"bin"+str(bin_index)
+                data_input=list(dataframe_input[data_index])
+                thresh,J_abs,J,sen,spec=threshold_finder(data_input,mark_list,thresh_iterators)
+                #print [thresh,J_abs,J,sen,spec]
+                test_name=data_index
+                adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B"])
+                data=data.append(adder_df)
+
+    #print "Part 1 Done"
+
+    ##part 2 is finding the parallel difference between all the white and black columns
+    if 2 in test_type:
+        for white_index in range(white_count):
+            for black_index in range(black_count):
+                for bin_index in range(bin_count):
+                    pos_data_index="white"+str(white_index)+"bin"+str(bin_index)
+                    pos_data=list(dataframe_input[pos_data_index])
+                    neg_data_index="black"+str(black_index)+"bin"+str(bin_index)
+                    neg_data=list(dataframe_input[neg_data_index])
+                    diff_data=list(np.array(pos_data)-np.array(neg_data))
+                    thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
+                    test_name=pos_data_index+"_minus_"+neg_data_index
+                    adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                    data=data.append(adder_df)
+
+    ##part 3 is finding the parallel difference between all the white and averaged black column
+    if 3 in test_type:
+        for white_index in range(white_count):
+            for blackavg_index in range(blackavg_count):
+                for bin_index in range(bin_count):
+                    pos_data_index="white"+str(white_index)+"bin"+str(bin_index)
+                    pos_data=list(dataframe_input[pos_data_index])
+                    neg_data_index="blackavg"+str(blackavg_index)+"bin"+str(bin_index)
+                    neg_data=list(dataframe_input[neg_data_index])
+                    diff_data=list(np.array(pos_data)-np.array(neg_data))
+                    thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
+                    test_name=pos_data_index+"_minus_"+neg_data_index
+                    adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                    data=data.append(adder_df)
+
+    ##part 4 is finding the difference between all combinations of the white and black columns
+    if 4 in test_type:
+        for white_index in range(white_count):
+            for black_index in range(black_count):
+                for bin_index_white in range(bin_count):
+                    for bin_index_black in range(bin_count):
+                        pos_data_index="white"+str(white_index)+"bin"+str(bin_index_white)
+                        pos_data=list(dataframe_input[pos_data_index])
+                        neg_data_index="black"+str(black_index)+"bin"+str(bin_index_black)
+                        neg_data=list(dataframe_input[neg_data_index])
+                        diff_data=list(np.array(pos_data)-np.array(neg_data))
+                        thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
+                        test_name=pos_data_index+"_minus_"+neg_data_index
+                        adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                        data=data.append(adder_df)
+
+    ##part 5 is finding the difference between all combinations of the white and averaged black columns
+    if 5 in test_type:
+        for white_index in range(white_count):
+            for blackavg_index in range(blackavg_count):
+                for bin_index_white in range(bin_count):
+                    for bin_index_black in range(bin_count):
+                        pos_data_index="white"+str(white_index)+"bin"+str(bin_index_white)
+                        pos_data=list(dataframe_input[pos_data_index])
+                        neg_data_index="blackavg"+str(blackavg_index)+"bin"+str(bin_index_black)
+                        neg_data=list(dataframe_input[neg_data_index])
+                        diff_data=list(np.array(pos_data)-np.array(neg_data))
+                        thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
+                        test_name=pos_data_index+"_minus_"+neg_data_index
+                        adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                        data=data.append(adder_df)
+
+    return data
+
 #converts from bgr to cct
 def cct(input_img):
     i_ext = cv2.cvtColor(input_img,cv2.COLOR_BGR2XYZ)
@@ -1237,6 +1331,7 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     roi_thresh_basis=np.linspace(scan_range[0],scan_range[1],scan_n)
     roi_dec_rng_list=[]
     roi_dec_basis=np.linspace(-0.05,0.95,scan_size+1)
+   # print roi_dec_basis
 
     for roi_iterator in range(roi_total):
         roi_thresh_rng_list.append(roi_thresh_basis)
@@ -1366,14 +1461,16 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     roi_thresh_basis=np.linspace(scan_range[0],scan_range[1],scan_n)
     roi_dec_rng_list=[]
     roi_dec_basis=np.linspace(-0.05,0.95,scan_size+1)
+   # print roi_dec_basis
 
     for roi_iterator in range(roi_total):
         thresh_list_temp=np.linspace(best_roi_thresh[roi_iterator]-T_swing,best_roi_thresh[roi_iterator]+T_swing,scan_n)
         roi_thresh_rng_list.append(thresh_list_temp)
         dec_list_temp=np.arange(np.max([-0.05,best_dec_thresh[roi_iterator]-D_swing]),np.min([0.95,best_dec_thresh[roi_iterator]+D_swing])+0.1,0.1)
-        roi_dec_rng_list.append(dec_list_temp)
+       # roi_dec_rng_list.append(dec_list_temp)
+        roi_dec_rng_list.append(roi_dec_basis)
 
-
+  #  print roi_dec_rng_list
 
 
         #print list_data_holder
@@ -1444,7 +1541,8 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
                     #print roi_thresh,
                     #print ",",
                     #print roi_dec
-    #print best_J
+    print best_J,
+    print ",",
     #print best_dec_thresh
     #print best_roi_thresh
 
@@ -1925,15 +2023,29 @@ def path_filter(dataframe_input,path):
     df=copy.copy(dataframe_input)
 
     if not path=='skip':
-        df=df.loc[df['Path'].str.contains(path)]
+        df=df.loc[df['path'].str.contains(path)]
 
     return df
 
-def arbitrary_exclude(dataframe_input,column,str):
+def arbitrary_exclude(dataframe_input,column,input_string):
     df=copy.copy(dataframe_input)
 
-    if not str=='skip':
-        df = df[~df[column].isin([str])]
+    
+
+    if not input_string=='skip':
+        df[column]=df[column].astype(str)
+        df = df[~df[column].isin([input_string])]
+
+    return df
+
+def arbitrary_include(dataframe_input,column,input_string):
+    df=copy.copy(dataframe_input)
+
+    
+
+    if not input_string=='skip':
+        df[column]=df[column].astype(str)
+        df = df[df[column].isin([input_string])]
 
     return df
 
@@ -2343,6 +2455,7 @@ def print_exif_UC(image_path):
          for k, v in img._getexif().items()
          if k in PIL.ExifTags.TAGS
          }
+    print exif
     return exif['UserComment']
 
 def print_exif_DT(image_path):
