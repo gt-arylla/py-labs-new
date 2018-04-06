@@ -110,7 +110,7 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
 
     thresh_iterators=100
 
-    data=pd.DataFrame(columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B","white_index","white_bin","black_index","black_bin"])
+    data_dict={"Test_Name":[],"Thresh":[],"J_Abs":[],"J":[],"Sen":[],"Spec":[],"n_P":[],"n_B":[],"white_index":[],"white_bin":[],"black_index":[],"black_bin":[]}
 
     #print "Analysis Started"
 
@@ -122,7 +122,20 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
             thresh,J_abs,J,sen,spec=threshold_finder(data_input,mark_list,thresh_iterators)
             #print [thresh,J_abs,J,sen,spec]
             test_name=data_index
-            adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank,white_index,bin_index,'notused','notused']],columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B","white_index","white_bin","black_index","black_bin"])
+            data_dict["Test_Name"].append(test_name)
+            data_dict["Thresh"].append(thresh)
+            data_dict["J_Abs"].append(J_abs)
+            data_dict["J"].append(J)
+            data_dict["Sen"].append(sen)
+            data_dict["Spec"].append(spec)
+            data_dict["n_P"].append(count_print)
+            data_dict["n_B"].append(count_blank)
+            data_dict["white_index"].append(white_index)
+            data_dict["white_bin"].append(bin_index)
+            data_dict["black_index"].append('notused')
+            data_dict["black_bin"].append('notused')
+
+
             data=data.append(adder_df)
 
     #print "Part 1 Done"
@@ -138,8 +151,18 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
                 diff_data=list(np.array(pos_data)-np.array(neg_data))
                 thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
                 test_name=pos_data_index+"_minus_"+neg_data_index
-                adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank,white_index,bin_index,black_index,bin_index]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B","white_index","white_bin","black_index","black_bin"])
-                data=data.append(adder_df)
+                data_dict["Test_Name"].append(test_name)
+                data_dict["Thresh"].append(thresh)
+                data_dict["J_Abs"].append(J_abs)
+                data_dict["J"].append(J)
+                data_dict["Sen"].append(sen)
+                data_dict["Spec"].append(spec)
+                data_dict["n_P"].append(count_print)
+                data_dict["n_B"].append(count_blank)
+                data_dict["white_index"].append(white_index)
+                data_dict["white_bin"].append(bin_index)
+                data_dict["black_index"].append(black_index)
+                data_dict["black_bin"].append(bin_index)
 
     ##part 3 is finding the parallel difference between all the white and averaged black column
     if 3 in test_type:
@@ -152,8 +175,18 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
                 diff_data=list(np.array(pos_data)-np.array(neg_data))
                 thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
                 test_name=pos_data_index+"_minus_"+neg_data_index
-                adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank,white_index,bin_index,-blackavg_index,bin_index]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B","white_index","white_bin","black_index","black_bin"])
-                data=data.append(adder_df)
+                data_dict["Test_Name"].append(test_name)
+                data_dict["Thresh"].append(thresh)
+                data_dict["J_Abs"].append(J_abs)
+                data_dict["J"].append(J)
+                data_dict["Sen"].append(sen)
+                data_dict["Spec"].append(spec)
+                data_dict["n_P"].append(count_print)
+                data_dict["n_B"].append(count_blank)
+                data_dict["white_index"].append(white_index)
+                data_dict["white_bin"].append(bin_index)
+                data_dict["black_index"].append(-blackavg_index)
+                data_dict["black_bin"].append(bin_index)
 
     ##part 4 is finding the difference between all combinations of the white and black columns
     if 4 in test_type:
@@ -167,8 +200,18 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
                     diff_data=list(np.array(pos_data)-np.array(neg_data))
                     thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
                     test_name=pos_data_index+"_minus_"+neg_data_index
-                    adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank,white_index,bin_index_white,black_index,bin_index_black]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B","white_index","white_bin","black_index","black_bin"])
-                    data=data.append(adder_df)
+                    data_dict["Test_Name"].append(test_name)
+                    data_dict["Thresh"].append(thresh)
+                    data_dict["J_Abs"].append(J_abs)
+                    data_dict["J"].append(J)
+                    data_dict["Sen"].append(sen)
+                    data_dict["Spec"].append(spec)
+                    data_dict["n_P"].append(count_print)
+                    data_dict["n_B"].append(count_blank)
+                    data_dict["white_index"].append(white_index)
+                    data_dict["white_bin"].append(bin_index_white)
+                    data_dict["black_index"].append(black_index)
+                    data_dict["black_bin"].append(bin_index_black)
 
     ##part 5 is finding the difference between all combinations of the white and averaged black columns
     if 5 in test_type:
@@ -182,12 +225,26 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
                     diff_data=list(np.array(pos_data)-np.array(neg_data))
                     thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
                     test_name=pos_data_index+"_minus_"+neg_data_index
-                    adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank,white_index,bin_index_white,-blackavg_index,bin_index_black]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B","white_index","white_bin","black_index","black_bin"])
-                    data=data.append(adder_df)
+                    data_dict["Test_Name"].append(test_name)
+                    data_dict["Thresh"].append(thresh)
+                    data_dict["J_Abs"].append(J_abs)
+                    data_dict["J"].append(J)
+                    data_dict["Sen"].append(sen)
+                    data_dict["Spec"].append(spec)
+                    data_dict["n_P"].append(count_print)
+                    data_dict["n_B"].append(count_blank)
+                    data_dict["white_index"].append(white_index)
+                    data_dict["white_bin"].append(bin_index_white)
+                    data_dict["black_index"].append(-blackavg_index)
+                    data_dict["black_bin"].append(bin_index_black)
+
+
+    data=pd.DataFrame(data_dict)
 
     #Reset data index
     data=data.reset_index(drop=True)
 
+   
    # print data
 
     # Filter out nan values
