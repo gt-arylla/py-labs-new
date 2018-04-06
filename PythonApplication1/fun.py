@@ -19,6 +19,19 @@ from sklearn.cross_validation import train_test_split
 from sklearn import metrics
 import shutil
 
+#def df_to_dict(input_df):
+#    df=copy.copy(input_df)
+
+#    rough_dict=df.to_dict()
+
+#    print rough_dict
+
+#    clean_dict={}
+#    for key in rough_dict:
+#        clean_dict[key]=rough_dict[key][0]
+
+#    return clean_dict 
+
 def dropNAN(input_df,column_where_numbers_start):
     df=input_df
     #remove NAN values from df
@@ -97,7 +110,7 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
 
     thresh_iterators=100
 
-    data=pd.DataFrame(columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B"])
+    data=pd.DataFrame(columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B","white_index","white_bin","black_index","black_bin"])
 
     #print "Analysis Started"
 
@@ -109,7 +122,7 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
             thresh,J_abs,J,sen,spec=threshold_finder(data_input,mark_list,thresh_iterators)
             #print [thresh,J_abs,J,sen,spec]
             test_name=data_index
-            adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B"])
+            adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank,white_index,bin_index,'notused','notused']],columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B","white_index","white_bin","black_index","black_bin"])
             data=data.append(adder_df)
 
     #print "Part 1 Done"
@@ -125,7 +138,7 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
                 diff_data=list(np.array(pos_data)-np.array(neg_data))
                 thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
                 test_name=pos_data_index+"_minus_"+neg_data_index
-                adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank,white_index,bin_index,black_index,bin_index]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B","white_index","white_bin","black_index","black_bin"])
                 data=data.append(adder_df)
 
     ##part 3 is finding the parallel difference between all the white and averaged black column
@@ -139,7 +152,7 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
                 diff_data=list(np.array(pos_data)-np.array(neg_data))
                 thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
                 test_name=pos_data_index+"_minus_"+neg_data_index
-                adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank,white_index,bin_index,-blackavg_index,bin_index]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B","white_index","white_bin","black_index","black_bin"])
                 data=data.append(adder_df)
 
     ##part 4 is finding the difference between all combinations of the white and black columns
@@ -154,7 +167,7 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
                     diff_data=list(np.array(pos_data)-np.array(neg_data))
                     thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
                     test_name=pos_data_index+"_minus_"+neg_data_index
-                    adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                    adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank,white_index,bin_index_white,black_index,bin_index_black]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B","white_index","white_bin","black_index","black_bin"])
                     data=data.append(adder_df)
 
     ##part 5 is finding the difference between all combinations of the white and averaged black columns
@@ -169,10 +182,62 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
                     diff_data=list(np.array(pos_data)-np.array(neg_data))
                     thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
                     test_name=pos_data_index+"_minus_"+neg_data_index
-                    adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                    adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank,white_index,bin_index_white,-blackavg_index,bin_index_black]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B","white_index","white_bin","black_index","black_bin"])
                     data=data.append(adder_df)
 
-    return data
+    #Reset data index
+    data=data.reset_index(drop=True)
+
+   # print data
+
+    # Filter out nan values
+    df=dropNAN(data,0)
+
+    # Determine maximum conditions
+    data_max=data.ix[data['J_Abs'].idxmax()]   
+    data_max_dict=data_max.to_dict()
+   # data_max=data_max.reset_index(drop=True)
+    #result_max_list=list(result_max)
+
+    #print data_max;
+
+    return data,data_max_dict
+
+#def black_white_redundancy(dataframe_input,white_count,black_count,test_type=[1],bin_count=55):
+#    #build a list of dataframes for all white ROIs
+#    white_list_dict=[]
+#    for white_index in range(white_count):
+#        temp_df=black_white_modeler(dataframe_input,white_index,black_count,test_type,bin_count)[1]
+#        white_df.append(temp_df)
+
+#    #reset input df index so that it can be iterated through
+#    df=copy.copy(dataframe_input)
+#    df=df.reset_index(drop=True)
+    
+
+#    #iterate through df, making a nested list of accuracy binaries
+#    for df_row in range(df.shape[0]):
+#        temp_list=[]
+#        for ROI_index in range(white_count):
+#            white_column='white'+str(white_list_dict[ROI_index]["white_index"])+'bin'+str(white_list_dict[ROI_index].["white_bin"])
+#            black_column='black'+str(white_list_dict[ROI_index]["black_index"])+'bin'+str(white_list_dict[ROI_index]["black_bin"])
+#            threshold_value=white_df[ROI_index]["Thresh"]
+#            diff=df.at[df_row,white_column]-df.at[df_row,black_column]
+#            if diff>threshold_value:
+#                temp_list.append(1)
+#            else:
+#                temp_list.append(0)
+
+#    #iterate through redundancy levels, always considering ALL the ROIs (in the future, I can loop this to only consider some ROIs)
+
+
+
+    
+#    mark_list=list(dataframe_input["mark"])
+#    count_print=np.sum(mark_list)
+#    count_blank=len(mark_list)-count_print
+
+    
 
 #converts from bgr to cct
 def cct(input_img):
@@ -2035,12 +2100,13 @@ def arbitrary_exclude(dataframe_input,column,input_string):
 
 def arbitrary_include(dataframe_input,column,input_string):
     df=copy.copy(dataframe_input)
-
-    
-
     if not input_string=='skip':
         df[column]=df[column].astype(str)
-        df=df.loc[df[column].str.contains(input_string)]
+        #print df[column]
+        if input_string=='path':
+            df=df.loc[df[column].str.contains(input_string)]
+        else:
+            df = df[df[column]==input_string]
 
     return df
 
