@@ -313,6 +313,7 @@ def black_white_redundancy(dataframe_input,white_count,black_count,test_type=[1]
     best_active_ROIs=[]
     best_red_thresh=0
     available_ROIs=range(white_count)
+    sum_list_final=[]
 
     for ROI_count in range(1,white_count):
         for active_ROIs in list(it.combinations(range(0,len(available_ROIs)),ROI_count)):
@@ -322,6 +323,7 @@ def black_white_redundancy(dataframe_input,white_count,black_count,test_type=[1]
 
 
             for red_thresh in np.linspace(0.5,len(active_ROIs)-0.5,len(active_ROIs)):
+                sum_list=[]
                 TP=0
                 TN=0
                 FP=0
@@ -330,6 +332,7 @@ def black_white_redundancy(dataframe_input,white_count,black_count,test_type=[1]
                     sum=0
                     for ROI in active_ROIs:
                         sum=sum+guess_list[df_row][ROI]
+                    sum_list.append(sum)
                     if sum>red_thresh:
                         guess=1
                     else:
@@ -368,9 +371,12 @@ def black_white_redundancy(dataframe_input,white_count,black_count,test_type=[1]
                     best_spec=specificity
                     best_active_ROIs=active_ROIs
                     best_red_thresh=red_thresh
+                    sum_list_final=sum_list
                     #print "J: "+str(J)
                     #print "Sen: "+str(sensitivity)
                     #print "Spec: "+str(specificity)
+
+    save_failed_images(df,mark_list,sum_list_final,best_red_thresh)
 
     output_dict={"j":best_J,"sen":best_sen,"spec":best_spec,"active_rois":best_active_ROIs,"red_thresh":best_red_thresh,"roi_thresh":ROI_thresh_dict,"optimal_rois":white_list_dict,"n_b":count_blank,"n_p":count_print}
     for key in ROI_thresh_dict:
