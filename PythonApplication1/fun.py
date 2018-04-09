@@ -110,7 +110,7 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
 
     thresh_iterators=100
 
-    data_dict={"Test_Name":[],"Thresh":[],"J_Abs":[],"J":[],"Sen":[],"Spec":[],"n_P":[],"n_B":[],"white_index":[],"white_bin":[],"black_index":[],"black_bin":[]}
+    data_dict={"test_name":[],"thresh":[],"j_abs":[],"j":[],"sen":[],"spec":[],"n_p":[],"n_b":[],"white_index":[],"white_bin":[],"black_index":[],"black_bin":[]}
 
     #print "Analysis Started"
 
@@ -122,14 +122,14 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
             thresh,J_abs,J,sen,spec=threshold_finder(data_input,mark_list,thresh_iterators)
             #print [thresh,J_abs,J,sen,spec]
             test_name=data_index
-            data_dict["Test_Name"].append(test_name)
-            data_dict["Thresh"].append(thresh)
-            data_dict["J_Abs"].append(J_abs)
-            data_dict["J"].append(J)
-            data_dict["Sen"].append(sen)
-            data_dict["Spec"].append(spec)
-            data_dict["n_P"].append(count_print)
-            data_dict["n_B"].append(count_blank)
+            data_dict["test_name"].append(test_name)
+            data_dict["thresh"].append(thresh)
+            data_dict["j_abs"].append(J_abs)
+            data_dict["j"].append(J)
+            data_dict["sen"].append(sen)
+            data_dict["spec"].append(spec)
+            data_dict["n_p"].append(count_print)
+            data_dict["n_b"].append(count_blank)
             data_dict["white_index"].append(white_index)
             data_dict["white_bin"].append(bin_index)
             data_dict["black_index"].append('notused')
@@ -151,14 +151,14 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
                 diff_data=list(np.array(pos_data)-np.array(neg_data))
                 thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
                 test_name=pos_data_index+"_minus_"+neg_data_index
-                data_dict["Test_Name"].append(test_name)
-                data_dict["Thresh"].append(thresh)
-                data_dict["J_Abs"].append(J_abs)
-                data_dict["J"].append(J)
-                data_dict["Sen"].append(sen)
-                data_dict["Spec"].append(spec)
-                data_dict["n_P"].append(count_print)
-                data_dict["n_B"].append(count_blank)
+                data_dict["test_name"].append(test_name)
+                data_dict["thresh"].append(thresh)
+                data_dict["j_abs"].append(J_abs)
+                data_dict["j"].append(J)
+                data_dict["sen"].append(sen)
+                data_dict["spec"].append(spec)
+                data_dict["n_p"].append(count_print)
+                data_dict["n_b"].append(count_blank)
                 data_dict["white_index"].append(white_index)
                 data_dict["white_bin"].append(bin_index)
                 data_dict["black_index"].append(black_index)
@@ -175,14 +175,14 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
                 diff_data=list(np.array(pos_data)-np.array(neg_data))
                 thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
                 test_name=pos_data_index+"_minus_"+neg_data_index
-                data_dict["Test_Name"].append(test_name)
-                data_dict["Thresh"].append(thresh)
-                data_dict["J_Abs"].append(J_abs)
-                data_dict["J"].append(J)
-                data_dict["Sen"].append(sen)
-                data_dict["Spec"].append(spec)
-                data_dict["n_P"].append(count_print)
-                data_dict["n_B"].append(count_blank)
+                data_dict["test_name"].append(test_name)
+                data_dict["thresh"].append(thresh)
+                data_dict["j_abs"].append(J_abs)
+                data_dict["j"].append(J)
+                data_dict["sen"].append(sen)
+                data_dict["spec"].append(spec)
+                data_dict["n_p"].append(count_print)
+                data_dict["n_b"].append(count_blank)
                 data_dict["white_index"].append(white_index)
                 data_dict["white_bin"].append(bin_index)
                 data_dict["black_index"].append(-blackavg_index)
@@ -200,14 +200,14 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
                     diff_data=list(np.array(pos_data)-np.array(neg_data))
                     thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
                     test_name=pos_data_index+"_minus_"+neg_data_index
-                    data_dict["Test_Name"].append(test_name)
-                    data_dict["Thresh"].append(thresh)
-                    data_dict["J_Abs"].append(J_abs)
-                    data_dict["J"].append(J)
-                    data_dict["Sen"].append(sen)
-                    data_dict["Spec"].append(spec)
-                    data_dict["n_P"].append(count_print)
-                    data_dict["n_B"].append(count_blank)
+                    data_dict["test_name"].append(test_name)
+                    data_dict["thresh"].append(thresh)
+                    data_dict["j_abs"].append(J_abs)
+                    data_dict["j"].append(J)
+                    data_dict["sen"].append(sen)
+                    data_dict["spec"].append(spec)
+                    data_dict["n_p"].append(count_print)
+                    data_dict["n_b"].append(count_blank)
                     data_dict["white_index"].append(white_index)
                     data_dict["white_bin"].append(bin_index_white)
                     data_dict["black_index"].append(black_index)
@@ -225,14 +225,14 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
                     diff_data=list(np.array(pos_data)-np.array(neg_data))
                     thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
                     test_name=pos_data_index+"_minus_"+neg_data_index
-                    data_dict["Test_Name"].append(test_name)
-                    data_dict["Thresh"].append(thresh)
-                    data_dict["J_Abs"].append(J_abs)
-                    data_dict["J"].append(J)
-                    data_dict["Sen"].append(sen)
-                    data_dict["Spec"].append(spec)
-                    data_dict["n_P"].append(count_print)
-                    data_dict["n_B"].append(count_blank)
+                    data_dict["test_name"].append(test_name)
+                    data_dict["thresh"].append(thresh)
+                    data_dict["j_abs"].append(J_abs)
+                    data_dict["j"].append(J)
+                    data_dict["sen"].append(sen)
+                    data_dict["spec"].append(spec)
+                    data_dict["n_p"].append(count_print)
+                    data_dict["n_b"].append(count_blank)
                     data_dict["white_index"].append(white_index)
                     data_dict["white_bin"].append(bin_index_white)
                     data_dict["black_index"].append(-blackavg_index)
@@ -251,7 +251,7 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
     df=dropNAN(data,0)
 
     # Determine maximum conditions
-    data_max=data.ix[data['J_Abs'].idxmax()]   
+    data_max=data.ix[data['j_abs'].idxmax()]   
     data_max_dict=data_max.to_dict()
    # data_max=data_max.reset_index(drop=True)
     #result_max_list=list(result_max)
@@ -260,40 +260,123 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
 
     return data,data_max_dict
 
-#def black_white_redundancy(dataframe_input,white_count,black_count,test_type=[1],bin_count=55):
-#    #build a list of dataframes for all white ROIs
-#    white_list_dict=[]
-#    for white_index in range(white_count):
-#        temp_df=black_white_modeler(dataframe_input,white_index,black_count,test_type,bin_count)[1]
-#        white_df.append(temp_df)
+def black_white_redundancy(dataframe_input,white_count,black_count,test_type=[1],bin_count=55):
+    #build a list of dataframes for all white ROIs
+    white_list_dict=[]
+    ROI_thresh_dict={}
+    for white_index in range(white_count):
+        temp_df=black_white_modeler(dataframe_input,white_index,black_count,test_type,bin_count)[1]
+        #print temp_df
+        white_list_dict.append(temp_df)
+        ROI_thresh_dict["roi"+str(white_index)]=temp_df["thresh"]
 
-#    #reset input df index so that it can be iterated through
-#    df=copy.copy(dataframe_input)
-#    df=df.reset_index(drop=True)
+    #reset input df index so that it can be iterated through
+    df=copy.copy(dataframe_input)
+    df=df.reset_index(drop=True)
     
 
-#    #iterate through df, making a nested list of accuracy binaries
-#    for df_row in range(df.shape[0]):
-#        temp_list=[]
-#        for ROI_index in range(white_count):
-#            white_column='white'+str(white_list_dict[ROI_index]["white_index"])+'bin'+str(white_list_dict[ROI_index].["white_bin"])
-#            black_column='black'+str(white_list_dict[ROI_index]["black_index"])+'bin'+str(white_list_dict[ROI_index]["black_bin"])
-#            threshold_value=white_df[ROI_index]["Thresh"]
-#            diff=df.at[df_row,white_column]-df.at[df_row,black_column]
-#            if diff>threshold_value:
-#                temp_list.append(1)
-#            else:
-#                temp_list.append(0)
+    #iterate through df, making a nested list of accuracy binaries
+    guess_list=[]
+    ROI_threshes={}
+    for df_row in range(df.shape[0]):
+        temp_list=[]
+        for ROI_index in range(white_count):
+            ROI_index = int(ROI_index)
+            white_column='white'+str(int(white_list_dict[ROI_index]["white_index"]))+'bin'+str(int(white_list_dict[ROI_index]["white_bin"]))
+            black_column='black'+str(int(white_list_dict[ROI_index]["black_index"]))+'bin'+str(int(white_list_dict[ROI_index]["black_bin"]))
+            #print ROI_index,
+            #print "  ",
+            #print white_column,
+            #print "  ",
+            #print black_column
+            threshold_value=ROI_thresh_dict["roi"+str(ROI_index)]
+            diff=df.at[df_row,white_column]-df.at[df_row,black_column]
 
-#    #iterate through redundancy levels, always considering ALL the ROIs (in the future, I can loop this to only consider some ROIs)
+            if diff>threshold_value:
+                temp_list.append(1)
+            else:
+                temp_list.append(0)
+        guess_list.append(temp_list)
+    
+    #prep data to check against later
+    mark_list=list(dataframe_input["mark"])
+    count_print=np.sum(mark_list)
+    count_blank=len(mark_list)-count_print
 
+    #iterate through redundancy levels, always considering ALL the ROIs (in the future, I can loop this to only consider some ROIs)
+   
+   # active_ROIs=[0]
+    best_J=0
+    best_sen=0
+    best_spec=0
+    best_active_ROIs=[]
+    best_red_thresh=0
+    available_ROIs=range(white_count)
+
+    for ROI_count in range(1,white_count):
+        for active_ROIs in list(it.combinations(range(0,len(available_ROIs)),ROI_count)):
 
 
     
-#    mark_list=list(dataframe_input["mark"])
-#    count_print=np.sum(mark_list)
-#    count_blank=len(mark_list)-count_print
 
+
+            for red_thresh in np.linspace(0.5,len(active_ROIs)-0.5,len(active_ROIs)):
+                TP=0
+                TN=0
+                FP=0
+                FN=0
+                for df_row in range(df.shape[0]):
+                    sum=0
+                    for ROI in active_ROIs:
+                        sum=sum+guess_list[df_row][ROI]
+                    if sum>red_thresh:
+                        guess=1
+                    else:
+                        guess=0
+                    mark=df.at[df_row,'mark']
+                    #print "Sum: "+str(sum)
+                    #print "RedThresh: "+str(red_thresh)
+                    #print "Guess: "+str(guess)
+                    #print "Mark: "+str(mark)
+                    if mark==1:
+                        if guess==1:
+                            TP=TP+1
+                        elif guess==0:
+                            FN=FN+1
+                    elif mark==0:
+                        if guess==0:
+                            TN=TN+1
+                        elif guess==1:
+                            FP=FP+1
+                    #print [TP,TN,FP,FN]
+                    #print ""
+                if not TP+FN==count_print:
+                    raise ("Loop print count and total #print count do not match")
+                if not TN+FP==count_blank:
+                    raise ("Loop blank count and total blank count do not match")
+                sensitivity=float(TP)/float(TP+FN)
+                specificity=float(TN)/float(TN+FP)
+                J=adapted_J(sensitivity,specificity)
+                #print "J: "+str(J)
+                #print "Sen: "+str(sensitivity)
+                #print "Spec: "+str(specificity)
+                if J>best_J:
+                    #print "################## NEW J ##########"
+                    best_J=J
+                    best_sen=sensitivity
+                    best_spec=specificity
+                    best_active_ROIs=active_ROIs
+                    best_red_thresh=red_thresh
+                    #print "J: "+str(J)
+                    #print "Sen: "+str(sensitivity)
+                    #print "Spec: "+str(specificity)
+
+    output_dict={"j":best_J,"sen":best_sen,"spec":best_spec,"active_rois":best_active_ROIs,"red_thresh":best_red_thresh,"roi_thresh":ROI_thresh_dict,"optimal_rois":white_list_dict,"n_b":count_blank,"n_p":count_print}
+    for key in ROI_thresh_dict:
+        output_dict[key]=ROI_thresh_dict[key]
+
+
+    return output_dict
     
 
 #converts from bgr to cct
@@ -1429,6 +1512,10 @@ def cg_redundancy_modeler_v2(dataframe_input,scan_size=10):
 
 def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     scan_range=cg_scan_range_finder(dataframe_input,scan_size,3)
+    #reset index of input dataframe
+    #dataframe_input=dataframe_input.reset_index(drop=True)
+
+
     #gonna sweep over bloody everything, and figure out the J value in each case, then save cases where J value is real good
     scan_n=100;
     #print scan_range[0]+3
@@ -1691,6 +1778,7 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     #print print_sum
     #print blank_sum
     ## now that the confidence lists are done, we get roi accuracy using dec_rng
+    #accuracy_list=[]
     best_redundancy=-1
     best_J=-1
     best_sensitivity=-1
