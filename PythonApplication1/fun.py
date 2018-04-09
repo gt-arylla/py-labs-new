@@ -18,6 +18,7 @@ from sklearn.svm import LinearSVC
 from sklearn.cross_validation import train_test_split
 from sklearn import metrics
 import shutil
+import os
 
 #def df_to_dict(input_df):
 #    df=copy.copy(input_df)
@@ -1513,7 +1514,7 @@ def cg_redundancy_modeler_v2(dataframe_input,scan_size=10):
 def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     scan_range=cg_scan_range_finder(dataframe_input,scan_size,3)
     #reset index of input dataframe
-    #dataframe_input=dataframe_input.reset_index(drop=True)
+    dataframe_input=dataframe_input.reset_index(drop=True)
 
 
     #gonna sweep over bloody everything, and figure out the J value in each case, then save cases where J value is real good
@@ -1753,6 +1754,8 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     #now figure out the best level of redundancy
     print_sum=[]
     blank_sum=[]
+    sum_list=[]
+    mark_list=[]
     for row in dataframe_input.itertuples():
         sum=0
         for roi_index in range(len(roi_thresh_rng_list)):
@@ -1768,17 +1771,21 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
             if confidence_value>dec_thresh:
                 sum+=1
         row_marker=row[roi_starter_index_list[-1]]
+        mark_list.append(row_marker)
         #print row_marker
         if row_marker==1:
             print_sum.append(sum)
+            sum_list.append(sum)
+            
         elif row_marker==0:
             blank_sum.append(sum)
+            sum_list.append(sum)
         else:
             print "***********MARKER MISSING ERROR3*********"
     #print print_sum
     #print blank_sum
     ## now that the confidence lists are done, we get roi accuracy using dec_rng
-    #accuracy_list=[]
+    accuracy_list=[]
     best_redundancy=-1
     best_J=-1
     best_sensitivity=-1
@@ -1824,6 +1831,8 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
             best_sensitivity=sensitivity
             best_specificity=specificity
 
+
+    save_failed_images(dataframe_input,mark_list,sum_list,best_redundancy)
 
     #print "*********END*********"
     return [[best_J,best_sensitivity,best_specificity,len(print_sum),len(blank_sum)],best_roi_thresh,best_dec_thresh,best_redundancy]
@@ -2709,6 +2718,29 @@ def import_and_sort_csv(csv_file,return_number,sort_index):
         print super_list[i]
 
     return 0
+
+def save_failed_images(dataframe_input,mark_list,sum_list,best_redundancy):
+    #save failed images
+    falsenegative_fail_image_paths=[]
+    falsepositive_failed_image_paths=[]
+    for save_fail_index in range(len(mark_list)):
+        if mark_list[save_fail_index]==1 and sum_list[save_fail_index]<best_redundancy:
+            falsenegative_fail_image_paths.append(dataframe_input.at[save_fail_index,'path'])
+        if mark_list[save_fail_index]==0 and sum_list[save_fail_index]>best_redundancy:
+            falsepositive_failed_image_paths.append(dataframe_input.at[save_fail_index,'path'])
+
+    #copy failed images to their destinations
+    for fn_path in falsenegative_fail_image_paths:
+        path_split=fn_path.split("\\")
+        file_name=path_split[-1]
+        file_move=os.path.join("modeler_badPics//falsenegative",file_name)
+        shutil.copyfile(fn_path,file_move)
+    for fp_path in falsepositive_failed_image_paths:
+        path_split=fp_path.split("\\")
+        file_name=path_split[-1]
+        file_move=os.path.join("modeler_badPics//falsepositive",file_name)
+        shutil.copyfile(fp_path,file_move)
+    return
 
 def weighted_average(input_data, input_weights):
     #data should be a list of lists.
