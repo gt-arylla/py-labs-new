@@ -1,8 +1,8 @@
-import cv2
+#import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.figure as pltfig
-import qrtools
+#import qrtools
 import os
 import winsound
 import sys
