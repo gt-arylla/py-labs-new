@@ -12,6 +12,7 @@ import time
 import fun
 
 #############____________CONSTANTS_______________##########33
+resize_big=0.7
 resize_initial=0.2
 resize_full=0.5
 b_ratio=0.1105
@@ -50,7 +51,11 @@ if len(sys.argv)<=2:
         img=cv2.imread(filname)
 
         if len(sys.argv)>2:
-            img=cv2.resize(img,None,fx=resize_initial,fy=resize_initial,interpolation = cv2.INTER_CUBIC)
+            if sys.argv[2]=="big":
+                resize_big=1
+            else:
+                resize_big=resize_initial
+        img=cv2.resize(img,None,fx=resize_initial,fy=resize_initial,interpolation = cv2.INTER_CUBIC)
 
         pltfig.Figure(figsize=[120,100], dpi=200, facecolor=None, edgecolor=None, linewidth=0.0, frameon=None, subplotpars=None, tight_layout=None)
         plt.subplot(461)
@@ -64,7 +69,7 @@ if len(sys.argv)<=2:
             plt.subplot(4,6,iter)
             plt.imshow(i_ext,cmap='jet')
             plt.axis('off')
-            plt.title(str(colorspace_index)+" 120"+ name,fontsize=8)
+            plt.title(str(colorspace_index)+" "+ name,fontsize=8)
         plt.show()
 
 
@@ -81,7 +86,7 @@ if len(sys.argv)>2:
     end_value=int(raw_input('End value? (int) '))
     tight_range=[start_value,end_value]
 else:
-    pic_show=raw_input('Show Pic? 1/0 ')
+    pic_show=int(raw_input('Show Pic? 1/0 '))
     final_cp_index=int(raw_input('Colorspace index? (int) '))
     start_value=int(raw_input('Start value? (int) '))
     end_value=int(raw_input('End value? (int) '))
