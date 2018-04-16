@@ -26,7 +26,7 @@ avg_thresh=60
 eq_hist='n'
 clay='n'
 s3='n'
-r_check='y'
+r_check=0
 
 #if user gave a path in the command line, use it.  Otherwise, use default
 if len(sys.argv)>1:
@@ -43,19 +43,21 @@ total_counter=22*numfil #there are 22 colorspaces
 dir_list=os.listdir(directory)
 
 print directory
+print len(sys.argv)
 
 #show all colorspaces in the style of colorspace2.py
-if len(sys.argv)<=2:
+if len(sys.argv)<=3:
     if dir_list[0][-4:].lower()=='.jpg':
         filname=os.path.join(directory, dir_list[0])
         img=cv2.imread(filname)
 
         if len(sys.argv)>2:
             if sys.argv[2]=="big":
+
                 resize_big=1
             else:
                 resize_big=resize_initial
-        img=cv2.resize(img,None,fx=resize_initial,fy=resize_initial,interpolation = cv2.INTER_CUBIC)
+        img=cv2.resize(img,None,fx=resize_big,fy=resize_big,interpolation = cv2.INTER_CUBIC)
 
         pltfig.Figure(figsize=[120,100], dpi=200, facecolor=None, edgecolor=None, linewidth=0.0, frameon=None, subplotpars=None, tight_layout=None)
         plt.subplot(461)
@@ -104,7 +106,7 @@ for filename in dir_list:
         # print img
         # print img.shape
         # print img.size
-        if img.size>resize_thresh and r_check=='y':
+        if img.size>resize_thresh and r_check==1:
         #resize=np.sqrt(resize_thresh/float(img.size))
         # print resize
             img=cv2.resize(img,None,fx=resize_full,fy=resize_full,interpolation = cv2.INTER_CUBIC)
