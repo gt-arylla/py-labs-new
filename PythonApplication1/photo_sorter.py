@@ -11,12 +11,12 @@ import shutil
 
 #############3_______PHOTO IMPORT_______##############
 
-directory_move="G://Developer//PhotoExports//180312 JB_FF_v1//"
+directory_move="C://Users//gttho//Resilio Sync//Developer//PhotoExports//180405 KG TB Grids//"
 
-directory_start="C://Users//gttho//Documents//Visual Studio 2017//Projects//PythonApplication1//PythonApplication1//bad_pics"
-directory_start="G://Developer//PhotoExports//180312 JB_FF_v1//"
+directory_start="C://Users//gttho//Resilio Sync//Developer//PhotoExports//180405 KG TB Grids//sortme"
+#directory_start="G://Developer//PhotoExports//180312 JB_FF_v1//"
 sort_dict={"1":"True//Perfect","2":"True//Bloated","3":"Fail//External Contour","4":"Fail//Hole in Contour","5":"Fail//NoCentaur","6":"Fail//Part Contour"}
-sort_dict={"t":"True","f":"Fail"}
+sort_dict={"1":"good","0":"bad"}
 adder_string=["50mS","75mS","100mS"]
 adder_string=[""]
 for adder in adder_string:
