@@ -1,6 +1,6 @@
 #Run Functions
 print "importing..."
-import cv2
+#import cv2
 import numpy as np
 print 'plt import'
 import matplotlib.pyplot as plt
@@ -248,12 +248,47 @@ if(0): #EXIF data for all files in tree
     start_dir='G://Google Drive//Original Images//Embroidery//180117 App35 Test'
     start_dir='G://Google Drive//Color_regression//images//v2app//Mi.50'
     start_dir="G://Google Drive//Original Images//Pumped Kicks//180207 Algo_Test//75ms"
-    start_dir="G://Google Drive//Original Images//Pumped Kicks//180302 Sponge_Stamp_Diff_Lux"
+    start_dir="C://Users//gttho//Resilio Sync//Original Images//CanadaGoose//180325-180326 DC_Wash_Conc_Sweep"
 
     pattern   = "*.jpg"
 
     for dir,_,_ in os.walk(start_dir):
         files.extend(glob(os.path.join(dir,pattern))) 
+    for file in files:
+        print file,
+        try:
+            UC=fun.print_exif_UC(file)
+            UC_new=UC.replace(':',',')
+            file=file.replace('Blank//Logo',',11,')
+            file=file.replace('Blank//Text',',12,')
+            file=file.replace('M1//Logo',',13,')
+            file=file.replace('M1//Text',',14,')
+            file=file.replace('M2//Logo',',15,')
+            file=file.replace('M2//Text',',16,')
+            file=file.replace('M5//Logo',',17,')
+            file=file.replace('M5//Text',',18,')
+            file=file.replace('M7//Logo',',19,')
+            file=file.replace('M7//Text',',20,')
+            file=file.replace('M1hc//Logo',',21,')
+            file=file.replace('M1hc//Text',',22,')
+            file=file.replace('M2hc//Logo',',23,')
+            file=file.replace('M2hc//Text',',24,')
+
+
+       
+
+            print UC_new
+        except:
+            print 'Failed to print: '+file
+if(0): #EXIF data for not exclusively User_comment
+    files = []
+    start_dir_list=["C://Users//gttho//Resilio Sync//Original Images//Kings Gift//180409 TW Blank Copies"]
+
+    pattern   = "*.jpg"
+
+    for start_dir in start_dir_list:
+        for dir,_,_ in os.walk(start_dir):
+            files.extend(glob(os.path.join(dir,pattern))) 
     for file in files:
         print file,
         try:
@@ -428,7 +463,7 @@ if(0): #Logistic Regression
             for perc in np.linspace(0.25,.25,1):
                 x_train,y_train,x_test,y_test=fun.logistic_regression_prep(csv_file,x_cols,row_keep,perc)
                 result=fun.logistic_regression_model(x_train,y_train,tester_switch=True,xTst=x_test,yTst=y_test)
-                print str(perc)+","+str(result[0])+","+str(result[1])+","+str(result[2])
+                print str(perc)+";"+str(result[0])+";"+str(result[1])+";"+str(result[2])
                 coeffs_list.append(result[3][0])
                 intercepts_list.append(result[4][0])
             x_train,y_train,x_test,y_test=fun.logistic_regression_prep(csv_file,x_cols,row_keep)
@@ -458,17 +493,17 @@ if(0): #Logistic Regression
 
                 #for val in result2:
                 #    print val,
-                #    print ",",
+                #    print ";",
                 #print " "
                     #print row_keep
-                    #print str(perc)+","+str(result[0])+","+str(result[1])+","+str(result[2])
+                    #print str(perc)+";"+str(result[0])+";"+str(result[1])+";"+str(result[2])
                     #print perc,
-                    #print ",",
+                    #print ";",
                     #print result[4][0],
-                    #print ",",
+                    #print ";",
                     #for val in result[3]:
                     #    for val2 in val:
-                    #        print str(val2)+",",
+                    #        print str(val2)+";",
                     #print " "
     if tn==82: #compare training pics with testing pics using sm
         csv_file='171115_NewApp_FixedSet.csv'
@@ -518,12 +553,12 @@ if(0): #Logistic Regression
                 except:
                     print "Failed x_col: ",
                     print x_cols
-                #print str(result[0])+","+str(result[1])+","+str(result[2])
+                #print str(result[0])+";"+str(result[1])+";"+str(result[2])
                 #print result[4][0],
-                #print ",",
+                #print ";",
                 #for val in result[3]:
                 #    for val2 in val:
-                #        print str(val2)+",",
+                #        print str(val2)+";",
     if tn==821: #compare training pics with testing pics using sm
         directory='G://Google Drive//Datasets//'
         csv_file='SuperDuperSet_train.csv'
@@ -558,9 +593,9 @@ if(0): #Logistic Regression
                 #if True:
                     result=fun.sm_logistic_regression_model(x_train,y_train)
                     print row_keep,
-                    print ",",
+                    print ";",
                     print x_cols,
-                    print ",",
+                    print ";",
                     print result
                     #print "anal_done"
                     #result.extend(x_cols)
@@ -570,12 +605,12 @@ if(0): #Logistic Regression
                 except:
                     print "Failed x_col: ",
                     print x_cols
-                #print str(result[0])+","+str(result[1])+","+str(result[2])
+                #print str(result[0])+";"+str(result[1])+";"+str(result[2])
                 #print result[4][0],
-                #print ",",
+                #print ";",
                 #for val in result[3]:
                 #    for val2 in val:
-                #        print str(val2)+",",
+                #        print str(val2)+";",
     if tn==83:
         csv_file='171115_NewApp_FixedSet.csv'
         data_cols=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
@@ -597,14 +632,14 @@ if(0): #Logistic Regression
                 for keep_list in val_keep_list_list:
                     row_keep=[['PhotoSet',keep_list]]
                     print row_keep,
-                    print ",",
+                    print ";",
                     print x_cols,
                     print ";",
                     x_train,y_train,x_test,y_test=fun.logistic_regression_prep(csv_file,x_cols,row_keep,0.66)
                     result=fun.logistic_regression_model(x_train,y_train,printer=False)
-                    print ",",
-                    print str(result[0])+","+str(result[1])+","+str(result[2])
-                    print ","
+                    print ";",
+                    print str(result[0])+";"+str(result[1])+";"+str(result[2])
+                    print ";"
     if tn==84:
         csv_file='171117_Distance_Test.csv'
         x_cols=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,17]
@@ -616,8 +651,8 @@ if(0): #Logistic Regression
         val_keep_list=[[0]]
         x_train,y_train,x_test,y_test=fun.logistic_regression_prep(csv_file,x_cols)
         result=fun.logistic_regression_model(x_train,y_train,printer=False)
-        print str(result[0])+","+str(result[1])+","+str(result[2])
-if(1): #CanadaGoose Logistic Regression
+        print str(result[0])+";"+str(result[1])+";"+str(result[2])
+if(0): #CanadaGoose Logistic Regression
     #0 - logistic regression
     #1 - threshold modeling
     #2 - threshold model testing
@@ -625,12 +660,12 @@ if(1): #CanadaGoose Logistic Regression
     #4 - threshold modeling v2
     #5 - threshold modeling v2 with filtered Blanks and Detailed Report
     #6 - threshold modeling v3 - arbitrary ROI_max and ROI_count
-    test_index=14
+    test_index=6
 
     line_by_line_check=0
 
     files=[]
-    start_dir='C://Users//gttho//Documents//Visual Studio 2017//Projects//PythonApplication1//PythonApplication1//csv_import'
+    start_dir='csv_import'
     pattern   = "*.csv"
     print 'prog1'
     for dir,_,_ in os.walk(start_dir): 
@@ -640,7 +675,8 @@ if(1): #CanadaGoose Logistic Regression
         filename=file.rpartition("\\")[2]
         #Import csv to dataframe only once
 
-        print filename
+        if (line_by_line_check):
+            print filename
 
         #grab ring number from filename
         f_list=filename.split("_")
@@ -663,7 +699,7 @@ if(1): #CanadaGoose Logistic Regression
             #print df_b
             df=df.append(df_b);
 
-        df=fun.set_column_sequence(df,['path','formulation','ap','shoe','brand','location','size','colour','lux','datetime'])
+      #  df=fun.set_column_sequence(df,['path','formulation','ap','shoe','brand','location','size','colour','lux','datetime'])
        # print df
 
        # df=fun.path_filter(df,"Solid_Square_80mS_100mS")
@@ -689,14 +725,35 @@ if(1): #CanadaGoose Logistic Regression
         ##THEN REMOVE NAN VALUES
         #df=df.dropna(subset = header_list[column_where_numbers_start:])
 
+        #replace '-nan(ind)' with 0
+
+        #df=df.replace('-nan(ind)',0)
+
+        if line_by_line_check:
+            print "ORIGINAL DATAFRAME: "
+            print df
+
+        df=df.loc[:, ~df.columns.str.contains('^Unnamed')]
+        if line_by_line_check:
+            print "DROP UNNAMED: "
+            print df
+
+        #df=fun.dropNAN(df,35)
+        if line_by_line_check:
+            print "DROP NAN VALUES: "
+            print df
         #print df
 
-        #Make Dataframe of Blanks
-        df_blank=df.loc[df['formulation'].str.contains('blank|Blank')]
+        df=df.loc[df['guess'].isin([0,1])]
 
+        #Make Dataframe of Blanks
+        #df_blank=df.loc[df['ink'].str.contains('blank|Blank')]
+        df_blank=df.loc[df['mark']==0]
+        
         #df_blank=df.loc[df['Path'].str.contains('blank|Blank')]
 
         if line_by_line_check:
+            print "BLANK DATAFRAME"
             print df_blank
 
 
@@ -706,7 +763,11 @@ if(1): #CanadaGoose Logistic Regression
        # path_list.append('Yeezy')
 
      #   path_list.append('180228')
-      #  path_list.append('180301')
+      #  path_list.append('180301').
+        #path_list.append('180327 New_Exp_Bias_-1.6')
+        #path_list.append('180327 DC_Wash_Different_Inks')
+       # path_list.append('180325-180326 DC_Wash_Conc_Sweep')
+     #   path_list.append('180409 White_Tag_PVP_Ink')
         path_list.append('skip')
     #    path_list.append("Solid_Square_80mS_100mS")
 
@@ -827,7 +888,16 @@ if(1): #CanadaGoose Logistic Regression
         #mod_list.append('PB27')
         #mod_list.append('PB39')
         #mod_list.append('M0')
-        mod_list=['skip']
+     #   mod_list.append(30)
+  #      mod_list.append(32.5)
+    #    mod_list.append(35)
+   #     mod_list.append(37.5)
+   #     mod_list.append(40)
+    #    mod_list.append(50)
+       # mod_list.append('skip')
+        mod_list.append('50.0')
+       # mod_list.append('35.0')
+       # mod_list=['skip']
 
        # mod_list.append("AP1")
         #mod_list.append("AP3")
@@ -854,7 +924,7 @@ if(1): #CanadaGoose Logistic Regression
         #x_col_list.append()
 
         ROI_max=10;
-        ROI_count=1;
+        ROI_count=4;
 
         for path in path_list:
             for formulation_list in formulation_superlist: #elements with the same formulation are clustered together
@@ -864,8 +934,8 @@ if(1): #CanadaGoose Logistic Regression
                         #print test_index
                         ROI_result=[]
                         ROI_avg_result=[]
-                       # try:
-                        if True:
+                        try:
+                        #if True:
                             if test_index==0:
                                 for ROI in ROI_list:
                                     df_input=copy.copy(df)
@@ -873,7 +943,8 @@ if(1): #CanadaGoose Logistic Regression
                                     formulation=formulation_list[0][0]
                                     df_input=fun.cg_dataframe_filter(df_input,formulation,recipe,mod)
                                     df_fin=fun.cg_combine_print_blank(df_input,df_blank)
-                                    print df_fin
+                                    if line_by_line_check:
+                                        print df_fin
                                     df_fin.head()
                                     [x_train,y_train]=fun.logistic_regression_prep_cg(df_input,df_blank_input,ROI,ROI_max)
                                     ROI_avg_result.append(y_train.Mark.mean())
@@ -882,32 +953,36 @@ if(1): #CanadaGoose Logistic Regression
                                 
                                     ROI_result.append(result[0])
                                 print filename,
-                                print ",",
+                                print ";",
                                 print formulation_list[0][0],
-                                print ",",
+                                print ";",
                                 print recipe[0],
-                                print ",",
+                                print ";",
                                 print recipe[1],
-                                print ",",
+                                print ";",
                                 print recipe[2],
-                                print ",",
+                                print ";",
                                 print mod,
-                                print ",",
+                                print ";",
                                 print ROI_result[0],
-                                print ",",
+                                print ";",
                                 print ROI_result[1],
-                                print ",",
+                                print ";",
                                 print ROI_result[2]
                             if test_index==1 or test_index==4 or test_index==5 or test_index==6:
                                 df_input=copy.copy(df)
                                 df_blank_input=copy.copy(df_blank)
                                 formulation=formulation_list[0][0]
 
-                                
-                               # print df_blank.head()
-                               # print df_input.head()
-                                df_input=fun.path_filter(df_input,path)
-                                df_input=fun.cg_dataframe_filter(df_input,formulation,recipe,mod)
+                                if line_by_line_check:
+                                    print 'INITIAL BLANK: '
+                                    print df_blank.head()
+                                    print 'INITIAL PRINT: '
+                                    print df_input.head()
+                                #df_input=fun.path_filter(df_input,path)
+                                #df_input=df_input.loc[df['conc']==mod]
+                                df_input=fun.arbitrary_include(df_input,'conc',mod)
+                                #df_input=fun.cg_dataframe_filter(df_input,formulation,recipe,mod)f
                                 #print recipe
                                 #print df_blank.iloc[:,0:5]
                                 #if recipe[1]==3:
@@ -915,12 +990,15 @@ if(1): #CanadaGoose Logistic Regression
                                 #elif recipe[1]==4:
                                 #    blank_recipe=2
                                 if test_index==5:
-                                    df_blank_input=fun.cg_dataframe_filter(df_blank_input,'Blank',['skip',recipe[1],'skip'],mod)
+                                    df_blank_input=fun.cg_dataframe_filter(df_blank_input,'blank',['skip',recipe[1],'skip'],mod)
                                 #df_blank_input=fun.cg_dataframe_filter(df_blank_input,'Blank',['skip',blank_recipe,'skip'],mod)
                                 #print df_blank.iloc[:,0:5]
-                                df_input=fun.arbitrary_exclude(df_input,'formulation','blank')
+                                #df_input=fun.arbitrary_exclude(df_input,'mark','0')
+                                df_input=df_input.loc[df['mark']==1]
                                 df_fin=fun.cg_combine_print_blank(df_input,df_blank_input)
-                                #print df_fin
+                                if line_by_line_check:
+                                    print 'FINAL DATAFRAME'
+                                    print df_fin
                                 #print df_fin
                                 if test_index==1:
                                     result=fun.cg_redundancy_modeler(df_fin)
@@ -934,32 +1012,34 @@ if(1): #CanadaGoose Logistic Regression
                                 
 
                                 print filename,
-                                print ",",
+                                print ";",
                                 print formulation_list[0][0],
-                                print ",",
+                                print ";",
                                 print str(recipe[0])+"-"+str(recipe[1])+"-"+str(recipe[2]),
-                                print ",",
+                                print ";",
                                 #print recipe[1],
-                                #print ",",
+                                #print ";",
                                 #print recipe[2],
-                                #print ",",
+                                #print ";",
                                 print mod,
-                                print ",",
+                                print ";",
                                 print result[0][0],
-                                print ",",
+                                print ";",
                                 print result[0][1],
-                                print ",",
+                                print ";",
                                 print result[0][2],
-                                print ",",
+                                print ";",
                                 print result[0][3],
-                                print ",",
+                                print ";",
                                 print result[0][4],
-                                print ",",
+                                print ";",
                                 print result[1],
-                                print ",",
+                                print ";",
                                 print result[2],
-                                print ",",
-                                print result[3]
+                                print ";",
+                                print result[3],
+                                print ";",
+                                print result[4]
                             if test_index==2:
                                 df_input=copy.copy(df)
                                 df_blank_input=copy.copy(df_blank)
@@ -1147,21 +1227,21 @@ if(1): #CanadaGoose Logistic Regression
                                 #result=fun.cg_redundancy_tester(df_fin,best_roi_thresh,best_dec_thresh,best_redundancy,print_failures=False)
                                 result=fun.cg_redundancy_tester_detail(df_fin,best_roi_thresh,best_dec_thresh,best_redundancy,scan_size=ROI_max,print_failures=False)
                                 print filename,
-                                print ",",
+                                print ";",
                                 print formulation_list[0][0],
-                                print ",",
+                                print ";",
                                 print str(recipe[0])+"-"+str(recipe[1])+"-"+str(recipe[2]),
-                                print ",",
+                                print ";",
                                 print mod,
-                                print ",",
+                                print ";",
                                 print result[0],
-                                print ",",
+                                print ";",
                                 print result[1],
-                                print ",",
+                                print ";",
                                 print result[2],
-                                print ",",
+                                print ";",
                                 print result[3],
-                                print ",",
+                                print ";",
                                 print result[4]
                             if test_index==3:
                                 df_input=copy.copy(df)
@@ -1182,27 +1262,27 @@ if(1): #CanadaGoose Logistic Regression
 
                                 result=fun.cg_white_mean_finder(df_fin)
                                 print filename,
-                                print ",",
+                                print ";",
                                 print formulation_list[0][0],
-                                print ",",
+                                print ";",
                                 print str(recipe[0])+"-"+str(recipe[1])+"-"+str(recipe[2]),
-                                print ",",
+                                print ";",
                                 print mod,
-                                print ",",
+                                print ";",
                                 print result[0][0],
-                                print ",",
+                                print ";",
                                 print result[0][1],
-                                print ",",
+                                print ";",
                                 print result[0][2],
-                                print ",",
+                                print ";",
                                 print result[0][3],
-                                print ",",
+                                print ";",
                                 print result[1][0],
-                                print ",",
+                                print ";",
                                 print result[1][1],
-                                print ",",
+                                print ";",
                                 print result[1][2],
-                                print ",",
+                                print ";",
                                 print result[1][3]
                             if test_index==10 or test_index==11 or test_index==12 or test_index==13 or test_index==14 or test_index==15:
                                 #print "t10"
@@ -1315,49 +1395,49 @@ if(1): #CanadaGoose Logistic Regression
                                       #  print thresh_dict
                                         max_J,best_sen,best_spec,count_blank,count_print,best_red,best_guess_mat,fail_pic_list=fun.pk_redundancy_tester(df_fin,thresh_dict,[1])
                                         print max_J,
-                                        print ",",
+                                        print ";",
                                         print best_sen,
-                                        print ",",
+                                        print ";",
                                         print best_spec,
-                                        print ",",
+                                        print ";",
                                         print count_blank,
-                                        print ",",
+                                        print ";",
                                         print count_print,
-                                        print ",",
+                                        print ";",
                                         print best_red,
-                                        print ",",
+                                        print ";",
                                         print path,
-                                        print ",",
+                                        print ";",
                                         print formulation,
-                                        print ",",
+                                        print ";",
                                         print recipe,
-                                        print ",",
+                                        print ";",
                                         print mod,
-                                        print ",",
+                                        print ";",
                                         print best_guess_mat
 
                                         if test_index==15:
                                             max_J,best_sen,best_spec,count_blank,count_print,best_red,best_guess_mat,fail_pic_list=fun.pk_redundancy_checker(df_test,best_guess_mat,best_red,[1])
                                             print max_J,
-                                            print ",",
+                                            print ";",
                                             print best_sen,
-                                            print ",",
+                                            print ";",
                                             print best_spec,
-                                            print ",",
+                                            print ";",
                                             print count_blank,
-                                            print ",",
+                                            print ";",
                                             print count_print,
-                                            print ",",
+                                            print ";",
                                             print best_red,
-                                            print ",",
+                                            print ";",
                                             print path,
-                                            print ",",
+                                            print ";",
                                             print formulation,
-                                            print ",",
+                                            print ";",
                                             print recipe,
-                                            print ",",
+                                            print ";",
                                             print mod,
-                                            print ",",
+                                            print ";",
                                             print best_guess_mat
 
                                 elif test_index==12 or test_index==13:
@@ -1430,43 +1510,280 @@ if(1): #CanadaGoose Logistic Regression
                                            
                                    # max_J,best_sen,best_spec,count_blank,count_print,best_red,best_guess_mat,fail_pic_list=fun.pk_redundancy_tester(df_fin,thresh_dict,[1])
                                     print max_J,
-                                    print ",",
+                                    print ";",
                                     print best_sen,
-                                    print ",",
+                                    print ";",
                                     print best_spec,
-                                    print ",",
+                                    print ";",
                                     print count_blank,
-                                    print ",",
+                                    print ";",
                                     print count_print,
-                                    print ",",
+                                    print ";",
                                     print best_red,
-                                    print ",",
+                                    print ";",
                                     print path,
-                                    print ",",
+                                    print ";",
                                     print formulation,
-                                    print ",",
+                                    print ";",
                                     print recipe,
-                                    print ",",
+                                    print ";",
                                     print mod,
-                                    print ",",
+                                    print ";",
                                     print best_guess_mat,
-                                    #print ",",
+                                    #print ";",
                                     #print fail_pic_list
 
-#                        except:
- #                           skipped=True
-                            #print 'SKIPPED: ',
-                            #print filename,
-                            #print ",",
-                            #print formulation_list[0][0],
-                            #print ",",
-                            #print recipe[0],
-                            #print ",",
-                            #print recipe[1],
-                            #print ",",
-                            #print recipe[2],
-                            #print ",",
-                            #print mod
+                        except:
+                            skipped=True
+if(1): #Genertic Thresholding Analysis
+    #0 - logistic regression
+    #0 - Black and White Check
+
+    test_index=[0]
+
+    line_by_line_check=0
+
+
+    files=[]
+    start_dir='csv_import'
+    pattern   = "*.csv"
+    print 'prog1'
+    for dir,_,_ in os.walk(start_dir): 
+        files.extend(glob(os.path.join(dir,pattern))) 
+    for file in files:
+        #print 'prog2'
+        filename=file.rpartition("\\")[2]
+        #Import csv to dataframe only once
+
+        if (line_by_line_check):
+            print filename
+
+        #grab ring number from filename
+        f_list=filename.split("_")
+        end_bit=f_list[-1]
+        ring_split=end_bit.split("'")
+        ring_string=ring_split[-1]
+        ring_string=ring_string[:-4]
+        #ring=55
+        try:
+            ring=int(ring_string)-500
+        except:
+            ring=55
+        #print ring
+        ring=36
+
+        df=pd.read_csv(file,header=0,error_bad_lines=False,warn_bad_lines=False)
+
+        if line_by_line_check:
+            print "ORIGINAL DATAFRAME: "
+            print df
+
+        df=df.loc[:, ~df.columns.str.contains('^Unnamed')]
+        if line_by_line_check:
+            print "DROP UNNAMED: "
+            print df
+
+        #drop empty colulmns
+        df=df.dropna(axis=1,how='all')
+
+
+        df=fun.dropNAN(df,24)
+        if line_by_line_check:
+            print "DROP NAN VALUES: "
+            print df
+        #print df
+
+        #Make Dataframe of Blanks
+        df_blank=df.loc[df['mark']==0]
+
+        if line_by_line_check:
+            print "BLANK DATAFRAME"
+            print df_blank
+
+        #filter blank dataframe
+        #df_blank=fun.arbitrary_include(df_blank,'numberofprints','2')
+
+        #Make Dataframe of Prints
+        df=df.loc[df['mark']==1]
+
+        #####Exclude List#####
+        exclude_list=[
+            ]
+
+
+         #####Exclude List Combo#####
+        exclude_list_combo=[
+            ]
+
+        ####Include List####
+        include_list=[
+            ['path',['skip']]
+            ]
+
+        ####Include List Combo####
+        include_list_combo=[
+            ]
+
+        #Transform Include and Exclude lists into product lists
+        include_array=[]
+        include_array_head=[]
+        for include_pair in include_list:
+            include_array.append(include_pair[1])
+            include_array_head.append(include_pair[0])
+
+        include_product_list=list(it.product(*include_array))
+
+        exclude_array=[]
+        exclude_array_head=[]
+        for exclude_pair in exclude_list:
+            exclude_array.append(exclude_pair[1])
+            exclude_array_head.append(exclude_pair[0])
+
+        exclude_product_list=list(it.product(*exclude_array))
+
+        if line_by_line_check:
+            print include_product_list
+            print exclude_product_list
+
+        ROI_list=range(3)
+        #x_col_list=[] #these should be COLUMN HEADERS
+        #x_col_list.append()
+
+        ROI_max=10;
+        ROI_count=3;
+
+        if True:
+        #try:
+            if len(exclude_list_combo)>0:
+                for exclude_pair in exclude_list_combo:
+                    for exclude_string in exclude_pair[1]:
+                        if line_by_line_check:
+                            print exclude_string,
+                            print " ",
+                            print exclude_pair[0]
+                        df=fun.arbitrary_exclude(df,exclude_pair[0],exclude_string)
+            if line_by_line_check:
+                print df
+            if len(include_list_combo)>0:
+                for include_pair in include_list_combo:
+                    df_concat=[];
+                    for include_string in include_pair[1]:
+                        if line_by_line_check:
+                            print include_string,
+                            print " ",
+                            print include_pair[0]
+                        df_concat.append(fun.arbitrary_include(df,include_pair[0],include_string))
+                    df=pd.concat(df_concat)
+            df_pre_filter=copy.copy(df)
+
+            if len(include_list)>0:
+                
+                for include_line in include_product_list:
+                    include_line_print=""
+                    if line_by_line_check:
+                        print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+                        print include_line
+                    #try:
+                    if True:
+                        parameter_export=""
+                        df=copy.copy(df_pre_filter)
+                        
+                        for include_index in range(len(include_line)):
+                            df=fun.arbitrary_include(df,include_array_head[include_index],include_line[include_index])
+                            parameter_export=parameter_export+include_array_head[include_index]+"'"+include_line[include_index]+"_"
+                            include_line_print=include_line_print+include_array_head[include_index]+":"+include_line[include_index]+";"
+                            if line_by_line_check:
+                                print "______________________________________________________________________"
+                                print include_array_head[include_index]+";"+include_line[include_index]
+                                print df
+                                print "______________________________________________________________________"          
+                        if len(exclude_list)>0:
+                            for exclude_line in exclude_product_list:
+                                for exclude_index in range(len(exclude_line)):
+                                    df=fun.arbitrary_exclude(df,exclude_array_head[exclude_index],exclude_line[exclude_index])
+
+                   
+                        #prep input to thresholding functions
+                        df_input=copy.copy(df)
+                        df_blank_input=copy.copy(df_blank)
+                        df_fin=fun.cg_combine_print_blank(df_input,df_blank)
+                        if line_by_line_check:
+                            print "PRINT DATAFRAME:"
+                            print df_input
+                            print "BLANK DATAFRAME:"
+                            print df_blank
+                            print "FINAL DATAFRAME:"
+                            print df_fin
+                            print df_fin.mark
+
+                        if 0 in test_index: #black/white analysis
+                            if line_by_line_check:
+                                print "black and white analysis"
+                            test_list=[4]
+                            white_count=1
+                            for white_index in range(white_count):
+                                result,max_result=fun.black_white_modeler(df_fin,white_index,1,test_list)
+
+                                df_one_line=pd.DataFrame.from_records([include_line],columns=include_array_head)
+                                df_multiline=copy.copy(df_one_line)
+
+                                for i in range(result.shape[0]-1):
+                                    df_multiline=pd.concat([df_one_line,df_multiline])
+
+                               # df_descriptor=df_descriptor.append(df_descriptor*result.shape[0],ignore_index=True)
+
+                                df_multiline=df_multiline.reset_index(drop=True)
+                                result=result.reset_index(drop=True)
+
+                                result_fin=pd.concat([df_multiline,result],axis=1)
+                              #  result_fin=result_fin.reset_index(drop=True)
+
+                                if line_by_line_check:
+                                    print result_fin
+
+                                #for head_index in range(len(include_array_head)):
+                                 #   result=result.assign(include_array_head[head_index]=pd.Series([include_line[head_index]]*result.shape[0]).values) #Formulation
+
+                                result_fin.to_csv("DF-"+filename+" "+parameter_export+str(test_list)+".csv")
+
+
+                                result_max=result_fin.ix[result_fin['j_abs'].idxmax()]   
+                                result_max_list=list(result_max)
+                                result_max_list=[filename]+result_max_list
+                                print result_max_list
+                        if 1 in test_index:
+                            if line_by_line_check:
+                                print "black and white redundancy analysis"
+                            test_list=[4]
+                            white_count=6
+                            black_count=9
+                            result=fun.black_white_redundancy(df_fin,white_count,black_count,test_list)
+                            #print "finished"
+                            export_cols=["j","sen","spec","active_rois","red_thresh","n_b","n_p"]
+                            roi_opt_export_cols=["white_index","white_bin","black_index","black_bin","thresh","j","test_name"]
+                            for thresh_index in range(white_count):
+                                export_cols.append("roi"+str(int(thresh_index)))
+                            #print result
+                            
+                            print filename,
+                            print ";",
+                            for col in export_cols:
+                                print result[col],
+                                print ";",
+                            #print result["optimal_rois"].
+
+                            for col in roi_opt_export_cols:
+                                print col+":",
+                                for ROI_index in result["active_rois"]:
+                                
+                                    print str(result["optimal_rois"][ROI_index][col])+",",
+                                print ";",
+                            print include_line_print
+
+                      
+
+                    #except:
+                    #    skipped=True
                         
                             
 
@@ -1481,18 +1798,18 @@ if(0): #csv import and sort
     fun.import_and_sort_csv(csv_file,1000,0)
 
 if(0): #make a list
-    numbers=[301,303,307,309,313,324,326,339,343,348,353]
+    numbers=[2,3,4]
     start_number_of_digits=1
     print "{",
     #for iter in range(start_number_of_digits,len(numbers)+1):
-    for iter in range(start_number_of_digits,2):
+    for iter in range(start_number_of_digits,4):
         for val in it.combinations(numbers,iter):
             x_cols=list(val)
-            x_cols.extend([2,10,17,102])
+            x_cols.extend([100,309])
             print "{",
             for iter in range(len(x_cols)-1):
                 print x_cols[iter],
-                print ",",
+                print ";",
             print x_cols[-1],
             print "},",
     print "}"
@@ -1500,4 +1817,4 @@ if(0): #make a list
     #print result
     #for val in result[3]:
     #    for val2 in val:
-    #        print str(val2)+",",
+    #        print str(val2)+";",
