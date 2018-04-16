@@ -239,6 +239,32 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
                     data_dict["black_index"].append(-blackavg_index)
                     data_dict["black_bin"].append(bin_index_black)
 
+        ##part 6 is finding the difference between a restricted set of bins, all combinations of the white and black columns
+    if 6 in test_type:
+        bin_subset=[9,8,18,7,17,26,16,6,25,33,24,32,5,15,39,4,14,31,38,44,23]
+        #bin_subset=[9,8,18,7,17,26,16,6,25,33]
+        for black_index in range(black_count):
+            for bin_index_white in bin_subset:
+                for bin_index_black in bin_subset:
+                    pos_data_index="white"+str(white_index)+"bin"+str(bin_index_white)
+                    pos_data=list(dataframe_input[pos_data_index])
+                    neg_data_index="black"+str(black_index)+"bin"+str(bin_index_black)
+                    neg_data=list(dataframe_input[neg_data_index])
+                    diff_data=list(np.array(pos_data)-np.array(neg_data))
+                    thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
+                    test_name=pos_data_index+"_minus_"+neg_data_index
+                    data_dict["test_name"].append(test_name)
+                    data_dict["thresh"].append(thresh)
+                    data_dict["j_abs"].append(J_abs)
+                    data_dict["j"].append(J)
+                    data_dict["sen"].append(sen)
+                    data_dict["spec"].append(spec)
+                    data_dict["n_p"].append(count_print)
+                    data_dict["n_b"].append(count_blank)
+                    data_dict["white_index"].append(white_index)
+                    data_dict["white_bin"].append(bin_index_white)
+                    data_dict["black_index"].append(black_index)
+                    data_dict["black_bin"].append(bin_index_black)
 
     data=pd.DataFrame(data_dict)
 
@@ -261,12 +287,71 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
 
     return data,data_max_dict
 
+#def black_white_tester(dataframe_in,parameter_dict):
+
+#    df=copy.copy(df)
+
+#    #Reset data index
+#    df=df.reset_index(drop=True)
+
+#    mark_list=list(df["mark"])
+#    count_print=np.sum(mark_list)
+#    count_blank=len(mark_list)-count_print
+
+#    TP=0
+#    TN=0
+#    FP=0
+#    FN=0
+#    for df_row in range(df.shape[0]):
+#        sum=0
+#        for i in range(len(parameter_dict['white_index'])):
+#            white_ID="white"+str(int(parameter_dict['white_index'][i]))+"bin"+str(int(parameter_dict['white_bin'][i]))
+#            black_ID="black"+str(int(parameter_dict['black_index'][i]))+"bin"+str(int(parameter_dict['black_bin'][i]))
+#            white_value=df.at[df_row,white_ID]
+#            black_value=df.at[df_row,black_ID]
+#        sum_list.append(sum)
+#        if sum>red_thresh:
+#            guess=1
+#        else:
+#            guess=0
+#        mark=df.at[df_row,'mark']
+#        #print "Sum: "+str(sum)
+#        #print "RedThresh: "+str(red_thresh)
+#        #print "Guess: "+str(guess)
+#        #print "Mark: "+str(mark)
+#        if mark==1:
+#            if guess==1:
+#                TP=TP+1
+#            elif guess==0:
+#                FN=FN+1
+#        elif mark==0:
+#            if guess==0:
+#                TN=TN+1
+#            elif guess==1:
+#                FP=FP+1
+#        #print [TP,TN,FP,FN]
+#        #print ""
+#    if not TP+FN==count_print:
+#        raise ("Loop print count and total #print count do not match")
+#    if not TN+FP==count_blank:
+#        raise ("Loop blank count and total blank count do not match")
+#    sensitivity=float(TP)/float(TP+FN)
+#    specificity=float(TN)/float(TN+FP)
+#    J=adapted_J(sensitivity,specificity)
+
+
+    
+
 def black_white_redundancy(dataframe_input,white_count,black_count,test_type=[1],bin_count=55):
     #build a list of dataframes for all white ROIs
     white_list_dict=[]
     ROI_thresh_dict={}
+  #  print white_count
     for white_index in range(white_count):
+        #print white_index
         temp_df=black_white_modeler(dataframe_input,white_index,black_count,test_type,bin_count)[1]
+        #print white_index
+       # print temp_df
         #print temp_df
         white_list_dict.append(temp_df)
         ROI_thresh_dict["roi"+str(white_index)]=temp_df["thresh"]
@@ -314,8 +399,9 @@ def black_white_redundancy(dataframe_input,white_count,black_count,test_type=[1]
     best_red_thresh=0
     available_ROIs=range(white_count)
     sum_list_final=[]
+    min_ROI_count_sweep=1
 
-    for ROI_count in range(1,white_count):
+    for ROI_count in range(min_ROI_count_sweep,white_count+1):
         for active_ROIs in list(it.combinations(range(0,len(available_ROIs)),ROI_count)):
 
 
@@ -1753,42 +1839,11 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
                     #print ",",
                     #print roi_dec
     print best_J,
-    print ",",
+    print ";",
     #print best_dec_thresh
     #print best_roi_thresh
 
-    #now figure out the best level of redundancy
-    print_sum=[]
-    blank_sum=[]
-    sum_list=[]
-    mark_list=[]
-    for row in dataframe_input.itertuples():
-        sum=0
-        for roi_index in range(len(roi_thresh_rng_list)):
-            roi_thresh=best_roi_thresh[roi_index]
-            dec_thresh=best_dec_thresh[roi_index]
-            read_count=0
-            for scan_index in range(scan_size):
-                #col_caller='roi_'+str(roi_index)+'_scan_'+str(scan_index)
-                    
-                if row[roi_starter_index_list[roi_index]+scan_index]>roi_thresh:
-                    read_count+=1
-            confidence_value=float(read_count)/float(scan_size)
-            if confidence_value>dec_thresh:
-                sum+=1
-        row_marker=row[roi_starter_index_list[-1]]
-        mark_list.append(row_marker)
-        #print row_marker
-        if row_marker==1:
-            print_sum.append(sum)
-            sum_list.append(sum)
-            
-        elif row_marker==0:
-            blank_sum.append(sum)
-            sum_list.append(sum)
-        else:
-            print "***********MARKER MISSING ERROR3*********"
-    #print print_sum
+        #print print_sum
     #print blank_sum
     ## now that the confidence lists are done, we get roi accuracy using dec_rng
     accuracy_list=[]
@@ -1796,52 +1851,92 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     best_J=-1
     best_sensitivity=-1
     best_specificity=-1
-    for redundancy in redundancy_range:
-        print_binary_list=np.zeros(len(print_sum))
-        blank_binary_list=np.zeros(len(blank_sum))
+    active_rois_final=[]
+    available_ROIs=range(roi_total)
 
-        #print redundancy
-        #print print_sum
-        #print print_binary_list
-        #print blank_binary_list
-        #set to 1 if value is greater than threshold
-        for print_index in range(len(print_sum)):
-            if print_sum[print_index]>redundancy:
-                print_binary_list[print_index]=1
+    for ROI_count in range(1,roi_total+1):
+        #ROI_count=1
+        for active_ROIs in list(it.combinations(range(0,len(available_ROIs)),ROI_count)):
 
-        for blank_index in range(len(blank_sum)):
-            if blank_sum[blank_index]>redundancy:
-                blank_binary_list[blank_index]=1
+            #now figure out the best level of redundancy
+            print_sum=[]
+            blank_sum=[]
+            sum_list=[]
+            mark_list=[]
+            for row in dataframe_input.itertuples():
+                sum=0
+                for roi_index in active_ROIs:
+                    roi_thresh=best_roi_thresh[roi_index]
+                    dec_thresh=best_dec_thresh[roi_index]
+                    read_count=0
+                    for scan_index in range(scan_size):
+                        #col_caller='roi_'+str(roi_index)+'_scan_'+str(scan_index)
+                    
+                        if row[roi_starter_index_list[roi_index]+scan_index]>roi_thresh:
+                            read_count+=1
+                    confidence_value=float(read_count)/float(scan_size)
+                    if confidence_value>dec_thresh:
+                        sum+=1
+                row_marker=row[roi_starter_index_list[-1]]
+                mark_list.append(row_marker)
+                #print row_marker
+                if row_marker==1:
+                    print_sum.append(sum)
+                    sum_list.append(sum)
+            
+                elif row_marker==0:
+                    blank_sum.append(sum)
+                    sum_list.append(sum)
+                else:
+                    print "***********MARKER MISSING ERROR3*********"
 
-        #    print_binary_list[print_sum>redundancy]=1
-        #blank_binary_list[blank_sum>redundancy]=1
+            for redundancy in redundancy_range:
+                print_binary_list=np.zeros(len(print_sum))
+                blank_binary_list=np.zeros(len(blank_sum))
 
-        #print print_binary_list
-        #print blank_binary_list
+                #print redundancy
+                #print print_sum
+                #print print_binary_list
+                #print blank_binary_list
+                #set to 1 if value is greater than threshold
+                for print_index in range(len(print_sum)):
+                    if print_sum[print_index]>redundancy:
+                        print_binary_list[print_index]=1
 
-        sensitivity=np.mean(print_binary_list)
-        specificity=1-np.mean(blank_binary_list)
-        J=sensitivity+specificity-1
+                for blank_index in range(len(blank_sum)):
+                    if blank_sum[blank_index]>redundancy:
+                        blank_binary_list[blank_index]=1
 
-        #print redundancy,
-        #print ",",
-        #print J,
-        #print ",",
-        #print sensitivity,
-        #print ",",
-        #print specificity
+                #    print_binary_list[print_sum>redundancy]=1
+                #blank_binary_list[blank_sum>redundancy]=1
 
-        if J>best_J:
-            best_J=J
-            best_redundancy=redundancy
-            best_sensitivity=sensitivity
-            best_specificity=specificity
+                #print print_binary_list
+                #print blank_binary_list
+
+                sensitivity=np.mean(print_binary_list)
+                specificity=1-np.mean(blank_binary_list)
+                J=sensitivity+specificity-1
+
+                #print redundancy,
+                #print ",",
+                #print J,
+                #print ",",
+                #print sensitivity,
+                #print ",",
+                #print specificity
+
+                if J>best_J:
+                    best_J=J
+                    best_redundancy=redundancy
+                    best_sensitivity=sensitivity
+                    best_specificity=specificity
+                    active_rois_final=active_ROIs
 
 
     save_failed_images(dataframe_input,mark_list,sum_list,best_redundancy)
 
     #print "*********END*********"
-    return [[best_J,best_sensitivity,best_specificity,len(print_sum),len(blank_sum)],best_roi_thresh,best_dec_thresh,best_redundancy]
+    return [[best_J,best_sensitivity,best_specificity,len(print_sum),len(blank_sum)],best_roi_thresh,best_dec_thresh,best_redundancy,active_rois_final]
 
 def logistic_regression_prep_cg(dataframe_input,dataframe_blank,roi,roi_max,combine_scan_data=True):
     df=copy.copy(dataframe_input)
@@ -2263,8 +2358,10 @@ def arbitrary_include(dataframe_input,column,input_string):
     if not input_string=='skip':
         df[column]=df[column].astype(str)
         #print df[column]
-        if input_string=='path':
+        #print input_string
+        if column=='path':
             df=df.loc[df[column].str.contains(input_string)]
+            print 'path detected'
         else:
             df = df[df[column]==input_string]
 
