@@ -21,6 +21,11 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="colorspace2.py" />
+    <Compile Include="colorspace3.py" />
+    <Compile Include="cshow.py" />
+    <Compile Include="cshow_hue.py" />
+    <Compile Include="cshow_val.py" />
     <Compile Include="csv_magic.py">
       <SubType>Code</SubType>
     </Compile>
@@ -44,6 +49,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="regress3.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="supershow.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="useful_things.py">
