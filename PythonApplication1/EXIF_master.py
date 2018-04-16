@@ -21,14 +21,15 @@ user_comment='test_comment'
 
 #############3_______PHOTO IMPORT_______##############
 
-directory_move="G://Google Drive//Original Images//Pumped Kicks//180207 Algo_Test//Blank"
+directory_move="C://Users//gttho//Resilio Sync//Developer//PhotoExports//180330 CG Refined Conc Sweep Test - BadPics//50mS"
 
 directory_start="C://Users//gttho//Documents//Visual Studio 2017//Projects//PythonApplication1//PythonApplication1//bad_pics"
-directory_start="C://Users//gttho//PleasePleasePleaseDeleteMe//180306 TestSetOrg"
+directory_start="C://Users//gttho//Resilio Sync//Original Images//CanadaGoose//180325-180326 DC_Wash_Conc_Sweep"
+directory_start="C://Users//gttho//Resilio Sync//Original Images//Kings Gift//180412 Demo_App_Test_TW//Lux=300"
 adder_string=["50mS","75mS","100mS"]
 adder_string=[""]
 for adder in adder_string:
-    all_file_switch=1
+    all_file_switch=0
 
     if not all_file_switch:
         directory=directory_start+adder
@@ -100,7 +101,7 @@ for adder in adder_string:
 
                 ############ Search for text in EXIF ############
                 if(0):
-                    search_string="Solvent:c"
+                    search_string="mark:print"
                     if search_string in user_comment:
                         finder_counter+=1
                         print filename,
@@ -111,8 +112,9 @@ for adder in adder_string:
 
                 ############CONVERT TEXT A TO TEXT B ##########
                 #convert Count value
-                if (0):
-                    user_comment=string.replace(user_comment,'Blank','Print')
+                if (1):
+                    user_comment=string.replace(user_comment,'lux:150,','lux:300,')
+                    #user_comment=string.replace(user_comment,'mark:blank,','mark:0,')
 
                 ############Fancy Convert (date, commas, convert to number)#############
                 #if counter1%3==0:
@@ -136,7 +138,7 @@ for adder in adder_string:
 
                 ###########Direct Add#################
                 if(0):
-                    user_comment='Colour:Black,Brand:Adidas,'+user_comment
+                    user_comment='lux:14000,'+user_comment
                     print user_comment
                     
 
@@ -146,8 +148,8 @@ for adder in adder_string:
                     #uc_lower=user_comment.lower()
                     uc_lower=user_comment
 
-                    move_list=["Formulation:Blank"]
-                    #move_string2="Binder:2"
+                 #   move_list=["mark:1,project:cg,wash no:0,dry clean no:0,sample no:1,conc:40,test type:wash,","mark:1,project:cg,wash no:1,dry clean no:0,sample no:1,conc:40,test type:wash,","mark:1,project:cg,wash no:2,dry clean no:0,sample no:1,conc:40,test type:wash,","mark:1,project:cg,wash no:3,dry clean no:0,sample no:1,conc:40,test type:wash,","mark:1,project:cg,wash no:4,dry clean no:0,sample no:1,conc:40,test type:wash,",",app:243,mark:1,project:cg,wash no:4,dry clean no:0,conc:40,test type:wash,sample no:1,"]
+                    move_list=["conc:50"]
 
                     for move_string in move_list:
                         if move_string in uc_lower:
@@ -170,9 +172,9 @@ for adder in adder_string:
 
 
                 ###########CHANGE EXIF BASED ON FILE PATH############
-                if(1):
-                    filname_mod=filname.replace('//',"\\")
-                    filname_list=filname_mod.split("\\")
+                if(0):
+                    filname_mod=filname.replace('//',"////")
+                    filname_list=filname_mod.split("////")
                     del filname_list[-1]  #Deletes the filename from the list
                     filname_list.reverse() #reverses the order so that the suff you care about is in the beginning
 
