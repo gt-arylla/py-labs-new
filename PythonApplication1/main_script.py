@@ -775,156 +775,22 @@ if(0): #CanadaGoose Logistic Regression
 
         ###############_FORMULATOINS_####################
         formulation_superlist=[]
-        #Add formulations in the format [FORMULATION,[[INK,BINDER,SOLVENT]]] or [[FORMULATION,[[INK,BINDER,SOLVENT],[INK2,BINDER2,SOLVENT2]]]
-        #formulation_superlist.append([['P.FM1 - 50/50-C - PM'],[[3.5,66.5,30],[3,67,30]]])
-        #formulation_superlist.append([['S.FM1 - 50/50-C - PM'],[[0.5,75.5,25],[1,72,27]]])
 
-        #formulation_superlist.append([['BR Formulation'],[[50,10,10],[50,10,11],[50,10,20]]])
-        #formulation_superlist.append([['P.FM1 - 50/50-B - PM'],[[10,65,25],[6.5,67,26.5]]])
-        #formulation_superlist.append([['P.FM1 - 50/50-C - PM'],[[10,65,25]]])
-        #formulation_superlist.append([['S.FM1 - 50/50-B - PM'],[[1.25,73,25.75],[1.5,73.5,25]]])
-        #formulation_superlist.append([['S.FM1 - 50/50-C - PM'],[[0.5,70.5,29],[0.5,74.5,25],[0.5,76.5,23]]])
-        
-        #formulation_superlist.append([['BR Formulation'],[[50,10,10]]])
-
-        #formulation_superlist.append([['S.FM1 - 50/50-B - PM'],[[1.25,73,25.75]]])
-
-        #formulation_superlist.append([['Ink'],[[750,0,0]]])
-
-        #formulation_superlist.append([['Ink'],[[750,1,0]]])
-        #formulation_superlist.append([['Ink'],[[750,2,0]]])
-        #formulation_superlist.append([['Ink'],[[800,1,1]]])
-        #formulation_superlist.append([['Ink'],[[800,2,1]]])
-
-        #formulation_superlist.append([['Ink'],[[750,1,1]]])
-        #formulation_superlist.append([['Ink'],[[750,2,1]]])
-
-        #formulation_superlist.append([['Ink'],[['skip',1,'skip']]])
-        #formulation_superlist.append([['Ink'],[['skip',2,'skip']]])
-        #formulation_superlist.append([['Ink'],[['skip',3,'skip']]])
-        #formulation_superlist.append([['Ink'],[['skip',4,'skip']]])
-
-        #formulation_superlist.append([['Ink'],[[200,'skip',18.75]]])
-        #formulation_superlist.append([['Ink'],[[200,'skip',25]]])
-        #formulation_superlist.append([['Ink'],[[200,'skip',31.25]]])
-        #formulation_superlist.append([['Ink'],[[300,'skip',12.5]]])
-        #formulation_superlist.append([['Ink'],[[300,'skip',18.75]]])
-        #formulation_superlist.append([['Ink'],[[300,'skip',25]]])
-
-        #formulation_superlist.append([['_30_Pbinder_S.FM1'],[[0,'skip','skip']]])
-        #formulation_superlist.append([['_700ms_S.FM1'],[[0,'skip','skip']]])
-        #formulation_superlist.append([['30_50-50_S.FM1'],[[0,'skip','skip']]])
-        #formulation_superlist.append([['60_6431_S.FM1'],[[0,'skip','skip']]])
-        
-       # formulation_superlist.append([["80mS"],[[' ','skip','skip']]])
-       # formulation_superlist.append([["120mS"],[[' ','skip','skip']]])
-       # formulation_superlist.append([["80mS"],[['skip','skip','_']]])
-
-     #   formulation_superlist.append([["80mS"],[['skip','skip','skip']]])
-
-     
-        #formulation_superlist.append([["100mS"],[['EV0','skip','skip']]])
-        #formulation_superlist.append([["100mS"],[['EV0','Nike','skip']]])
-        #formulation_superlist.append([["100mS"],[['EV0','Adidas','skip']]])
-        #formulation_superlist.append([["120mS"],[['EV0','skip','skip']]])
-        #formulation_superlist.append([["120mS"],[['EV0','Nike','skip']]])
-        #formulation_superlist.append([["120mS"],[['EV0','Adidas','skip']]])
-        #formulation_superlist.append([["150mS"],[['EV0','skip','skip']]])
-        #formulation_superlist.append([["150mS"],[['EV0','Nike','skip']]])
-        #formulation_superlist.append([["150mS"],[['EV0','Adidas','skip']]])
-
-        #formulation_superlist.append([["100mS"],[['EV-1','skip','skip']]])
-        #formulation_superlist.append([["100mS"],[['EV-1','Nike','skip']]])
-        #formulation_superlist.append([["100mS"],[['EV-1','Adidas','skip']]])
-       # formulation_superlist.append([["120mS"],[['EV-1','skip','skip']]])
-        #formulation_superlist.append([["120mS"],[['EV-1','Nike','skip']]])
-        #formulation_superlist.append([["120mS"],[['EV-1','Adidas','skip']]])
-        #formulation_superlist.append([["150mS"],[['EV-1','skip','skip']]])
-        #formulation_superlist.append([["150mS"],[['EV-1','Nike','skip']]])
-        #formulation_superlist.append([["150mS"],[['EV-1','Adidas','skip']]])
-
-        #formulation_superlist.append([["120mS"],[['skip','skip','skip']]])
-        #formulation_superlist.append([["120mS"],[['skip','Nike','skip']]])
-        #formulation_superlist.append([["120mS"],[['skip','Adidas','skip']]])
-
-     #   formulation_superlist.append([["200mS"],[['0.75 inch','skip','skip']]])
-    #    formulation_superlist.append([["200mS"],[['0.5 inch','skip','skip']]])
-    #    formulation_superlist.append([["200mS"],[['0.34 inch','skip','skip']]])
-
-    ##    formulation_superlist.append([["150mS"],[['0.75 inch','skip','skip']]])
-    #    formulation_superlist.append([["150mS"],[['0.50 inch','skip','skip']]])
-    #    formulation_superlist.append([["150mS"],[['0.34 inch','skip','skip']]])
-
-
-    #    formulation_superlist.append([["120mS"],[['skip','skip','skip']]])
-       ## formulation_superlist.append([["80mS"],[['skip','skip','skip']]])
-      #  formulation_superlist.append([["150mS"],[['skip','skip','skip']]])
-       # formulation_superlist.append([["Print"],[['skip','skip','skip']]])
         formulation_superlist.append([["skip"],[['skip','skip','skip']]])
 
         #[FORMULATION,RECIPE]->[FORMULATION,[INK,BINDER,SOLVENT]]->[FORMULATION,[[INK,BINDER,SOLVENT],[INK2,BINDER2,SOLVENT2]]]
 
         mod_list=[]
-        #mod_list.append('W0')
-        #mod_list.append('W1')
-        #mod_list.append('W2')
-        #mod_list.append('W3')
-        #mod_list.append('W4')
-        #mod_list.append('D0')
-        #mod_list.append('D1')
-        #mod_list.append('D2')
-        #mod_list.append('D3')
-        #mod_list.append('CG')
-        #mod_list.append('DW0')
-        #mod_list.append('DW1')
-        #mod_list.append('DW2')
-        #mod_list.append('WD0')
-        #mod_list.append('WD1')
-        #mod_list.append('WD2')
-        #mod_list.append('PB0')
-        #mod_list.append('PB15')
-        #mod_list.append('PB22')
-        #mod_list.append('PB25')
-        #mod_list.append('PB27')
-        #mod_list.append('PB39')
-        #mod_list.append('M0')
-     #   mod_list.append(30)
-  #      mod_list.append(32.5)
-    #    mod_list.append(35)
-   #     mod_list.append(37.5)
-   #     mod_list.append(40)
-    #    mod_list.append(50)
-       # mod_list.append('skip')
-        mod_list.append('50.0')
-       # mod_list.append('35.0')
-       # mod_list=['skip']
 
-       # mod_list.append("AP1")
-        #mod_list.append("AP3")
-        #mod_list.append("AP5")
-        #mod_list.append("AP8")
-        #mod_list.append("AP9")
+        mod_list.append('skip')
 
-        #mod_list.append("WSB")
-        #mod_list.append("WWB")
-
-
-        #mod_list.append("BSB")
-        #mod_list.append("BWS")
-        #mod_list.append("bsw")
-        #mod_list.append('1coat')
-       # mod_list.append('2coat')
-
-        #mod_list.append('1')
-        #mod_list.append('2')
-        #mod_list.append('3')
 
         ROI_list=range(3)
         #x_col_list=[] #these should be COLUMN HEADERS
         #x_col_list.append()
 
         ROI_max=10;
-        ROI_count=4;
+        ROI_count=1;
 
         for path in path_list:
             for formulation_list in formulation_superlist: #elements with the same formulation are clustered together
@@ -1539,7 +1405,7 @@ if(1): #Genertic Thresholding Analysis
     #0 - logistic regression
     #0 - Black and White Check
 
-    test_index=[0]
+    test_index=[2]
 
     line_by_line_check=0
 
@@ -1578,13 +1444,20 @@ if(1): #Genertic Thresholding Analysis
             print "ORIGINAL DATAFRAME: "
             print df
 
+
+        #drop error rows
+        df=df.loc[df['guess'].isin([0,1])]
+
         df=df.loc[:, ~df.columns.str.contains('^Unnamed')]
         if line_by_line_check:
             print "DROP UNNAMED: "
             print df
 
+
+
         #drop empty colulmns
         df=df.dropna(axis=1,how='all')
+
 
 
         df=fun.dropNAN(df,24)
@@ -1617,7 +1490,8 @@ if(1): #Genertic Thresholding Analysis
 
         ####Include List####
         include_list=[
-            ['path',['skip']]
+            ['path',['Black','White','skip']],
+            ['path',['Repeat','skip']]
             ]
 
         ####Include List Combo####
@@ -1683,8 +1557,8 @@ if(1): #Genertic Thresholding Analysis
                     if line_by_line_check:
                         print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
                         print include_line
-                    #try:
-                    if True:
+                    try:
+                    #if True:
                         parameter_export=""
                         df=copy.copy(df_pre_filter)
                         
@@ -1780,10 +1654,38 @@ if(1): #Genertic Thresholding Analysis
                                 print ";",
                             print include_line_print
 
-                      
+                        if 2 in test_index:
+                            if line_by_line_check:
+                                print "black and white redundancy analysis"
 
-                    #except:
-                    #    skipped=True
+                            ROI_scans=10
+                            ROI_count=1
+
+                            result=fun.cg_redundancy_modeler_v4(df_fin,ROI_scans,ROI_count)
+
+                            export_cols=["j","sen","spec","active_rois","red_thresh","n_b","n_p"]
+                            roi_opt_export_cols=["white_index","thresh","dec_thresh","j"]
+                            for thresh_index in range(ROI_count):
+                                export_cols.append("roi"+str(int(thresh_index)))
+                            #print result
+                            
+                            print filename,
+                            print ";",
+                            for col in export_cols:
+                                print result[col],
+                                print ";",
+                            #print result["optimal_rois"].
+
+                            for col in roi_opt_export_cols:
+                                print col+":",
+                                for ROI_index in result["active_rois"]:
+                                
+                                    print str(result["optimal_rois"][ROI_index][col])+",",
+                                print ";",
+                            print include_line_print
+
+                    except:
+                        skipped=True
                         
                             
 
