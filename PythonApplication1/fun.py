@@ -19,6 +19,7 @@ from sklearn.cross_validation import train_test_split
 from sklearn import metrics
 import shutil
 import os
+import string
 
 #def df_to_dict(input_df):
 #    df=copy.copy(input_df)
@@ -33,6 +34,36 @@ import os
 
 #    return clean_dict 
 
+def data_combo(df,analysis_dict,data_type):
+    #Split up df by print and blank
+    print_df=arbitrary_include(df,'mark','1.0')
+    blank_df=arbitrary_include(df,'mark','0.0')
+    output_dict={};
+    #print blank_df
+    if data_type=='circle':
+        #Blank Data
+        for roi in analysis_dict["active_rois"]:
+            blank_superdata=[]
+            for scan in range(analysis_dict["roi_scans"]):
+                col_header="roi_"+str(int(roi))+"_scan_"+str(int(scan))
+                #print col_header
+                #print blank_df[col_header]
+                blank_superdata.extend(blank_df[col_header])
+            dict_key="blank_roi"+str(int(roi))
+            output_dict[dict_key]=blank_superdata
+
+        #Print Data
+        for roi in analysis_dict["active_rois"]:
+            print_superdata=[]
+            for scan in range(analysis_dict["roi_scans"]):
+                col_header="roi_"+str(int(roi))+"_scan_"+str(int(scan))
+                print_superdata.extend(print_df[col_header])
+            include_line_print=analysis_dict["include_line_print"]
+            include_line_print=string.replace(include_line_print,':','-')
+            dict_key="print_"+include_line_print+"_roi"+str(int(roi))
+            output_dict[dict_key]=print_superdata
+    
+    return output_dict
 
 def make_colorspace_single(img,colorspace_index):
     m_1=np.array([1,0,0]).reshape((1,3))

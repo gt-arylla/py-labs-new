@@ -1405,7 +1405,7 @@ if(1): #Genertic Thresholding Analysis
     #0 - logistic regression
     #0 - Black and White Check
 
-    test_index=[2]
+    test_index=[2,3]
 
     line_by_line_check=0
 
@@ -1417,6 +1417,8 @@ if(1): #Genertic Thresholding Analysis
     for dir,_,_ in os.walk(start_dir): 
         files.extend(glob(os.path.join(dir,pattern))) 
     for file in files:
+        if 3 in test_index:
+            label_list=[]
         #print 'prog2'
         filename=file.rpartition("\\")[2]
         #Import csv to dataframe only once
@@ -1656,7 +1658,7 @@ if(1): #Genertic Thresholding Analysis
 
                         if 2 in test_index:
                             if line_by_line_check:
-                                print "black and white redundancy analysis"
+                                print "circle check redundancy analysis"
 
                             ROI_scans=10
                             ROI_count=1
@@ -1684,8 +1686,44 @@ if(1): #Genertic Thresholding Analysis
                                 print ";",
                             print include_line_print
 
+                        if 3 in test_index:
+                            if line_by_line_check:
+                                print "data histogram"
+                            #print df_fin
+                            analysis_dict={}
+                            analysis_dict["active_rois"]=[0]
+                            analysis_dict["roi_scans"]=10
+                            analysis_dict["include_line_print"]=include_line_print
+
+                            histo_data=fun.data_combo(df_fin,analysis_dict,"circle")
+
+                            #print histo_data["blank_roi0"]
+
+                           
+
+                            keys=[]
+                            data=[]
+                            for key in histo_data:
+                                if not key in label_list:
+                                    plt.hist(histo_data[key],100,alpha=0.3,label=key,normed=1,histtype='stepfilled')
+                                    label_list.append(key)
+                                #print key
+                                #print len(histo_data[key])
+                                #print histo_data[key]
+                            #plt.legend()
+                            #plt.show()
+                            #print data
+                            #for iter in range(len(data)):
+                            #    print len(data[iter])
+                            #plt.hist(data,100,alpha=0.3,normed=0,histtype='stepfilled')
+                            #plt.legend(keys)
+                            #plt.show()
+
                     except:
                         skipped=True
+        if 3 in test_index:
+            plt.legend()
+            plt.show()
                         
                             
 
