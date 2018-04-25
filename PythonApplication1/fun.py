@@ -1,6 +1,6 @@
 #functions
 import numpy as np
-import cv2
+#import cv2
 import matplotlib.pyplot as plt
 import math
 import copy
@@ -1023,7 +1023,7 @@ def logistic_regression_prep(csv_file,x_cols,row_keep=[[0]], tst_size=0.000,mark
 
 def adapted_J(sensitivity,specificity,n_print=0,n_CP=0):
     sen_weight=1
-    spec_weight=3
+    spec_weight=1
     FN_weight=1
     CP_weight=2
     n_FN=(1-sensitivity)*n_print-n_CP
@@ -2846,6 +2846,7 @@ def arbitrary_exclude(dataframe_input,column,input_string):
 def arbitrary_include(dataframe_input,column,input_string):
     df=copy.copy(dataframe_input)
     if not input_string=='skip':
+        #df[column]=df[column].astype(int)
         df[column]=df[column].astype(str)
         #print df[column]
         #print input_string
@@ -2853,7 +2854,10 @@ def arbitrary_include(dataframe_input,column,input_string):
             df=df.loc[df[column].str.contains(input_string)]
             #print 'path detected'
         else:
-            df = df[df[column]==input_string]
+            df_original = df[df[column]==input_string]
+            input_string_append=input_string+".0"
+            df_append=df[df[column]==input_string_append]
+            df=pd.concat([df_original,df_append])
 
     return df
 
