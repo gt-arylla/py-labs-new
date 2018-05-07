@@ -9,7 +9,7 @@ import winsound
 import sys
 import time
 
-import fun
+import funcv
 
 #############____________CONSTANTS_______________##########33
 resize_big=0.7
@@ -25,7 +25,7 @@ avg_thresh=60
 
 eq_hist='n'
 clay='n'
-s3='n'
+s3='n' 
 r_check=0
 
 #if user gave a path in the command line, use it.  Otherwise, use default
@@ -66,7 +66,7 @@ if len(sys.argv)<=3:
         plt.title(dir_list[0],fontsize=8)
         plt.axis('off')
         for colorspace_index in range(22):
-            i_ext,name=fun.make_colorspace_single(img,colorspace_index)
+            i_ext,name=funcv.make_colorspace_single(img,colorspace_index)
             iter =colorspace_index+3
             plt.subplot(4,6,iter)
             plt.imshow(i_ext,cmap='jet')
@@ -121,13 +121,14 @@ for filename in dir_list:
         # plt.axis('off')
 
         ############________COLORSPACES_______#############
-        i_ext,name=fun.make_colorspace_single(img,final_cp_index)
+        i_ext,name=funcv.make_colorspace_single(img,final_cp_index)
         i_ext_temp=cv2.equalizeHist(i_ext)
         cv2.imwrite("export.jpg",i_ext_temp)
         cv2.imwrite("basis.jpg",img);
         plt.figure(5)
         plt.imshow(i_ext,clim=(tight_range[0],tight_range[1]),cmap="jet")
         plt.axis('off')
+        plt.title(filename)
         if pic_show==1:
             plt.show()
         else:
