@@ -24,8 +24,8 @@ user_comment='test_comment'
 directory_move="C://Users//gttho//Resilio Sync//Developer//PhotoExports//180330 CG Refined Conc Sweep Test - BadPics//50mS"
 
 directory_start="C://Users//gttho//Documents//Visual Studio 2017//Projects//PythonApplication1//PythonApplication1//bad_pics"
-directory_start="C://Users//gttho//Resilio Sync//Original Images//CanadaGoose//180325-180326 DC_Wash_Conc_Sweep"
-directory_start="C://Users//gttho//Resilio Sync//Original Images//Kings Gift//180412 Demo_App_Test_TW//Lux=300"
+directory_start="D://Google Drive//RM Stress Testing//Print_lowlux"
+#directory_start="D://Offline//AryllaTemp"
 adder_string=["50mS","75mS","100mS"]
 adder_string=[""]
 for adder in adder_string:
@@ -113,7 +113,14 @@ for adder in adder_string:
                 ############CONVERT TEXT A TO TEXT B ##########
                 #convert Count value
                 if (1):
-                    user_comment=string.replace(user_comment,'lux:150,','lux:300,')
+                    user_comment=string.replace(user_comment,'mark:0,','mark:1,')
+                    #user_comment=string.replace(user_comment,'mark:blank,','mark:0,')
+
+                ############CONVERT TEXT A TO TEXT B with switch ##########
+                if (0):
+                    switch_string="cap:cap 4"
+                    if switch_string in user_comment:
+                        user_comment=string.replace(user_comment,'mark:0','mark:1')
                     #user_comment=string.replace(user_comment,'mark:blank,','mark:0,')
 
                 ############Fancy Convert (date, commas, convert to number)#############
@@ -138,7 +145,7 @@ for adder in adder_string:
 
                 ###########Direct Add#################
                 if(0):
-                    user_comment='lux:14000,'+user_comment
+                    user_comment=user_comment+"location:labbench,"
                     print user_comment
                     
 
