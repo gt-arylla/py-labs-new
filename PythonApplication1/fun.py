@@ -1,6 +1,5 @@
 #functions
 import numpy as np
-#import cv2
 import matplotlib.pyplot as plt
 import math
 import copy
@@ -49,8 +48,15 @@ def data_combo(df,analysis_dict,data_type):
                 #print col_header
                 #print blank_df[col_header]
                 blank_superdata.extend(blank_df[col_header])
+            blank_superdata_cleaned=[]
+            for item in blank_superdata:
+                try:
+                    data_val=float(item)
+                    blank_superdata_cleaned.append(float(item))
+                except:
+                    nope=1
             dict_key="blank_roi"+str(int(roi))
-            output_dict[dict_key]=blank_superdata
+            output_dict[dict_key]=blank_superdata_cleaned
 
         #Print Data
         for roi in analysis_dict["active_rois"]:
@@ -58,109 +64,24 @@ def data_combo(df,analysis_dict,data_type):
             for scan in range(analysis_dict["roi_scans"]):
                 col_header="roi_"+str(int(roi))+"_scan_"+str(int(scan))
                 print_superdata.extend(print_df[col_header])
+            print_superdata_cleaned=[]
+            for item in print_superdata:
+                try:
+                    data_val=float(item)
+                    print_superdata_cleaned.append(float(item))
+                except:
+                    nope=1
+            #print print_superdata
+            #print type(print_superdata)
+            #print print_superdata_cleaned
+            #print type(print_superdata_cleaned)
+            ##print_superdata_cleaned=[ x for x in print_superdata if x.isdigit() ]
             include_line_print=analysis_dict["include_line_print"]
             include_line_print=string.replace(include_line_print,':','-')
             dict_key="print_"+include_line_print+"_roi"+str(int(roi))
-            output_dict[dict_key]=print_superdata
+            output_dict[dict_key]=print_superdata_cleaned
     
     return output_dict
-
-def make_colorspace_single(img,colorspace_index):
-    m_1=np.array([1,0,0]).reshape((1,3))
-    m_2=np.array([0,1,0]).reshape((1,3))
-    m_3=np.array([0,0,1]).reshape((1,3))
-    name=''
-    i_ext=img
-    if colorspace_index==0:
-        i_ext=img
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-        name='Gray'
-    elif colorspace_index==1:
-        i_ext=img
-        i_ext=cv2.transform(i_ext,m_1)
-        name='BGR Blue'
-    elif colorspace_index==2:
-        i_ext=img
-        i_ext=cv2.transform(i_ext,m_2)
-        name='BGR Green'
-    elif colorspace_index==3:
-        i_ext=img
-        i_ext=cv2.transform(i_ext,m_3)
-        name='BGR Red'
-    elif colorspace_index==4:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2XYZ)
-        i_ext=cv2.transform(i_ext,m_1)
-        name='CIE X'
-    elif colorspace_index==5:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2XYZ)
-        i_ext=cv2.transform(i_ext,m_2)
-        name='CIE Y'
-    elif colorspace_index==6:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2XYZ)
-        i_ext=cv2.transform(i_ext,m_3)
-        name='CIE Z'
-    elif colorspace_index==7:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2YCR_CB)
-        i_ext=cv2.transform(i_ext,m_1)
-        name='YCrCb Y'
-    elif colorspace_index==8:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2YCR_CB)
-        i_ext=cv2.transform(i_ext,m_2)
-        name='YCrCb Cr'
-    elif colorspace_index==9:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2YCR_CB)
-        i_ext=cv2.transform(i_ext,m_3)
-        name='YCrCb Cb'
-    #cv2.imwrite('YCrCb Cb test.jpg',i_ext)
-    elif colorspace_index==10:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
-        i_ext=cv2.transform(i_ext,m_1)
-        name='HSV H'
-    elif colorspace_index==11:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
-        i_ext=cv2.transform(i_ext,m_2)
-        name='HSV S'
-    elif colorspace_index==12:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
-        i_ext=cv2.transform(i_ext,m_3)
-        name='HSV V'
-    elif colorspace_index==13:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2HLS)
-        i_ext=cv2.transform(i_ext,m_1)
-        name='HLS H'
-    elif colorspace_index==14:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2HLS)
-        i_ext=cv2.transform(i_ext,m_2)
-        name='HLS L'
-    elif colorspace_index==15:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2HLS)
-        i_ext=cv2.transform(i_ext,m_3)
-        name='HLS S'
-    elif colorspace_index==16:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2LAB)
-        i_ext=cv2.transform(i_ext,m_1)		
-        name='CLa L'
-    elif colorspace_index==17:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2LAB)
-        i_ext=cv2.transform(i_ext,m_2)
-        name='CLa a'
-    elif colorspace_index==18:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2LAB)
-        i_ext=cv2.transform(i_ext,m_3)		
-        name='CLa b'
-    elif colorspace_index==19:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2LUV)
-        i_ext=cv2.transform(i_ext,m_1)
-        name='CLu L'
-    elif colorspace_index==20:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2LUV)
-        i_ext=cv2.transform(i_ext,m_2)	
-        name='CLu u'
-    elif colorspace_index==21:
-        i_ext=cv2.cvtColor(img,cv2.COLOR_BGR2LUV)
-        i_ext=cv2.transform(i_ext,m_3)		
-        name='CLu v'
-    return i_ext,name
 
 def dropNAN(input_df,column_where_numbers_start):
     df=input_df
@@ -173,6 +94,18 @@ def dropNAN(input_df,column_where_numbers_start):
     #THEN REMOVE NAN VALUES
     df=df.dropna(subset = header_list[column_where_numbers_start:])
     return df
+
+#def dropNAN_specific(input_df,column_basis):
+#    df=input_df
+#    #remove NAN values from df
+#    #column_where_numbers_start=8;
+#    header_list=df.columns.values.tolist()
+#    #FIRST, CONVERT COLUMNS TO FLOATS
+#    for index in range(column_where_numbers_start,len(header_list)): #ONLY OPERATE ON COLUMNS PAST COLUMN x
+#        df[header_list[index]] = df[header_list[index]].apply(pd.to_numeric,errors='coerce')
+#    #THEN REMOVE NAN VALUES
+#    df=df.dropna(subset = header_list[column_where_numbers_start:])
+#    return df
 
 #converts nan to binary where nan values are 0 and non-nan values are 1
 def nanTObin(input_mat,flipper=False):
@@ -278,8 +211,26 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
                 pos_data=list(dataframe_input[pos_data_index])
                 neg_data_index="black"+str(black_index)+"bin"+str(bin_index)
                 neg_data=list(dataframe_input[neg_data_index])
+
+
+                 #Combine pos_data, neg_data, and mark in dataframe and drop nan values
+                combo_df=pd.DataFrame({'pos':list(dataframe_input[pos_data_index]),'neg':list(dataframe_input[neg_data_index]),'mark':mark_list})
+                combo_df = combo_df.apply(pd.to_numeric,errors='coerce')
+                combo_df=combo_df.dropna()
+                pos_data=list(combo_df['pos'])
+                neg_data=list(combo_df['neg'])
+                mark_data=list(combo_df['mark'])
+                #print pos_data
+                #print neg_data
+
                 diff_data=list(np.array(pos_data)-np.array(neg_data))
-                thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
+
+                count_print_in=np.sum(mark_data)
+                count_blank_in=len(mark_data)-count_print
+
+
+
+                thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_data,thresh_iterators)
                 test_name=pos_data_index+"_minus_"+neg_data_index
                 data_dict["test_name"].append(test_name)
                 data_dict["thresh"].append(thresh)
@@ -287,8 +238,8 @@ def black_white_modeler(dataframe_input,white_index,black_count,test_type=[1],bi
                 data_dict["j"].append(J)
                 data_dict["sen"].append(sen)
                 data_dict["spec"].append(spec)
-                data_dict["n_p"].append(count_print)
-                data_dict["n_b"].append(count_blank)
+                data_dict["n_p"].append(count_print_in)
+                data_dict["n_b"].append(count_blank_in)
                 data_dict["white_index"].append(white_index)
                 data_dict["white_bin"].append(bin_index)
                 data_dict["black_index"].append(black_index)
@@ -1023,7 +974,7 @@ def logistic_regression_prep(csv_file,x_cols,row_keep=[[0]], tst_size=0.000,mark
 
 def adapted_J(sensitivity,specificity,n_print=0,n_CP=0):
     sen_weight=1
-    spec_weight=1
+    spec_weight=3
     FN_weight=1
     CP_weight=2
     n_FN=(1-sensitivity)*n_print-n_CP
@@ -1032,8 +983,17 @@ def adapted_J(sensitivity,specificity,n_print=0,n_CP=0):
     else:
         sen_mod=1-(((n_FN*FN_weight)/float(n_print))+((n_CP*CP_weight)/float(n_print)))/float(FN_weight+CP_weight)
 
-    J=2*(sen_weight*sensitivity+spec_weight*specificity)/float(sen_weight+spec_weight)-1
+    prelim_J=sensitivity+specificity-1
+
+    if sensitivity>0.85 and specificity>0.85:
+        J=2*(sen_weight*sensitivity+spec_weight*specificity)/float(sen_weight+spec_weight)-1
+    else:
+        J=prelim_J
     #J=(sen_weight*sensitivity+spec_weight*specificity)/float(sen_weight+spec_weight)
+
+    #force biased J
+    #J=2*(sen_weight*sensitivity+spec_weight*specificity)/float(sen_weight+spec_weight)-1
+
     return J
    
 def J_from_vectors(guess_list,input_mark):
@@ -2067,7 +2027,7 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     #print "*********END*********"
     return [[best_J,best_sensitivity,best_specificity,len(print_sum),len(blank_sum)],best_roi_thresh,best_dec_thresh,best_redundancy,active_rois_final]
 
-def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3):
+def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""):
     scan_range=cg_scan_range_finder(dataframe_input,scan_size,3)
     #reset index of input dataframe
     dataframe_input=dataframe_input.reset_index(drop=True)
@@ -2106,7 +2066,7 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3):
     roi_starter_list=[]
     roi_starter_index_list=[]
     for roi_iterator in range(roi_total):
-        roi_starter_list.append("roi_"+str(roi_iterator)+"_scan_0")
+        roi_starter_list.append("roi_"+str(roi_iterator)+"_scan_0"+bin_col)
         roi_starter_index_list.append(0)
     roi_starter_list.append("mark")
     roi_starter_index_list.append(0)
@@ -2232,7 +2192,8 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3):
         roi_dec_rng_list.append(roi_dec_basis)
 
   #  print roi_dec_rng_list
-
+   # print T_list
+   # print D_list
 
         #print list_data_holder
     #first find optimal thresholds for each roi
@@ -2240,50 +2201,51 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3):
     best_dec_thresh=len(roi_thresh_rng_list)*[-1]
     #best_J=len(roi_thresh_rng_list)*[-1]
     for roi_index in range(len(roi_thresh_rng_list)):
-        T_list=[]
-        D_list=[]
-        for roi_thresh in roi_thresh_rng_list[roi_index]:
-            #make two new lists - blank confidence and print confidence
-            print_confidence=[]
-            blank_confidence=[]
-            for row_index in range(len(list_data_holder)):
-                #print row
-                #print type(row)
-                read_count=0
-                for scan_index in range(len(list_data_holder[row_index][0][roi_index])):
-                    #col_caller='roi_'+str(roi_index)+'_scan_'+str(scan_index)
+        if True:
+            T_list=[]
+            D_list=[]
+            for roi_thresh in roi_thresh_rng_list[roi_index]:
+                #make two new lists - blank confidence and print confidence
+                print_confidence=[]
+                blank_confidence=[]
+                for row_index in range(len(list_data_holder)):
+                    #print row
+                    #print type(row)
+                    read_count=0
+                    for scan_index in range(len(list_data_holder[row_index][0][roi_index])):
+                        #col_caller='roi_'+str(roi_index)+'_scan_'+str(scan_index)
                     
-                    if list_data_holder[row_index][0][roi_index][scan_index]>roi_thresh:
-                        read_count+=1
-                confidence_value=float(read_count)/float(scan_size)
-                row_marker=list_data_holder[row_index][1]
-                #print row_marker
-                if row_marker==1:
-                    print_confidence.append(confidence_value)
-                elif row_marker==0:
-                    blank_confidence.append(confidence_value)
-                else:
-                    print "***********MARKER MISSING ERROR2*********"
-            ## now that the confidence lists are done, we get roi accuracy using dec_rng
+                        if list_data_holder[row_index][0][roi_index][scan_index]>roi_thresh:
+                            read_count+=1
+                    confidence_value=float(read_count)/float(scan_size)
+                    row_marker=list_data_holder[row_index][1]
+                    #print row_marker
+                    if row_marker==1:
+                        print_confidence.append(confidence_value)
+                    elif row_marker==0:
+                        blank_confidence.append(confidence_value)
+                    else:
+                        print "***********MARKER MISSING ERROR2*********"
+                ## now that the confidence lists are done, we get roi accuracy using dec_rng
             
-            for roi_dec in roi_dec_rng_list[roi_index]:
-                print_binary_list=np.zeros(len(print_confidence))
-                blank_binary_list=np.zeros(len(blank_confidence))
+                for roi_dec in roi_dec_rng_list[roi_index]:
+                    print_binary_list=np.zeros(len(print_confidence))
+                    blank_binary_list=np.zeros(len(blank_confidence))
 
-                #set to 1 if value is greater than threshold
-                print_binary_list[print_confidence>roi_dec]=1
-                blank_binary_list[blank_confidence>roi_dec]=1
+                    #set to 1 if value is greater than threshold
+                    print_binary_list[print_confidence>roi_dec]=1
+                    blank_binary_list[blank_confidence>roi_dec]=1
 
 
 
-                sensitivity=np.mean(print_binary_list)
-                specificity=1-np.mean(blank_binary_list)
-                J=sensitivity+specificity-1
-                J=adapted_J(sensitivity,specificity)
+                    sensitivity=np.mean(print_binary_list)
+                    specificity=1-np.mean(blank_binary_list)
+                    J=sensitivity+specificity-1
+                    J=adapted_J(sensitivity,specificity)
 
-                if J>best_J[roi_index]-0.05:
-                    T_list.append(roi_thresh)
-                    D_list.append(roi_dec)
+                    if J>best_J[roi_index]-0.05:
+                        T_list.append(roi_thresh)
+                        D_list.append(roi_dec)
         #once all threshold-dec pairs have been tried, take median of each of T_list and D_list vectors
         best_roi_thresh[roi_index]=np.median(T_list)
         best_dec_thresh[roi_index]=np.median(D_list)
@@ -2396,7 +2358,8 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3):
 
                 sensitivity=np.mean(print_binary_list)
                 specificity=1-np.mean(blank_binary_list)
-                J=sensitivity+specificity-1
+                J=adapted_J(sensitivity,specificity)
+                #sensitivity+specificity-1
 
                 #print redundancy,
                 #print ",",
@@ -2570,8 +2533,18 @@ def sm_logistic_regression_model(X_train,y_train, printer=False,tester_switch=Fa
         print result.summary()
 
         print result.pred_table(0.5)
-    
-    
+        print type(result.pred_table(0.5))
+
+    if not tester_switch:
+        conf_matrix=result.pred_table(0.5)
+        TN=conf_matrix[0][0]
+        FP=conf_matrix[0][1]
+        FN=conf_matrix[1][0]
+        TP=conf_matrix[1][1]
+        sen=TP/float(TP+FN)
+        spec=TN/float(TN+FP)
+        J=sen+spec-1
+        return [J,sen,spec]
     
     prediction_train=result.predict(X_train)
     
@@ -2858,6 +2831,27 @@ def arbitrary_include(dataframe_input,column,input_string):
             input_string_append=input_string+".0"
             df_append=df[df[column]==input_string_append]
             df=pd.concat([df_original,df_append])
+
+    return df
+
+def arbitrary_include_number(dataframe_input,column,input_number,bounds=0.1,round=2,keep_all_low=False,keep_all_high=False):
+    df=copy.copy(dataframe_input)
+    if not input_number=='skip':
+        #df[column]=df[column].astype(int)
+        df[column]=df[column].astype(float)
+        #print df
+        if (keep_all_low & keep_all_high):
+            df_original=copy.copy(df);
+        elif keep_all_low:
+            df_original = df[(df[column]<=input_number+bounds)]
+        elif keep_all_high:
+            df_original = df[(df[column]>=input_number-bounds)]
+        else:
+            df_original = df[(df[column]>=input_number-bounds) & (df[column]<=input_number+bounds)]
+        #input_string_append=input_string+".0"
+        #df_append=df[df[column]==input_string_append]
+        #df=pd.concat([df_original,df_append])
+        df=copy.copy(df_original)
 
     return df
 
@@ -3315,6 +3309,260 @@ def import_and_sort_csv(csv_file,return_number,sort_index):
         print super_list[i]
 
     return 0
+
+def rings_modeler(dataframe_input,ring_count,test_type=[1],active_roi=0):
+    #code will accept a dataframe input and ring count.  It'll then find the optimal threshold for each ring and each ring combination.  The combos I have in mind are pure differences between rows and averaged differences between rows
+
+    #The format for the ring avg column headers are 'Rx' where x is the ring index.  The format for ring count column headers are 'RCx' where x is the ring index
+    #for each test, the result will be saved in a dataframe
+
+    mark_list=list(dataframe_input["mark"])
+    count_print=np.sum(mark_list)
+    count_blank=len(mark_list)-count_print
+
+    thresh_iterators=100
+
+    data=pd.DataFrame(columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B"])
+    data_dict={"test_name":[],"thresh":[],"j_abs":[],"j":[],"sen":[],"spec":[],"n_p":[],"n_b":[],"white_index":[],"white_bin":[],"black_index":[],"black_bin":[]}
+
+    #print "Analysis Started"
+
+    #part 1 is simply running through the rings
+    if 1 in test_type:
+        for row_index in range(ring_count):
+            data_index="roi_"+str(int(active_roi))+"_r"+str(row_index)
+            data_input=list(dataframe_input[data_index])
+            thresh,J_abs,J,sen,spec=threshold_finder(data_input,mark_list,thresh_iterators)
+            test_name=data_index
+
+            data_dict["test_name"].append(test_name)
+            data_dict["thresh"].append(thresh)
+            data_dict["j_abs"].append(J_abs)
+            data_dict["j"].append(J)
+            data_dict["sen"].append(sen)
+            data_dict["spec"].append(spec)
+            data_dict["n_p"].append(count_print)
+            data_dict["n_b"].append(count_blank)
+            data_dict["white_index"].append(row_index)
+            data_dict["white_bin"].append('notused')
+            data_dict["black_index"].append('notused')
+            data_dict["black_bin"].append('notused')
+
+
+            #adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B"])
+            #data=data.append(adder_df)
+
+    #print "Part 1 Done"
+
+    ##part 2 is finding the difference between all the columns
+    if 2 in test_type:
+        for start_index in range(ring_count):
+            for end_index in range(ring_count):
+                if end_index>start_index:
+                    pos_data_index="roi_"+str(int(active_roi))+"_r"+str(end_index)
+                    pos_data=list(dataframe_input[pos_data_index])
+                    neg_data_index="roi_"+str(int(active_roi))+"_r"+str(start_index)
+                    neg_data=list(dataframe_input[neg_data_index])
+                    diff_data=list(np.array(pos_data)-np.array(neg_data))
+                    thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
+                    test_name=pos_data_index+"_minus_"+neg_data_index
+
+                    data_dict["test_name"].append(test_name)
+                    data_dict["thresh"].append(thresh)
+                    data_dict["j_abs"].append(J_abs)
+                    data_dict["j"].append(J)
+                    data_dict["sen"].append(sen)
+                    data_dict["spec"].append(spec)
+                    data_dict["n_p"].append(count_print)
+                    data_dict["n_b"].append(count_blank)
+                    data_dict["white_index"].append(end_index)
+                    data_dict["white_bin"].append('notused')
+                    data_dict["black_index"].append(start_index)
+                    data_dict["black_bin"].append('notused')
+
+                 #   adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                 #   data=data.append(adder_df)
+
+    #print "Part 2 Done"
+
+    ###part 3 is doing a weighted average between all combinations of consecutive columns
+    ######## CURRENTLY NOT FINISHED CONVERSION #################
+    if 3 in test_type:    
+        neg_index=0
+        for start_range_index in range(1,ring_count-1):
+            for number_of_columns in range(2,ring_count-start_range_index+2):
+                for start_range_fin in range(start_range_index,ring_count-number_of_columns+1):
+                    data_list=[]
+                    weight_list=[]
+                    for col in range(number_of_columns):
+                        data_name="R"+str(col+start_range_fin)
+                        data_list.append(list(dataframe_input[data_name]))
+                        weight_name="RC"+str(col+start_range_fin)
+                        weight_list.append(list(dataframe_input[weight_name]))
+                    avg_col=weighted_average(data_list,weight_list)
+
+                    neg_data_index="R"+str(neg_index)
+                    neg_data=list(dataframe_input[neg_data_index])
+
+                    diff_data=list(np.array(avg_col)-np.array(neg_data))
+                    thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
+                    test_name="R"+str(start_range_fin)+"_to_R"+str(start_range_fin+number_of_columns-1)+"__minus__"+"R"+str(neg_index)
+                    adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                    data=data.append(adder_df)
+
+    #part 4 is finding the difference between all the columns.  By default compares R and RC columns
+    ######## CURRENTLY NOT FINISHED CONVERSION #################
+    if 4 in test_type:    
+        for start_index in range(ring_count):
+            for end_index in range(ring_count):
+                pos_data_index="R"+str(end_index)
+                pos_data=list(dataframe_input[pos_data_index])
+                neg_data_index="RC"+str(start_index)
+                neg_data=list(dataframe_input[neg_data_index])
+                diff_data=list(np.array(pos_data)-np.array(neg_data))
+                thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_list,thresh_iterators)
+                test_name=pos_data_index+"_minus_"+neg_data_index
+                adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                data=data.append(adder_df)
+
+    ######## CURRENTLY NOT FINISHED CONVERSION #################
+    if 5 in test_type:
+        for start_index in range(ring_count):
+            for end_index in range(ring_count):
+                if end_index>start_index:
+                    bin_count=55
+                    for bin_count_start in range(bin_count):     
+                        #pos_data_index="R"+str(end_index)+"b"+str(bin_count_end)
+                        pos_data_index="roi_"+str(int(active_roi))+"_r"+str(end_index)+"bin"+str(bin_count_start)
+                        #pos_dataframe
+                        pos_data=list(dataframe_input[pos_data_index])
+                        #neg_data_index="R"+str(start_index)+"b"+str(bin_count_start)
+                        neg_data_index="roi_"+str(int(active_roi))+"_r"+str(start_index)+"bin"+str(bin_count_start)
+                        neg_data=list(dataframe_input[neg_data_index])
+                        #print pos_data
+                        #print neg_data
+
+                        #Combine pos_data, neg_data, and mark in dataframe and drop nan values
+                        combo_df=pd.DataFrame({'pos':list(dataframe_input[pos_data_index]),'neg':list(dataframe_input[neg_data_index]),'mark':mark_list})
+                        combo_df = combo_df.apply(pd.to_numeric,errors='coerce')
+                        combo_df=combo_df.dropna()
+                        pos_data=list(combo_df['pos'])
+                        neg_data=list(combo_df['neg'])
+                        mark_data=list(combo_df['mark'])
+                        #print pos_data
+                        #print neg_data
+
+                        diff_data=list(np.array(pos_data)-np.array(neg_data))
+
+                        count_print_in=np.sum(mark_data)
+                        count_blank_in=len(mark_data)-count_print
+
+                        thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_data,thresh_iterators)
+                        test_name=pos_data_index+"_minus_"+neg_data_index
+                        #adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                        #data=data.append(adder_df)
+
+                        #print data_dict
+                            
+                        data_dict["test_name"].append(test_name)
+                        data_dict["thresh"].append(thresh)
+                        data_dict["j_abs"].append(J_abs)
+                        data_dict["j"].append(J)
+                        data_dict["sen"].append(sen)
+                        data_dict["spec"].append(spec)
+                        data_dict["n_p"].append(count_print_in)
+                        data_dict["n_b"].append(count_blank_in)
+                        data_dict["white_index"].append(end_index)
+                        data_dict["white_bin"].append(bin_count_start)
+                        data_dict["black_index"].append(start_index)
+                        data_dict["black_bin"].append(bin_count_start)
+    
+     ######## CURRENTLY NOT FINISHED CONVERSION #################
+    if 6 in test_type:
+        for start_index in range(ring_count):
+            for end_index in range(ring_count):
+                if end_index>start_index:
+                    bin_count=55
+                    for bin_count_start in range(bin_count):
+                        for bin_count_end in range(bin_count):       
+                            #pos_data_index="R"+str(end_index)+"b"+str(bin_count_end)
+                            pos_data_index="roi_"+str(int(active_roi))+"_r"+str(end_index)+"bin"+str(bin_count_end)
+                            #pos_dataframe
+                            pos_data=list(dataframe_input[pos_data_index])
+                            #neg_data_index="R"+str(start_index)+"b"+str(bin_count_start)
+                            neg_data_index="roi_"+str(int(active_roi))+"_r"+str(start_index)+"bin"+str(bin_count_start)
+                            neg_data=list(dataframe_input[neg_data_index])
+                            #print pos_data
+                            #print neg_data
+
+                            #Combine pos_data, neg_data, and mark in dataframe and drop nan values
+                            combo_df=pd.DataFrame({'pos':list(dataframe_input[pos_data_index]),'neg':list(dataframe_input[neg_data_index]),'mark':mark_list})
+                            combo_df = combo_df.apply(pd.to_numeric,errors='coerce')
+                            combo_df=combo_df.dropna()
+                            pos_data=list(combo_df['pos'])
+                            neg_data=list(combo_df['neg'])
+                            mark_data=list(combo_df['mark'])
+                            #print pos_data
+                            #print neg_data
+
+                            diff_data=list(np.array(pos_data)-np.array(neg_data))
+
+                            count_print_in=np.sum(mark_data)
+                            count_blank_in=len(mark_data)-count_print
+
+                            thresh,J_abs,J,sen,spec=threshold_finder(diff_data,mark_data,thresh_iterators)
+                            test_name=pos_data_index+"_minus_"+neg_data_index
+                            #adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J","J_Abs","Sen","Spec","n_P","n_B"])
+                            #data=data.append(adder_df)
+
+                            
+                            data_dict["test_name"].append(test_name)
+                            data_dict["thresh"].append(thresh)
+                            data_dict["j_abs"].append(J_abs)
+                            data_dict["j"].append(J)
+                            data_dict["sen"].append(sen)
+                            data_dict["spec"].append(spec)
+                            data_dict["n_p"].append(count_print_in)
+                            data_dict["n_b"].append(count_blank_in)
+                            data_dict["white_index"].append(end_index)
+                            data_dict["white_bin"].append(bin_count_end)
+                            data_dict["black_index"].append(start_index)
+                            data_dict["black_bin"].append(bin_count_start)
+
+    ######### CURRENTLY NOT FINISHED CONVERSION #################                        
+    #if 6 in test_type:
+    #    for row_index in range(ring_count):
+    #        bin_count=55
+    #        for bin in range(bin_count):
+    #            data_index="R"+str(row_index)+"b"+str(bin)
+    #            #print data_index
+    #            data_input=list(dataframe_input[data_index])
+    #            thresh,J_abs,J,sen,spec=threshold_finder(data_input,mark_list,thresh_iterators)
+    #            test_name=data_index
+    #            adder_df=pd.DataFrame([[test_name,thresh,J_abs,J,sen,spec,count_print,count_blank]],columns=["Test_Name","Thresh","J_Abs","J","Sen","Spec","n_P","n_B"])
+    #            data=data.append(adder_df)
+    #data.to_csv("dataframe_export2.csv")
+
+    data=pd.DataFrame(data_dict)
+
+    #Reset data index
+    data=data.reset_index(drop=True)
+
+   
+   # print data
+
+    # Filter out nan values
+    df=dropNAN(data,0)
+
+    # Determine maximum conditions
+    data_max=data.ix[data['j_abs'].idxmax()]   
+    data_max_dict=data_max.to_dict()
+   # data_max=data_max.reset_index(drop=True)
+    #result_max_list=list(result_max)
+
+    #print data_max;
+
+    return data,data_max_dict
 
 def save_failed_images(dataframe_input,mark_list,sum_list,best_redundancy):
     #save failed images
