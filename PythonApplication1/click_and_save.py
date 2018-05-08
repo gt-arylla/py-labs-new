@@ -3,6 +3,7 @@ import argparse
 import cv2
 import os
 import json
+import numpy as np
 from glob import glob
  
 
@@ -67,6 +68,15 @@ for index, image_path in enumerate(files):
  
     # load the image, clone it, and setup the mouse callback function
     image = cv2.imread(image_path)
+
+    rows,cols,height=image.shape
+
+    print rows
+    print cols
+
+    if rows<cols:
+        image=np.rot90(image,3)
+
     clone = image.copy()
     cv2.namedWindow("image",cv2.WINDOW_NORMAL)
 
