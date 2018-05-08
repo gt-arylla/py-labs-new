@@ -16,6 +16,7 @@ def click_and_crop(event, x, y, flags, param):
     point_list=[]
     if event == cv2.EVENT_LBUTTONDOWN:
         refPt.append([x, y])
+        print "("+str(x)+","+str(y)+"), ",
         #cropping = True
  
     # check to see if the left mouse button was released
@@ -43,7 +44,15 @@ for dir,_,_ in os.walk(start_dir):
 test_name=raw_input("Input test name: ")
 coordinate_map={}
 
-for image_path in files:
+print "You will be analyzing "+str(len(files))+" images"
+print "To save the candidate points, press 's'"
+print "To reset the candidate points, press 'r'"
+
+
+
+for index, image_path in enumerate(files):
+    print ""
+    print "The test is "+str(float(index)/float(len(files)))+"% Complete."
 
     # initialize the list of reference points and boolean indicating
     # whether cropping is being performed or not
@@ -60,6 +69,9 @@ for image_path in files:
     image = cv2.imread(image_path)
     clone = image.copy()
     cv2.namedWindow("image",cv2.WINDOW_NORMAL)
+
+    print "The following points will be saved: ",
+
     cv2.setMouseCallback("image", click_and_crop)
 
  
@@ -72,9 +84,13 @@ for image_path in files:
         # if the 'r' key is pressed, reset the cropping region
         if key == ord("r"):
             image = clone.copy()
+            print ""
+            print "Candidate Points have been reset!"
+            print "The following points will be saved: ",
+            refPt=[]
  
-        # if the 'c' key is pressed, break from the loop
-        elif key == ord("c"):
+        # if the 's' key is pressed, break from the loop
+        elif key == ord("s"):
             break
     
  
@@ -83,6 +99,10 @@ for image_path in files:
     if len(refPt)>=1:
         #roi = clone[refPt[0][1]:refPt[1][1], refPt[0][0]:refPt[1][0]]
         coordinate_map[image_path]=refPt
+        print ""
+        print "Process complete."
+        print "File: "+image_path
+        print "Points: ",
         print refPt
         refPt=[]
         #cv2.imshow("ROI", roi)
