@@ -184,11 +184,11 @@ for filename in os.listdir(directory):
 			plt.subplot(4,6,iter)
 			if thresh=='y':
 				loss,i_ext_t=cv2.threshold(i_ext,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-				plt.imshow(i_ext_t,cmap='gray')
+				plt.imshow(i_ext_t,cmap='jet')
 				thresh_name='_t'
 			else:
 				# i_ext=cv2.equalizeHist(i_ext)
-				plt.imshow(i_ext,cmap='gray')
+				plt.imshow(i_ext,cmap='jet')
 				thresh_name=''
 			plt.axis('off')
 			plt.title(name+'\n'+str(var3)+" "+str(var_agv),fontsize=8)
