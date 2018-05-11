@@ -27,6 +27,8 @@ from sklearn.svm import LinearSVC
 from sklearn.cross_validation import train_test_split
 from sklearn import metrics
 import time
+import string
+import json
 
 print 'running...'
 
@@ -316,7 +318,32 @@ if(0): #EXIF data for not exclusively User_comment
         except:
             print 'Failed to print: '+file
 if(0): #Logistic Regression
-    tn=1;
+    tn=0;
+    if tn==0: #NO TRAIN
+        directory='C://Users//gttho//Resilio Sync//Developer//csvExports//180321 JB Exports//180428//'
+        csv_file=directory+'RGBGV Log Regression.csv'
+        #csv_file=directory+'PrelimLogRegression.csv'
+        df=pd.read_csv(csv_file,header=0,error_bad_lines=False,warn_bad_lines=False)
+
+        #kill nan values
+        df=fun.dropNAN(df,0)
+
+        col_list=[['blue_avg','brightness'],['red_avg','brightness'],['green_avg','brightness'],['value_avg','brightness'],['grey_avg','brightness'],['blue_avg','red_avg','brightness'],['blue_avg','green_avg','brightness'],['blue_avg','value_avg','brightness'],['blue_avg','grey_avg','brightness'],['red_avg','green_avg','brightness'],['red_avg','value_avg','brightness'],['red_avg','grey_avg','brightness'],['green_avg','value_avg','brightness'],['green_avg','grey_avg','brightness'],['value_avg','grey_avg','brightness'],['blue_avg','red_avg','green_avg','brightness'],['blue_avg','red_avg','value_avg','brightness'],['blue_avg','red_avg','grey_avg','brightness'],['blue_avg','green_avg','value_avg','brightness'],['blue_avg','green_avg','grey_avg','brightness'],['blue_avg','value_avg','grey_avg','brightness'],['red_avg','green_avg','value_avg','brightness'],['red_avg','green_avg','grey_avg','brightness'],['red_avg','value_avg','grey_avg','brightness'],['green_avg','value_avg','grey_avg','brightness'],['blue_avg','red_avg','green_avg','value_avg','brightness'],['blue_avg','red_avg','green_avg','grey_avg','brightness'],['blue_avg','red_avg','value_avg','grey_avg','brightness'],['blue_avg','green_avg','value_avg','grey_avg','brightness'],['red_avg','green_avg','value_avg','grey_avg','brightness'],['blue_avg','red_avg','green_avg','value_avg','grey_avg','brightness']]
+        for coeff_cols in col_list:
+        #if True:
+            #Separate out x values
+            #coeff_cols=['avg',  'luxpred', 'brightness']
+            train_x=df.filter(coeff_cols,axis=1)
+            #print train_x
+            #Separate out y values
+            train_y=df.filter(['mark'],axis=1)
+
+            result=fun.sm_logistic_regression_model(train_x,train_y)
+            print coeff_cols,
+            print ";",
+            print result
+            #result=fun.logistic_regression_model(x_train,y_train,printer)
+
     if tn==1: #NO TRAIN
         directory='G://Developer//csvExports//'
         csv_file=directory+'171213 CG Data Prelim.csv'
@@ -1390,7 +1417,7 @@ if(0): #CanadaGoose Logistic Regression
                                     print path,
                                     print ";",
                                     print formulation,
-                                    print ";",
+                                    print ";",v
                                     print recipe,
                                     print ";",
                                     print mod,
@@ -1402,10 +1429,24 @@ if(0): #CanadaGoose Logistic Regression
                         except:
                             skipped=True
 if(1): #Genertic Thresholding Analysis
-    #0 - logistic regression
-    #0 - Black and White Check
+    
+    #0 - Black and White Simple Check
+    #1 - Black and White Redundancy Analysis
+    #2 - Circle Check Redundancy Analysis
+    #3 - Draw Histogram
+    #4 - H Combine ROIs in Histogram
+    #5 - H Turn OFF Divided ROI Histogram
+    #6 - H Save figure rather than show
+    #7 - H Draw or Show Histogram Filter by Filter
+    #8 - Add Binning to Circle Check
 
+    #10 - Rings Simple Check
+
+    test_index=[-1,2,3,6,7]
     test_index=[2,3]
+
+    ROI_scans=10
+    ROI_count=1
 
     line_by_line_check=0
 
@@ -1437,8 +1478,482 @@ if(1): #Genertic Thresholding Analysis
             ring=int(ring_string)-500
         except:
             ring=55
-        #print ring
-        ring=36
+        #ring=36
+
+        number_filters=np.logspace(2,5,50)
+        number_filter=0
+        number_filters=[400,700,900,1000,1500,2500]
+        #number_filters=range(3)
+        number_filter=0
+
+        #for number_filter in number_filters:
+        if True:
+
+            df=pd.read_csv(file,header=0,error_bad_lines=False,warn_bad_lines=False)
+
+            if line_by_line_check:
+                print "ORIGINAL DATAFRAME: "
+                print df
+
+
+            #drop error rows
+            #df=df.loc[df['guess'].isin([0,1])]
+            df=df.loc[df['guess'].isin([-99])]
+
+            df=df.loc[:, ~df.columns.str.contains('^Unnamed')]
+            if line_by_line_check:
+                print "DROP UNNAMED: "
+                print df
+
+
+
+            #drop empty colulmns
+            df=df.dropna(axis=1,how='all')
+
+
+
+            #df=fun.dropNAN(df,41)
+            if line_by_line_check:
+                print "DROP NAN VALUES: "
+                print df
+            #print df
+
+            #Manual number filters
+            #df=fun.arbitrary_include_number(df,'exposurebias',-1.4,0.2)
+            #df=fun.arbitrary_include_number(df,'lux',number_filter,5)
+            #df=fun.arbitrary_include_number(df,'lux',number_filter,0.2,keep_all_low=True,keep_all_high=False)
+            #df=fun.arbitrary_include_number(df,'lux',number_filter,1000)
+
+            #Manual text filter
+            #df=fun.arbitrary_exclude(df,'location','window')
+            path_list=['180504 Perry_15Short_iP8plus','180504 Perry_15Short_iP7','180504 Ben_15Short_iP8_HeadOn','skip']
+            #df=fun.arbitrary_include(df,'path',path_list[number_filter])
+            #df=fun.arbitrary_include(df,'path','Perry_15Short_iP8plus')
+            #df=fun.arbitrary_exclude(df,'lux','900')
+            #df=fun.arbitrary_exclude(df,'lux','2500')
+            #df=fun.arbitrary_exclude(df,'lux','1500')
+
+            #Make Dataframe of Blanks
+            df_blank=df.loc[df['mark']==0]
+            cap_list=['blank','blankout','blankfill']
+            #df_blank=fun.arbitrary_filter(df,'cap',cap_list[number_filter])
+
+            if line_by_line_check:
+                print "BLANK DATAFRAME"
+                print df_blank
+
+            #filter blank dataframe
+            #df_blank=fun.arbitrary_include(df_blank,'numberofprints','2')
+
+            #Make Dataframe of Prints
+            df=df.loc[df['mark']==1]
+
+            #df=fun.arbitrary_filter(df,'mark','1')
+
+            #####Exclude List#####
+            exclude_list=[
+                ]
+
+
+             #####Exclude List Combo#####
+            exclude_list_combo=[
+                ]
+
+            #Unique include
+            unique_key='test'
+            unique_list=df[unique_key].unique()
+
+            ####Include List####
+            include_list=[
+                ['path',['skip']],
+                ['serial',['1','2']]
+               #['path',['180505 Cap15_iP8plus_2photo','180505 Cap15_iP8_2Photo','180505 Cap15_iP7','skip']],
+           #    ['path',['iP8','iP7']],
+          #     [unique_key,unique_list]
+               #['location',['whitetable','blacktable','window']],
+            #   ['location',['window']],
+            #   ['lux',['100']]
+             #  ['test',['stcboardroomphotoset']]
+            #     ['cap',['cap4']],
+            #    ['scenario',['campus']],
+            #    ['test',['cap2photoset']]
+            #    ['background',['black','white','window','skip']],
+            #    ['lux',['555','1400','1650','1700','3000','3200','6200','8000','11000','11700','34000']]
+          #  ['lux',['440','770','1400','2600','3400']],
+            #['expbias',['-2.4','-1.9','-1.4']]
+        
+                ]
+
+            ####Include List Combo####
+            include_list_combo=[
+                ]
+
+            #Transform Include and Exclude lists into product lists
+            include_array=[]
+            include_array_head=[]
+            for include_pair in include_list:
+                include_array.append(include_pair[1])
+                include_array_head.append(include_pair[0])
+
+            include_product_list=list(it.product(*include_array))
+
+            exclude_array=[]
+            exclude_array_head=[]
+            for exclude_pair in exclude_list:
+                exclude_array.append(exclude_pair[1])
+                exclude_array_head.append(exclude_pair[0])
+
+            exclude_product_list=list(it.product(*exclude_array))
+
+            if line_by_line_check:
+                print include_product_list
+                print exclude_product_list
+
+            ROI_list=range(3)
+            #x_col_list=[] #these should be COLUMN HEADERS
+            #x_col_list.append()
+
+            if True:
+            #try:
+                if len(exclude_list_combo)>0:
+                    for exclude_pair in exclude_list_combo:
+                        for exclude_string in exclude_pair[1]:
+                            if line_by_line_check:
+                                print exclude_string,
+                                print " ",
+                                print exclude_pair[0]
+                            df=fun.arbitrary_exclude(df,exclude_pair[0],exclude_string)
+                if line_by_line_check:
+                    print df
+                if len(include_list_combo)>0:
+                    for include_pair in include_list_combo:
+                        df_concat=[];
+                        for include_string in include_pair[1]:
+                            if line_by_line_check:
+                                print include_string,
+                                print " ",
+                                print include_pair[0]
+                            df_concat.append(fun.arbitrary_include(df,include_pair[0],include_string))
+                        df=pd.concat(df_concat)
+                df_pre_filter=copy.copy(df)
+                df_blank_pre_filter=copy.copy(df_blank)
+
+                if len(include_list)>0:
+                
+                    for include_line in include_product_list:
+                        include_line_print=""
+                        if line_by_line_check:
+                            print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+                            print include_line
+                        #try:
+                        if True:
+                            parameter_export=""
+                            df=copy.copy(df_pre_filter)
+                            df_blank=copy.copy(df_blank_pre_filter)
+                        
+                            for include_index in range(len(include_line)):
+                                df=fun.arbitrary_include(df,include_array_head[include_index],include_line[include_index])
+                                if -1 in test_index:
+                                    df_blank=fun.arbitrary_include(df_blank,include_array_head[include_index],include_line[include_index])
+                                parameter_export=parameter_export+include_array_head[include_index]+"'"+include_line[include_index]+"_"
+                                include_line_print=include_line_print+include_array_head[include_index]+":"+include_line[include_index]+";"
+                                if line_by_line_check:
+                                    print "______________________________________________________________________"
+                                    print include_array_head[include_index]+";"+include_line[include_index]
+                                    print df
+                                    print "______________________________________________________________________"          
+                            if len(exclude_list)>0:
+                                for exclude_line in exclude_product_list:
+                                    for exclude_index in range(len(exclude_line)):
+                                        df=fun.arbitrary_exclude(df,exclude_array_head[exclude_index],exclude_line[exclude_index])
+
+                   
+                            #prep input to thresholding functions
+                            df_input=copy.copy(df)
+                            df_blank_input=copy.copy(df_blank)
+                            df_fin=fun.cg_combine_print_blank(df_input,df_blank)
+                            if line_by_line_check:
+                                print "PRINT DATAFRAME:"
+                                print df_input
+                                print "BLANK DATAFRAME:"
+                                print df_blank
+                                print "FINAL DATAFRAME:"
+                                print df_fin
+                                print df_fin.mark
+                            #make include_line that can be used as a filename
+                            include_line_filename=string.replace(include_line_print,':',' ')
+                            include_line_filename=string.replace(include_line_filename,';',',')
+
+                            if 0 in test_index: #black/white analysis
+                                if line_by_line_check:
+                                    print "black and white analysis"
+                                test_list=[2]
+                                white_count=1
+                                for white_index in range(white_count):
+                                    result,max_result=fun.black_white_modeler(df_fin,white_index,1,test_list)
+
+                                    df_one_line=pd.DataFrame.from_records([include_line],columns=include_array_head)
+                                    df_multiline=copy.copy(df_one_line)
+
+                                    for i in range(result.shape[0]-1):
+                                        df_multiline=pd.concat([df_one_line,df_multiline])
+
+                                   # df_descriptor=df_descriptor.append(df_descriptor*result.shape[0],ignore_index=True)
+
+                                    df_multiline=df_multiline.reset_index(drop=True)
+                                    result=result.reset_index(drop=True)
+
+                                    result_fin=pd.concat([df_multiline,result],axis=1)
+                                  #  result_fin=result_fin.reset_index(drop=True)
+
+                                    if line_by_line_check:
+                                        print result_fin
+
+                                    #for head_index in range(len(include_array_head)):
+                                     #   result=result.assign(include_array_head[head_index]=pd.Series([include_line[head_index]]*result.shape[0]).values) #Formulation
+
+                                    result_fin.to_csv("DF-"+filename+" "+parameter_export+str(test_list)+".csv")
+
+
+                                    result_max=result_fin.ix[result_fin['j_abs'].idxmax()]   
+                                    result_max_list=list(result_max)
+                                    result_max_list=[filename]+result_max_list
+                                    print result_max_list
+                            if 1 in test_index:
+                                if line_by_line_check:
+                                    print "black and white redundancy analysis"
+                                test_list=[4]
+                                white_count=3
+                                black_count=5
+                                result=fun.black_white_redundancy(df_fin,white_count,black_count,test_list)
+                                #print "finished"
+                                export_cols=["j","sen","spec","active_rois","red_thresh","n_b","n_p"]
+                                roi_opt_export_cols=["white_index","white_bin","black_index","black_bin","thresh","j","test_name"]
+                                for thresh_index in range(white_count):
+                                    export_cols.append("roi"+str(int(thresh_index)))
+                                #print result
+                            
+                                print filename,
+                                print ";",
+                                for col in export_cols:
+                                    print result[col],
+                                    print ";",
+                                #print result["optimal_rois"].
+
+                                for col in roi_opt_export_cols:
+                                    print col+":",
+                                    for ROI_index in result["active_rois"]:
+                                
+                                        print str(result["optimal_rois"][ROI_index][col])+",",
+                                    print ";",
+                                print include_line_print
+
+                            if 2 in test_index:
+                                if line_by_line_check:
+                                    print "circle check redundancy analysis"
+
+                                if 8 in test_index:
+                                    bin_inputs=range(55)
+                                else:
+                                    bin_inputs=[16]
+
+                               
+                                for bin_index in bin_inputs:
+                                #if True:
+                                    if 8 in test_index:
+                                        string_input="_bin_"+str(int(bin_index))
+                                    else:
+                                        string_input=""
+                                    result=fun.cg_redundancy_modeler_v4(df_fin,ROI_scans,ROI_count,string_input)
+                                    #result=fun.cg_redundancy_modeler_v4(df_fin,ROI_scans,ROI_count)
+
+                                    export_cols=["j","sen","spec","active_rois","red_thresh","n_b","n_p","t","p"]
+                                    roi_opt_export_cols=["white_index","thresh","dec_thresh","j"]
+                                    for thresh_index in range(ROI_count):
+                                        export_cols.append("roi"+str(int(thresh_index)))
+                                    #print result
+                            
+                                    print filename,
+                                    print ";",
+                                    for col in export_cols:
+                                        print result[col],
+                                        print ";",
+                                    #print result["optimal_rois"].
+
+                                    for col in roi_opt_export_cols:
+                                        print col+":",
+                                        for ROI_index in result["active_rois"]:
+                                
+                                            print str(result["optimal_rois"][ROI_index][col])+",",
+                                        print ";",
+                                    print "bin:"+str(int(bin_index))+";",
+                                    print "numfilter:"+str(number_filter)+";",
+                                    print str(number_filter)+";",
+                                    print include_line_print
+
+                            if 3 in test_index:
+                                if line_by_line_check:
+                                    print "data histogram"
+                                #print df_fin
+                                analysis_dict={}
+                                analysis_dict["active_rois"]=range(ROI_count)
+                                analysis_dict["roi_scans"]=ROI_scans
+                                analysis_dict["include_line_print"]=include_line_print
+
+                                histo_data=fun.data_combo(df_fin,analysis_dict,"circle")
+
+                                #print histo_data["blank_roi0"]
+
+                                roi_combo_list=[]
+                                histo_combo_dict={}
+                                if 4 in test_index:
+                                    for key in histo_data:
+                                        split_key=key.split("_roi")
+                                        if split_key[0] in roi_combo_list:
+                                            histo_combo_dict[split_key[0]].extend(histo_data[key])
+                                        
+                                        else:
+                                            histo_combo_dict[split_key[0]]=histo_data[key]
+                                            roi_combo_list.append(split_key[0])
+                                    for key in histo_combo_dict:
+                                        if not key in label_list:
+                                            data=histo_combo_dict[key]
+                                            if len(data)>0:
+                                                plt.hist(histo_combo_dict[key],100,alpha=0.3,label=key,normed=1,histtype='stepfilled')
+                                                label_list.append(key)
+                                if not 5 in test_index:
+                                    for key in histo_data:
+                                        if not key in label_list:
+                                            data=histo_data[key]
+                                            if len(data)>0:
+                                                plt.hist(histo_data[key],20,alpha=0.3,label=key,normed=1,histtype='stepfilled')
+                                                label_list.append(key)
+
+                                if 7 in test_index:
+                                    print include_line_filename
+                                    label_list=[]
+                                    plt.legend()
+                                    plt.xlim(-10,35)
+                                    plt.title(filename)
+                                    if 6 in test_index:
+                                        plt.savefig('H_'+filename[:-4]+include_line_filename+'.jpg', format='jpg', dpi=400)
+                                    else:
+                                        plt.show()
+                                    plt.clf()
+                                        #print key
+                                        #print len(histo_data[key])
+                                        #print histo_data[key]
+                                    #plt.legend()
+                                    #plt.show()
+                                    #print data
+                                    #for iter in range(len(data)):
+                                    #    print len(data[iter])
+                                    #plt.hist(data,100,alpha=0.3,normed=0,histtype='stepfilled')
+                                    #plt.legend(keys)
+                                    #plt.show()
+                            if 10 in test_index: #black/white analysis
+                                if line_by_line_check:
+                                    print "ring analysis"
+                                test_list=[6]
+                                white_count=1
+                                for roi_index in range(white_count):
+                                    result,max_result=fun.rings_modeler(df_fin,ring,test_list,roi_index)
+
+                                    df_one_line=pd.DataFrame.from_records([include_line],columns=include_array_head)
+                                    df_multiline=copy.copy(df_one_line)
+
+                                    for i in range(result.shape[0]-1):
+                                        df_multiline=pd.concat([df_one_line,df_multiline])
+
+                                   # df_descriptor=df_descriptor.append(df_descriptor*result.shape[0],ignore_index=True)
+
+                                    df_multiline=df_multiline.reset_index(drop=True)
+                                    result=result.reset_index(drop=True)
+
+                                    result_fin=pd.concat([df_multiline,result],axis=1)
+                                  #  result_fin=result_fin.reset_index(drop=True)
+
+                                    if line_by_line_check:
+                                        print result_fin
+
+                                    #for head_index in range(len(include_array_head)):
+                                     #   result=result.assign(include_array_head[head_index]=pd.Series([include_line[head_index]]*result.shape[0]).values) #Formulation
+
+                                    result_fin.to_csv("DF-"+filename+" "+parameter_export+str(test_list)+".csv")
+
+
+                                    result_max=result_fin.ix[result_fin['j_abs'].idxmax()]   
+                                    result_dict=result_max.to_dict()
+                                    result_max_list=list(result_max)
+                                    result_max_list=[filename]+result_max_list
+
+                                    export_cols=["j","sen","spec","white_index","white_bin","black_index","black_bin","n_b","n_p"]
+                                    print filename,
+                                    print ";",
+                                    for col in export_cols:
+                                        print result_dict[col],
+                                        print ";",
+                                    print include_line_print
+                    #    except:
+                     #       skipped=True
+            if 3 in test_index:
+                if not 7 in test_index:
+                    plt.legend()
+                    plt.title(filename+"_"+str(number_filter))
+                    #plt.title(filename)
+                    plt.xlim(-5,5)
+                    if 6 in test_index:
+                        plt.savefig('H_'+filename[:-4]+'NF_'+str(int(number_filter))+'.jpg', format='jpg', dpi=400)
+                    else:
+                        plt.show()
+                    plt.clf()
+                    label_list=[]
+                        
+                            
+
+
+
+if(0): #FeatureFinding Accuracy Test
+    test_index=[]
+
+    point_count=6
+
+    line_by_line_check=0
+
+
+    files=[]
+    json_files=[]
+    start_dir='csv_import'
+    start_json_dir='json_import'
+    pattern   = "*.csv"
+    json_pattern="*.json"
+    print 'prog1'
+    for dir,_,_ in os.walk(start_dir): 
+        files.extend(glob(os.path.join(dir,pattern))) 
+    for dir,_,_ in os.walk(start_json_dir): 
+        json_files.extend(glob(os.path.join(dir,json_pattern))) 
+    
+    std_dict={}
+    for json_file in json_files:
+        with open(json_file) as json_data:
+            adder_dict=json.load(json_data)
+        std_dict.update(adder_dict)
+
+    #Delete keys that don't the the correct number of points
+    for key in std_dict.keys():
+        if not len(std_dict[key])==point_count:
+            del std_dict[key]
+
+    for file in files:
+
+
+        filename=file.rpartition("\\")[2]
+        #Import csv to dataframe only once
+
+        if (line_by_line_check):
+            print filename
+
+
 
         df=pd.read_csv(file,header=0,error_bad_lines=False,warn_bad_lines=False)
 
@@ -1446,290 +1961,445 @@ if(1): #Genertic Thresholding Analysis
             print "ORIGINAL DATAFRAME: "
             print df
 
-
-        #drop error rows
-        df=df.loc[df['guess'].isin([0,1])]
-
         df=df.loc[:, ~df.columns.str.contains('^Unnamed')]
         if line_by_line_check:
             print "DROP UNNAMED: "
             print df
 
+        df=fun.arbitrary_include(df,'path','iP8plus')
+
+        distance_superdict={}
+        print filename
+        print '{} {} {} {}'.format('point','avg','stdev','count')
+        for ff_index in range(point_count):
+            mean_dist,stdev_dist,list_dist,dict_dist=fun.ff_accuracy(df,std_dict,ff_index)
+            print '{0:2d} {1:3f} {2:4f} {3:5d}'.format(ff_index,mean_dist,stdev_dist,len(list_dist))
+            #print stdev_dist
+            distance_superdict[str(ff_index)]=list_dist
+        #    for key in dict_dist.keys():
+        #        print key
+
+        #print distance_superdict
+        #for key in distance_superdict[0].keys():
+        #    print key
+
+        for key in distance_superdict:
+            data=distance_superdict[key]
+            if len(data)>0:
+                plt.hist(distance_superdict[key],alpha=0.3,label=key,normed=1,histtype='stepfilled')
+                #label_list.append(key)
+        #plt.legend()
+        #plt.title(filename)
+        #plt.show()
+            #  #drop error rows
+            #  #df=df.loc[df['guess'].isin([0,1])]
+            #  df=df.loc[df['guess'].isin([-99])]
 
 
-        #drop empty colulmns
-        df=df.dropna(axis=1,how='all')
+
+
+            #  #drop empty colulmns
+            #  df=df.dropna(axis=1,how='all')
 
 
 
-        df=fun.dropNAN(df,24)
-        if line_by_line_check:
-            print "DROP NAN VALUES: "
-            print df
-        #print df
+            #  #df=fun.dropNAN(df,41)
+            #  if line_by_line_check:
+            #      print "DROP NAN VALUES: "
+            #      print df
+            #  #print df
 
-        #Make Dataframe of Blanks
-        df_blank=df.loc[df['mark']==0]
+            #  #Manual number filters
+            #  #df=fun.arbitrary_include_number(df,'exposurebias',-1.4,0.2)
+            #  #df=fun.arbitrary_include_number(df,'lux',number_filter,5)
+            #  #df=fun.arbitrary_include_number(df,'lux',number_filter,0.2,keep_all_low=True,keep_all_high=False)
+            #  #df=fun.arbitrary_include_number(df,'lux',number_filter,1000)
 
-        if line_by_line_check:
-            print "BLANK DATAFRAME"
-            print df_blank
+            #  #Manual text filter
+            #  #df=fun.arbitrary_exclude(df,'location','window')
+            #  path_list=['180504 Perry_15Short_iP8plus','180504 Perry_15Short_iP7','180504 Ben_15Short_iP8_HeadOn','skip']
+            #  #df=fun.arbitrary_include(df,'path',path_list[number_filter])
+            #  #df=fun.arbitrary_include(df,'path','Perry_15Short_iP8plus')
+            #  #df=fun.arbitrary_exclude(df,'lux','900')
+            #  #df=fun.arbitrary_exclude(df,'lux','2500')
+            #  #df=fun.arbitrary_exclude(df,'lux','1500')
 
-        #filter blank dataframe
-        #df_blank=fun.arbitrary_include(df_blank,'numberofprints','2')
+            #  #Make Dataframe of Blanks
+            #  df_blank=df.loc[df['mark']==0]
+            #  cap_list=['blank','blankout','blankfill']
+            #  #df_blank=fun.arbitrary_filter(df,'cap',cap_list[number_filter])
 
-        #Make Dataframe of Prints
-        df=df.loc[df['mark']==1]
+            #  if line_by_line_check:
+            #      print "BLANK DATAFRAME"
+            #      print df_blank
 
-        #####Exclude List#####
-        exclude_list=[
-            ]
+            #  #filter blank dataframe
+            #  #df_blank=fun.arbitrary_include(df_blank,'numberofprints','2')
+
+            #  #Make Dataframe of Prints
+            #  df=df.loc[df['mark']==1]
+
+            #  #df=fun.arbitrary_filter(df,'mark','1')
+
+            #  #####Exclude List#####
+            #  exclude_list=[
+            #      ]
 
 
-         #####Exclude List Combo#####
-        exclude_list_combo=[
-            ]
+            #   #####Exclude List Combo#####
+            #  exclude_list_combo=[
+            #      ]
 
-        ####Include List####
-        include_list=[
-            ['path',['Black','White','skip']],
-            ['path',['Repeat','skip']]
-            ]
+            #  #Unique include
+            #  unique_key='test'
+            #  unique_list=df[unique_key].unique()
 
-        ####Include List Combo####
-        include_list_combo=[
-            ]
+            #  ####Include List####
+            #  include_list=[
+            #      ['path',['skip']]
+            #     #['path',['180505 Cap15_iP8plus_2photo','180505 Cap15_iP8_2Photo','180505 Cap15_iP7','skip']],
+            # #    ['path',['iP8','iP7']],
+            ##     [unique_key,unique_list]
+            #     #['location',['whitetable','blacktable','window']],
+            #  #   ['location',['window']],
+            #  #   ['lux',['100']]
+            #   #  ['test',['stcboardroomphotoset']]
+            #  #     ['cap',['cap4']],
+            #  #    ['scenario',['campus']],
+            #  #    ['test',['cap2photoset']]
+            #  #    ['background',['black','white','window','skip']],
+            #  #    ['lux',['555','1400','1650','1700','3000','3200','6200','8000','11000','11700','34000']]
+            ##  ['lux',['440','770','1400','2600','3400']],
+            #  #['expbias',['-2.4','-1.9','-1.4']]
+        
+            #      ]
 
-        #Transform Include and Exclude lists into product lists
-        include_array=[]
-        include_array_head=[]
-        for include_pair in include_list:
-            include_array.append(include_pair[1])
-            include_array_head.append(include_pair[0])
+            #  ####Include List Combo####
+            #  include_list_combo=[
+            #      ]
 
-        include_product_list=list(it.product(*include_array))
+            #  #Transform Include and Exclude lists into product lists
+            #  include_array=[]
+            #  include_array_head=[]
+            #  for include_pair in include_list:
+            #      include_array.append(include_pair[1])
+            #      include_array_head.append(include_pair[0])
 
-        exclude_array=[]
-        exclude_array_head=[]
-        for exclude_pair in exclude_list:
-            exclude_array.append(exclude_pair[1])
-            exclude_array_head.append(exclude_pair[0])
+            #  include_product_list=list(it.product(*include_array))
 
-        exclude_product_list=list(it.product(*exclude_array))
+            #  exclude_array=[]
+            #  exclude_array_head=[]
+            #  for exclude_pair in exclude_list:
+            #      exclude_array.append(exclude_pair[1])
+            #      exclude_array_head.append(exclude_pair[0])
 
-        if line_by_line_check:
-            print include_product_list
-            print exclude_product_list
+            #  exclude_product_list=list(it.product(*exclude_array))
 
-        ROI_list=range(3)
-        #x_col_list=[] #these should be COLUMN HEADERS
-        #x_col_list.append()
+            #  if line_by_line_check:
+            #      print include_product_list
+            #      print exclude_product_list
 
-        ROI_max=10;
-        ROI_count=3;
+            #  ROI_list=range(3)
+            #  #x_col_list=[] #these should be COLUMN HEADERS
+            #  #x_col_list.append()
 
-        if True:
-        #try:
-            if len(exclude_list_combo)>0:
-                for exclude_pair in exclude_list_combo:
-                    for exclude_string in exclude_pair[1]:
-                        if line_by_line_check:
-                            print exclude_string,
-                            print " ",
-                            print exclude_pair[0]
-                        df=fun.arbitrary_exclude(df,exclude_pair[0],exclude_string)
-            if line_by_line_check:
-                print df
-            if len(include_list_combo)>0:
-                for include_pair in include_list_combo:
-                    df_concat=[];
-                    for include_string in include_pair[1]:
-                        if line_by_line_check:
-                            print include_string,
-                            print " ",
-                            print include_pair[0]
-                        df_concat.append(fun.arbitrary_include(df,include_pair[0],include_string))
-                    df=pd.concat(df_concat)
-            df_pre_filter=copy.copy(df)
+            #  if True:
+            #  #try:
+            #      if len(exclude_list_combo)>0:
+            #          for exclude_pair in exclude_list_combo:
+            #              for exclude_string in exclude_pair[1]:
+            #                  if line_by_line_check:
+            #                      print exclude_string,
+            #                      print " ",
+            #                      print exclude_pair[0]
+            #                  df=fun.arbitrary_exclude(df,exclude_pair[0],exclude_string)
+            #      if line_by_line_check:
+            #          print df
+            #      if len(include_list_combo)>0:
+            #          for include_pair in include_list_combo:
+            #              df_concat=[];
+            #              for include_string in include_pair[1]:
+            #                  if line_by_line_check:
+            #                      print include_string,
+            #                      print " ",
+            #                      print include_pair[0]
+            #                  df_concat.append(fun.arbitrary_include(df,include_pair[0],include_string))
+            #              df=pd.concat(df_concat)
+            #      df_pre_filter=copy.copy(df)
+            #      df_blank_pre_filter=copy.copy(df_blank)
 
-            if len(include_list)>0:
+            #      if len(include_list)>0:
                 
-                for include_line in include_product_list:
-                    include_line_print=""
-                    if line_by_line_check:
-                        print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-                        print include_line
-                    try:
-                    #if True:
-                        parameter_export=""
-                        df=copy.copy(df_pre_filter)
+            #          for include_line in include_product_list:
+            #              include_line_print=""
+            #              if line_by_line_check:
+            #                  print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+            #                  print include_line
+            #              #try:
+            #              if True:
+            #                  parameter_export=""
+            #                  df=copy.copy(df_pre_filter)
+            #                  df_blank=copy.copy(df_blank_pre_filter)
                         
-                        for include_index in range(len(include_line)):
-                            df=fun.arbitrary_include(df,include_array_head[include_index],include_line[include_index])
-                            parameter_export=parameter_export+include_array_head[include_index]+"'"+include_line[include_index]+"_"
-                            include_line_print=include_line_print+include_array_head[include_index]+":"+include_line[include_index]+";"
-                            if line_by_line_check:
-                                print "______________________________________________________________________"
-                                print include_array_head[include_index]+";"+include_line[include_index]
-                                print df
-                                print "______________________________________________________________________"          
-                        if len(exclude_list)>0:
-                            for exclude_line in exclude_product_list:
-                                for exclude_index in range(len(exclude_line)):
-                                    df=fun.arbitrary_exclude(df,exclude_array_head[exclude_index],exclude_line[exclude_index])
+            #                  for include_index in range(len(include_line)):
+            #                      df=fun.arbitrary_include(df,include_array_head[include_index],include_line[include_index])
+            #                      if -1 in test_index:
+            #                          df_blank=fun.arbitrary_include(df_blank,include_array_head[include_index],include_line[include_index])
+            #                      parameter_export=parameter_export+include_array_head[include_index]+"'"+include_line[include_index]+"_"
+            #                      include_line_print=include_line_print+include_array_head[include_index]+":"+include_line[include_index]+";"
+            #                      if line_by_line_check:
+            #                          print "______________________________________________________________________"
+            #                          print include_array_head[include_index]+";"+include_line[include_index]
+            #                          print df
+            #                          print "______________________________________________________________________"          
+            #                  if len(exclude_list)>0:
+            #                      for exclude_line in exclude_product_list:
+            #                          for exclude_index in range(len(exclude_line)):
+            #                              df=fun.arbitrary_exclude(df,exclude_array_head[exclude_index],exclude_line[exclude_index])
 
                    
-                        #prep input to thresholding functions
-                        df_input=copy.copy(df)
-                        df_blank_input=copy.copy(df_blank)
-                        df_fin=fun.cg_combine_print_blank(df_input,df_blank)
-                        if line_by_line_check:
-                            print "PRINT DATAFRAME:"
-                            print df_input
-                            print "BLANK DATAFRAME:"
-                            print df_blank
-                            print "FINAL DATAFRAME:"
-                            print df_fin
-                            print df_fin.mark
+            #                  #prep input to thresholding functions
+            #                  df_input=copy.copy(df)
+            #                  df_blank_input=copy.copy(df_blank)
+            #                  df_fin=fun.cg_combine_print_blank(df_input,df_blank)
+            #                  if line_by_line_check:
+            #                      print "PRINT DATAFRAME:"
+            #                      print df_input
+            #                      print "BLANK DATAFRAME:"
+            #                      print df_blank
+            #                      print "FINAL DATAFRAME:"
+            #                      print df_fin
+            #                      print df_fin.mark
+            #                  #make include_line that can be used as a filename
+            #                  include_line_filename=string.replace(include_line_print,':',' ')
+            #                  include_line_filename=string.replace(include_line_filename,';',',')
 
-                        if 0 in test_index: #black/white analysis
-                            if line_by_line_check:
-                                print "black and white analysis"
-                            test_list=[4]
-                            white_count=1
-                            for white_index in range(white_count):
-                                result,max_result=fun.black_white_modeler(df_fin,white_index,1,test_list)
+            #                  if 0 in test_index: #black/white analysis
+            #                      if line_by_line_check:
+            #                          print "black and white analysis"
+            #                      test_list=[2]
+            #                      white_count=1
+            #                      for white_index in range(white_count):
+            #                          result,max_result=fun.black_white_modeler(df_fin,white_index,1,test_list)
 
-                                df_one_line=pd.DataFrame.from_records([include_line],columns=include_array_head)
-                                df_multiline=copy.copy(df_one_line)
+            #                          df_one_line=pd.DataFrame.from_records([include_line],columns=include_array_head)
+            #                          df_multiline=copy.copy(df_one_line)
 
-                                for i in range(result.shape[0]-1):
-                                    df_multiline=pd.concat([df_one_line,df_multiline])
+            #                          for i in range(result.shape[0]-1):
+            #                              df_multiline=pd.concat([df_one_line,df_multiline])
 
-                               # df_descriptor=df_descriptor.append(df_descriptor*result.shape[0],ignore_index=True)
+            #                         # df_descriptor=df_descriptor.append(df_descriptor*result.shape[0],ignore_index=True)
 
-                                df_multiline=df_multiline.reset_index(drop=True)
-                                result=result.reset_index(drop=True)
+            #                          df_multiline=df_multiline.reset_index(drop=True)
+            #                          result=result.reset_index(drop=True)
 
-                                result_fin=pd.concat([df_multiline,result],axis=1)
-                              #  result_fin=result_fin.reset_index(drop=True)
+            #                          result_fin=pd.concat([df_multiline,result],axis=1)
+            #                        #  result_fin=result_fin.reset_index(drop=True)
 
-                                if line_by_line_check:
-                                    print result_fin
+            #                          if line_by_line_check:
+            #                              print result_fin
 
-                                #for head_index in range(len(include_array_head)):
-                                 #   result=result.assign(include_array_head[head_index]=pd.Series([include_line[head_index]]*result.shape[0]).values) #Formulation
+            #                          #for head_index in range(len(include_array_head)):
+            #                           #   result=result.assign(include_array_head[head_index]=pd.Series([include_line[head_index]]*result.shape[0]).values) #Formulation
 
-                                result_fin.to_csv("DF-"+filename+" "+parameter_export+str(test_list)+".csv")
+            #                          result_fin.to_csv("DF-"+filename+" "+parameter_export+str(test_list)+".csv")
 
 
-                                result_max=result_fin.ix[result_fin['j_abs'].idxmax()]   
-                                result_max_list=list(result_max)
-                                result_max_list=[filename]+result_max_list
-                                print result_max_list
-                        if 1 in test_index:
-                            if line_by_line_check:
-                                print "black and white redundancy analysis"
-                            test_list=[4]
-                            white_count=6
-                            black_count=9
-                            result=fun.black_white_redundancy(df_fin,white_count,black_count,test_list)
-                            #print "finished"
-                            export_cols=["j","sen","spec","active_rois","red_thresh","n_b","n_p"]
-                            roi_opt_export_cols=["white_index","white_bin","black_index","black_bin","thresh","j","test_name"]
-                            for thresh_index in range(white_count):
-                                export_cols.append("roi"+str(int(thresh_index)))
-                            #print result
+            #                          result_max=result_fin.ix[result_fin['j_abs'].idxmax()]   
+            #                          result_max_list=list(result_max)
+            #                          result_max_list=[filename]+result_max_list
+            #                          print result_max_list
+            #                  if 1 in test_index:
+            #                      if line_by_line_check:
+            #                          print "black and white redundancy analysis"
+            #                      test_list=[4]
+            #                      white_count=3
+            #                      black_count=5
+            #                      result=fun.black_white_redundancy(df_fin,white_count,black_count,test_list)
+            #                      #print "finished"
+            #                      export_cols=["j","sen","spec","active_rois","red_thresh","n_b","n_p"]
+            #                      roi_opt_export_cols=["white_index","white_bin","black_index","black_bin","thresh","j","test_name"]
+            #                      for thresh_index in range(white_count):
+            #                          export_cols.append("roi"+str(int(thresh_index)))
+            #                      #print result
                             
-                            print filename,
-                            print ";",
-                            for col in export_cols:
-                                print result[col],
-                                print ";",
-                            #print result["optimal_rois"].
+            #                      print filename,
+            #                      print ";",
+            #                      for col in export_cols:
+            #                          print result[col],
+            #                          print ";",
+            #                      #print result["optimal_rois"].
 
-                            for col in roi_opt_export_cols:
-                                print col+":",
-                                for ROI_index in result["active_rois"]:
+            #                      for col in roi_opt_export_cols:
+            #                          print col+":",
+            #                          for ROI_index in result["active_rois"]:
                                 
-                                    print str(result["optimal_rois"][ROI_index][col])+",",
-                                print ";",
-                            print include_line_print
+            #                              print str(result["optimal_rois"][ROI_index][col])+",",
+            #                          print ";",
+            #                      print include_line_print
 
-                        if 2 in test_index:
-                            if line_by_line_check:
-                                print "circle check redundancy analysis"
+            #                  if 2 in test_index:
+            #                      if line_by_line_check:
+            #                          print "circle check redundancy analysis"
 
-                            ROI_scans=10
-                            ROI_count=1
+            #                      if 8 in test_index:
+            #                          bin_inputs=range(55)
+            #                      else:
+            #                          bin_inputs=[16]
 
-                            result=fun.cg_redundancy_modeler_v4(df_fin,ROI_scans,ROI_count)
+                               
+            #                      for bin_index in bin_inputs:
+            #                      #if True:
+            #                          if 8 in test_index:
+            #                              string_input="_bin_"+str(int(bin_index))
+            #                          else:
+            #                              string_input=""
+            #                          result=fun.cg_redundancy_modeler_v4(df_fin,ROI_scans,ROI_count,string_input)
+            #                          #result=fun.cg_redundancy_modeler_v4(df_fin,ROI_scans,ROI_count)
 
-                            export_cols=["j","sen","spec","active_rois","red_thresh","n_b","n_p"]
-                            roi_opt_export_cols=["white_index","thresh","dec_thresh","j"]
-                            for thresh_index in range(ROI_count):
-                                export_cols.append("roi"+str(int(thresh_index)))
-                            #print result
+            #                          export_cols=["j","sen","spec","active_rois","red_thresh","n_b","n_p","t","p"]
+            #                          roi_opt_export_cols=["white_index","thresh","dec_thresh","j"]
+            #                          for thresh_index in range(ROI_count):
+            #                              export_cols.append("roi"+str(int(thresh_index)))
+            #                          #print result
                             
-                            print filename,
-                            print ";",
-                            for col in export_cols:
-                                print result[col],
-                                print ";",
-                            #print result["optimal_rois"].
+            #                          print filename,
+            #                          print ";",
+            #                          for col in export_cols:
+            #                              print result[col],
+            #                              print ";",
+            #                          #print result["optimal_rois"].
 
-                            for col in roi_opt_export_cols:
-                                print col+":",
-                                for ROI_index in result["active_rois"]:
+            #                          for col in roi_opt_export_cols:
+            #                              print col+":",
+            #                              for ROI_index in result["active_rois"]:
                                 
-                                    print str(result["optimal_rois"][ROI_index][col])+",",
-                                print ";",
-                            print include_line_print
+            #                                  print str(result["optimal_rois"][ROI_index][col])+",",
+            #                              print ";",
+            #                          print "bin:"+str(int(bin_index))+";",
+            #                          print "numfilter:"+str(number_filter)+";",
+            #                          print str(number_filter)+";",
+            #                          print include_line_print
 
-                        if 3 in test_index:
-                            if line_by_line_check:
-                                print "data histogram"
-                            #print df_fin
-                            analysis_dict={}
-                            analysis_dict["active_rois"]=[0]
-                            analysis_dict["roi_scans"]=10
-                            analysis_dict["include_line_print"]=include_line_print
+            #                  if 3 in test_index:
+            #                      if line_by_line_check:
+            #                          print "data histogram"
+            #                      #print df_fin
+            #                      analysis_dict={}
+            #                      analysis_dict["active_rois"]=range(ROI_count)
+            #                      analysis_dict["roi_scans"]=ROI_scans
+            #                      analysis_dict["include_line_print"]=include_line_print
 
-                            histo_data=fun.data_combo(df_fin,analysis_dict,"circle")
+            #                      histo_data=fun.data_combo(df_fin,analysis_dict,"circle")
 
-                            #print histo_data["blank_roi0"]
+            #                      #print histo_data["blank_roi0"]
 
-                           
+            #                      roi_combo_list=[]
+            #                      histo_combo_dict={}
+            #                      if 4 in test_index:
+            #                          for key in histo_data:
+            #                              split_key=key.split("_roi")
+            #                              if split_key[0] in roi_combo_list:
+            #                                  histo_combo_dict[split_key[0]].extend(histo_data[key])
+                                        
+            #                              else:
+            #                                  histo_combo_dict[split_key[0]]=histo_data[key]
+            #                                  roi_combo_list.append(split_key[0])
+            #                          for key in histo_combo_dict:
+            #                              if not key in label_list:
+            #                                  data=histo_combo_dict[key]
+            #                                  if len(data)>0:
+            #                                      plt.hist(histo_combo_dict[key],100,alpha=0.3,label=key,normed=1,histtype='stepfilled')
+            #                                      label_list.append(key)
+            #                      if not 5 in test_index:
+            #                          for key in histo_data:
+            #                              if not key in label_list:
+            #                                  data=histo_data[key]
+            #                                  if len(data)>0:
+            #                                      plt.hist(histo_data[key],20,alpha=0.3,label=key,normed=1,histtype='stepfilled')
+            #                                      label_list.append(key)
 
-                            keys=[]
-                            data=[]
-                            for key in histo_data:
-                                if not key in label_list:
-                                    plt.hist(histo_data[key],100,alpha=0.3,label=key,normed=1,histtype='stepfilled')
-                                    label_list.append(key)
-                                #print key
-                                #print len(histo_data[key])
-                                #print histo_data[key]
-                            #plt.legend()
-                            #plt.show()
-                            #print data
-                            #for iter in range(len(data)):
-                            #    print len(data[iter])
-                            #plt.hist(data,100,alpha=0.3,normed=0,histtype='stepfilled')
-                            #plt.legend(keys)
-                            #plt.show()
+            #                      if 7 in test_index:
+            #                          print include_line_filename
+            #                          label_list=[]
+            #                          plt.legend()
+            #                          plt.xlim(-10,35)
+            #                          plt.title(filename)
+            #                          if 6 in test_index:
+            #                              plt.savefig('H_'+filename[:-4]+include_line_filename+'.jpg', format='jpg', dpi=400)
+            #                          else:
+            #                              plt.show()
+            #                          plt.clf()
+            #                              #print key
+            #                              #print len(histo_data[key])
+            #                              #print histo_data[key]
+            #                          #plt.legend()
+            #                          #plt.show()
+            #                          #print data
+            #                          #for iter in range(len(data)):
+            #                          #    print len(data[iter])
+            #                          #plt.hist(data,100,alpha=0.3,normed=0,histtype='stepfilled')
+            #                          #plt.legend(keys)
+            #                          #plt.show()
+            #                  if 10 in test_index: #black/white analysis
+            #                      if line_by_line_check:
+            #                          print "ring analysis"
+            #                      test_list=[6]
+            #                      white_count=1
+            #                      for roi_index in range(white_count):
+            #                          result,max_result=fun.rings_modeler(df_fin,ring,test_list,roi_index)
 
-                    except:
-                        skipped=True
-        if 3 in test_index:
-            plt.legend()
-            plt.show()
+            #                          df_one_line=pd.DataFrame.from_records([include_line],columns=include_array_head)
+            #                          df_multiline=copy.copy(df_one_line)
+
+            #                          for i in range(result.shape[0]-1):
+            #                              df_multiline=pd.concat([df_one_line,df_multiline])
+
+            #                         # df_descriptor=df_descriptor.append(df_descriptor*result.shape[0],ignore_index=True)
+
+            #                          df_multiline=df_multiline.reset_index(drop=True)
+            #                          result=result.reset_index(drop=True)
+
+            #                          result_fin=pd.concat([df_multiline,result],axis=1)
+            #                        #  result_fin=result_fin.reset_index(drop=True)
+
+            #                          if line_by_line_check:
+            #                              print result_fin
+
+            #                          #for head_index in range(len(include_array_head)):
+            #                           #   result=result.assign(include_array_head[head_index]=pd.Series([include_line[head_index]]*result.shape[0]).values) #Formulation
+
+            #                          result_fin.to_csv("DF-"+filename+" "+parameter_export+str(test_list)+".csv")
+
+
+            #                          result_max=result_fin.ix[result_fin['j_abs'].idxmax()]   
+            #                          result_dict=result_max.to_dict()
+            #                          result_max_list=list(result_max)
+            #                          result_max_list=[filename]+result_max_list
+
+            #                          export_cols=["j","sen","spec","white_index","white_bin","black_index","black_bin","n_b","n_p"]
+            #                          print filename,
+            #                          print ";",
+            #                          for col in export_cols:
+            #                              print result_dict[col],
+            #                              print ";",
+            #                          print include_line_print
+            #          #    except:
+            #           #       skipped=True
+            #  if 3 in test_index:
+            #      if not 7 in test_index:
+            #          plt.legend()
+            #          plt.title(filename+"_"+str(number_filter))
+            #          #plt.title(filename)
+            #          plt.xlim(-5,5)
+            #          if 6 in test_index:
+            #              plt.savefig('H_'+filename[:-4]+'NF_'+str(int(number_filter))+'.jpg', format='jpg', dpi=400)
+            #          else:
+            #              plt.show()
+            #          plt.clf()
+            #          label_list=[]
                         
                             
-
-
-
-
 
 if(0): #csv import and sort
     csv_file="G://Developer//csvExports//InitialCP Sweep//Combo_data.csv"
@@ -1738,14 +2408,14 @@ if(0): #csv import and sort
     fun.import_and_sort_csv(csv_file,1000,0)
 
 if(0): #make a list
-    numbers=[2,3,4]
+    numbers=['brightness','luxpred','luspredcorr','avg','blue','lux']
     start_number_of_digits=1
     print "{",
-    #for iter in range(start_number_of_digits,len(numbers)+1):
-    for iter in range(start_number_of_digits,4):
+    for iter in range(start_number_of_digits,len(numbers)+1):
+    #for iter in range(start_number_of_digits,4):
         for val in it.combinations(numbers,iter):
             x_cols=list(val)
-            x_cols.extend([100,309])
+           # x_cols.extend([15,35])
             print "{",
             for iter in range(len(x_cols)-1):
                 print x_cols[iter],
@@ -1754,6 +2424,44 @@ if(0): #make a list
             print "},",
     print "}"
 
+  
+if(0): #make a text list for python
+    numbers=['blue_avg','red_avg','green_avg','value_avg','grey_avg']
+    start_number_of_digits=1
+    print "[",
+    for iter in range(start_number_of_digits,len(numbers)+1):
+    #for iter in range(start_number_of_digits,4):
+        for val in it.combinations(numbers,iter):
+            x_cols=list(val)
+            x_cols.extend(['brightness'])
+            print "[",
+            for iter in range(len(x_cols)-1):
+                print "'",
+                print x_cols[iter],
+                print "',",
+            print "'",
+            print x_cols[-1],
+            print "'],",
+    print "]"
+
+if(0): #make a simple list
+    numbers=[503,505,507,509,511,521,519]
+    start_number_of_digits=1
+    print "{",
+    #for iter in range(start_number_of_digits,len(numbers)+1):
+    for number in numbers:
+        x_cols=[number]
+        x_cols_temp=[2031,17,35]
+        x_cols_temp.extend(x_cols)
+        x_cols=copy.copy(x_cols_temp)
+       # x_cols.extend()
+        print "{",
+        for iter in range(len(x_cols)-1):
+            print x_cols[iter],
+            print ",",
+        print x_cols[-1],
+        print "},",
+    print "}"
     #print result
     #for val in result[3]:
     #    for val2 in val:
