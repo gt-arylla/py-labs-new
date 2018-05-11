@@ -8,8 +8,8 @@ import winsound
 import sys
 from glob import glob
 import time
-import piexif
-import piexif.helper
+#import piexif
+#import piexif.helper
 import string
 import copy
 import shutil
