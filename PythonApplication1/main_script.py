@@ -1446,7 +1446,7 @@ if(1): #Genertic Thresholding Analysis
     #20 - Rings Simple Check
 
     test_index=[-1,2,3,6,7]
-    test_index=[2,9]
+    test_index=[3,9,5,6,11]
 
     serial_dict={}
     serial_dict[0]=[1,0]
@@ -1720,6 +1720,7 @@ if(1): #Genertic Thresholding Analysis
                                 df_print_print=fun.arbitrary_include(df,'serial',str(active_serial))
                                 df=copy.copy(df_print_print)
                                 df_blank=pd.concat([df_print_blank,df_blank])
+                                include_line_print=include_line_print+"serial:"+str(active_serial)+";"
                             #prep input to thresholding functions
                             df_input=copy.copy(df)
                             df_blank_input=copy.copy(df_blank)
@@ -1861,7 +1862,22 @@ if(1): #Genertic Thresholding Analysis
 
                                 histo_data=fun.data_combo(df_fin,analysis_dict,"circle")
 
-                                #print histo_data["blank_roi0"]
+                                print histo_data.keys()
+
+                                if 11 in test_index:
+                                    for roi_index in range(ROI_count):
+                                        for histo_key in histo_data.keys():
+                                            if 'roi'+str(int(roi_index)) in histo_key:
+                                                key=histo_key
+                                                plt.hist(histo_data[key],20,alpha=0.3,label=key,normed=1,histtype='stepfilled')
+                                        plt.legend()
+                                        #plt.xlim(-10,35)
+                                        plt.title(filename)
+                                        if 6 in test_index:
+                                            plt.savefig('H_'+'roi'+str(roi_index)+"_"+filename[:-4]+include_line_filename+'.jpg', format='jpg', dpi=400)
+                                        else:
+                                            plt.show()
+                                        plt.clf()
 
                                 roi_combo_list=[]
                                 histo_combo_dict={}
