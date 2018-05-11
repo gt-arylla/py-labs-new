@@ -19,6 +19,7 @@ from sklearn import metrics
 import shutil
 import os
 import string
+from scipy import stats
 
 #def df_to_dict(input_df):
 #    df=copy.copy(input_df)
@@ -33,6 +34,28 @@ import string
 
 #    return clean_dict 
 
+def euclidian_distance(reference_point,test_point):
+    if not len(reference_point)==len(test_point):
+        raise ValueError('Reference and Tests Points not the same length in euclidian distance calculation')
+
+    sum_to_square_root=0
+    for point_index in range(len(reference_point)):
+        sum_to_square_root+=math.pow(reference_point[point_index]-test_point[point_index],2)
+    distance=math.sqrt(sum_to_square_root)
+    return distance
+
+
+def path_cleanup(input_path):
+    path_edit=copy.copy(input_path)
+    path_edit=path_edit.replace("\\","")
+    path_edit=path_edit.replace("//","")
+    path_edit=path_edit.replace(" ","")
+    path_edit=path_edit.lower()
+    path_edit=path_edit.replace("f:","")
+    path_edit=path_edit.replace("c:usersgtthoresiliosync","")
+    path_edit=path_edit.replace(":","")    
+    return path_edit
+    
 def data_combo(df,analysis_dict,data_type):
     #Split up df by print and blank
     print_df=arbitrary_include(df,'mark','1.0')
@@ -2080,7 +2103,7 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
     
    
 
-    #move values from dataframe to list: [[[[roi1][roi2][roi3]]],[mark]]
+    #move values from dataframe to list: [[[roi1][roi2][roi3]],[mark]]
     list_data_holder=[]
     for row in dataframe_input.itertuples():
         roi_list_holder=[]
@@ -2297,10 +2320,11 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
     active_rois_final=[]
     available_ROIs=range(roi_total)
 
-    for ROI_count in range(1,roi_total+1):
+    #for ROI_count in range(1,roi_total+1):
+    for ROI_count in [roi_total]:
         #ROI_count=1
-        for active_ROIs in list(it.combinations(range(0,len(available_ROIs)),ROI_count)):
-
+        #for active_ROIs in list(it.combinations(range(0,len(available_ROIs)),ROI_count)):
+        for active_ROIs in [range(ROI_count)]:
             #now figure out the best level of redundancy
             print_sum=[]
             blank_sum=[]
@@ -2379,10 +2403,23 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
 
     save_failed_images(dataframe_input,mark_list,sum_list,best_redundancy)
 
+    # Calculate the Welch's t-test for blank and print data
+    blank_data=[]
+    print_data=[]
+    for row_index in range(len(list_data_holder)):
+        mark=list_data_holder[row_index][1]
+        for roi_index in active_rois_final:
+            for data_point in list_data_holder[row_index][0][roi_index]:
+                if mark==0:
+                    blank_data.append(data_point)
+                elif mark==1:
+                    print_data.append(data_point)
+    t,p=stats.ttest_ind(print_data,blank_data)
+
     count_print=len(print_sum)
     count_blank=len(blank_sum)
 
-    output_dict={"j":best_J,"sen":best_sensitivity,"spec":best_specificity,"active_rois":active_rois_final,"red_thresh":best_redundancy,"roi_thresh":ROI_thresh_dict,"dec_thresh":ROI_thresh_dec_dict,"optimal_rois":white_list_dict,"n_b":count_blank,"n_p":count_print}
+    output_dict={"j":best_J,"sen":best_sensitivity,"spec":best_specificity,"active_rois":active_rois_final,"red_thresh":best_redundancy,"roi_thresh":ROI_thresh_dict,"dec_thresh":ROI_thresh_dec_dict,"optimal_rois":white_list_dict,"n_b":count_blank,"n_p":count_print,"t":t,"p":p}
     for key in ROI_thresh_dict:
         output_dict[key]=ROI_thresh_dict[key]
     for key in ROI_thresh_dec_dict:
@@ -2390,6 +2427,46 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
 
     #print "*********END*********"
     return output_dict
+
+def ff_accuracy(dataframe_input,standard_map,ff_index):
+    #clean up 'path' column of dataframe_input and keys in standard_map to eliminate '\','/' and make everything lowercase
+    data=copy.copy(dataframe_input)
+    data=data.reset_index(drop=True)
+    data['path_clean'] = data.apply(lambda row: path_cleanup(row['path']), axis=1)
+    data['path_clean']=data['path_clean'].astype(str)
+    data=data.set_index('path_clean')
+
+    map_clean={}
+    for key in standard_map:
+        key_clean=path_cleanup(key)
+        key_clean=str(key_clean)
+        map_clean[key_clean]=standard_map[key]
+
+    #print map_clean
+    #print data.index
+    #now, go through all standard keys and calculate euclidian distances.  Save it as a vector of data, a dictionary, and summary stats
+    distance_dict={}
+    distance_list=[]
+    for key in map_clean:
+        #print key
+        if key in data.index:
+            #print "###################KEY FOUND####################"
+            std_x=map_clean[key][ff_index][0]
+            std_y=map_clean[key][ff_index][1]
+            ff_column='ff_point'+str(int(ff_index))
+            test_x=data.at[key,ff_column+'x']
+            test_y=data.at[key,ff_column+'y']
+            distance=euclidian_distance([std_x,std_y],[test_x,test_y])
+            #print data.at[key,'path']
+            distance_dict[data.at[key,'path']]=distance
+            distance_list.append(distance)
+
+    mean_distance=np.average(distance_list)
+    stdev_distance=np.std(distance_list)
+
+    return mean_distance,stdev_distance,distance_list,distance_dict
+
+
 
 def logistic_regression_prep_cg(dataframe_input,dataframe_blank,roi,roi_max,combine_scan_data=True):
     df=copy.copy(dataframe_input)
