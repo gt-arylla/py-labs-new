@@ -1092,6 +1092,8 @@ def cg_scan_range_finder(dataframe_input,roi_cols,roi_size):
 def cg_combine_print_blank(dataframe_print,dataframe_blank):
     dfp=copy.copy(dataframe_print)
     dfb=copy.copy(dataframe_blank)
+    del dfp['mark']
+    del dfb['mark']
     pLength = dfp.shape[0]
     bLength = dfb.shape[0]
     #print pLength
@@ -2050,7 +2052,7 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     #print "*********END*********"
     return [[best_J,best_sensitivity,best_specificity,len(print_sum),len(blank_sum)],best_roi_thresh,best_dec_thresh,best_redundancy,active_rois_final]
 
-def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""):
+def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col="",use_all_rois=False):
     scan_range=cg_scan_range_finder(dataframe_input,scan_size,3)
     #reset index of input dataframe
     dataframe_input=dataframe_input.reset_index(drop=True)
@@ -2320,11 +2322,18 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
     active_rois_final=[]
     available_ROIs=range(roi_total)
 
-    #for ROI_count in range(1,roi_total+1):
-    for ROI_count in [roi_total]:
+    if use_all_rois:
+        ROI_count_loop=[roi_total]
+    else:
+        ROI_count_loop=range(1,roi_total+1)
+
+    for ROI_count in ROI_count_loop:
         #ROI_count=1
-        #for active_ROIs in list(it.combinations(range(0,len(available_ROIs)),ROI_count)):
-        for active_ROIs in [range(ROI_count)]:
+        if use_all_rois:
+            active_ROIs_loop=[range(ROI_count)]
+        else:
+            active_ROIs_loop=list(it.combinations(range(0,len(available_ROIs)),ROI_count))
+        for active_ROIs in active_ROIs_loop:
             #now figure out the best level of redundancy
             print_sum=[]
             blank_sum=[]
