@@ -1439,12 +1439,14 @@ if(1): #Genertic Thresholding Analysis
     #6 - H Save figure rather than show
     #7 - H Draw or Show Histogram Filter by Filter
     #8 - Add Binning to Circle Check
-    #9 - Serial Test
+    #9 - Serial Test for Circle Check
+    #10 - Use ALL ROIs for Circle Check
 
-    #10 - Rings Simple Check
+
+    #20 - Rings Simple Check
 
     test_index=[-1,2,3,6,7]
-    test_index=[2,8,9]
+    test_index=[2,9]
 
     serial_dict={}
     serial_dict[0]=[1,0]
@@ -1814,7 +1816,12 @@ if(1): #Genertic Thresholding Analysis
                                         string_input="_bin_"+str(int(bin_index))
                                     else:
                                         string_input=""
-                                    result=fun.cg_redundancy_modeler_v4(df_fin,ROI_scans,ROI_count,string_input)
+                                    if 10 in test_index:
+                                        use_all_ROIs=True
+                                    else:
+                                        use_all_ROIs=False
+
+                                    result=fun.cg_redundancy_modeler_v4(df_fin,ROI_scans,ROI_count,string_input,use_all_ROIs)
                                     #result=fun.cg_redundancy_modeler_v4(df_fin,ROI_scans,ROI_count)
 
                                     export_cols=["j","sen","spec","active_rois","red_thresh","n_b","n_p","t","p"]
@@ -1903,7 +1910,7 @@ if(1): #Genertic Thresholding Analysis
                                     #plt.hist(data,100,alpha=0.3,normed=0,histtype='stepfilled')
                                     #plt.legend(keys)
                                     #plt.show()
-                            if 10 in test_index: #black/white analysis
+                            if 20 in test_index: #black/white analysis
                                 if line_by_line_check:
                                     print "ring analysis"
                                 test_list=[6]
