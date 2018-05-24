@@ -18,6 +18,10 @@ resize_full=0.5
 b_ratio=0.1105
 resize_thresh=130000
 
+file_type='.jpg'
+
+if sys.argv[2]=="png":
+    file_type='.png'
 
 c_thresh=.0
 stdev_t=110
@@ -47,32 +51,34 @@ print len(sys.argv)
 
 #show all colorspaces in the style of colorspace2.py
 if len(sys.argv)<=3:
-    if dir_list[0][-4:].lower()=='.jpg':
-        filname=os.path.join(directory, dir_list[0])
-        img=cv2.imread(filname)
+    for filename in dir_list:
+        if filename[-4:].lower()==file_type:
+            filname=os.path.join(directory, filename)
+            img=cv2.imread(filname)
 
-        if len(sys.argv)>2:
-            if sys.argv[2]=="big":
+            if len(sys.argv)>2:
+                if sys.argv[2]=="big" or sys.argv[2]=="png":
 
-                resize_big=1
-            else:
-                resize_big=resize_initial
-        img=cv2.resize(img,None,fx=resize_big,fy=resize_big,interpolation = cv2.INTER_CUBIC)
+                    resize_big=1
+                else:
+                    resize_big=resize_initial
+            img=cv2.resize(img,None,fx=resize_big,fy=resize_big,interpolation = cv2.INTER_CUBIC)
 
-        pltfig.Figure(figsize=[120,100], dpi=200, facecolor=None, edgecolor=None, linewidth=0.0, frameon=None, subplotpars=None, tight_layout=None)
-        plt.subplot(461)
-        i_rgb=cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
-        plt.imshow(i_rgb)
-        plt.title(dir_list[0],fontsize=8)
-        plt.axis('off')
-        for colorspace_index in range(22):
-            i_ext,name=funcv.make_colorspace_single(img,colorspace_index)
-            iter =colorspace_index+3
-            plt.subplot(4,6,iter)
-            plt.imshow(i_ext,cmap='jet')
+            pltfig.Figure(figsize=[120,100], dpi=200, facecolor=None, edgecolor=None, linewidth=0.0, frameon=None, subplotpars=None, tight_layout=None)
+            plt.subplot(461)
+            i_rgb=cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+            plt.imshow(i_rgb)
+            plt.title(filename,fontsize=8)
             plt.axis('off')
-            plt.title(str(colorspace_index)+" "+ name,fontsize=8)
-        plt.show()
+            for colorspace_index in range(22):
+                i_ext,name=funcv.make_colorspace_single(img,colorspace_index)
+                iter =colorspace_index+3
+                plt.subplot(4,6,iter)
+                plt.imshow(i_ext,cmap='jet')
+                plt.axis('off')
+                plt.title(str(colorspace_index)+" "+ name,fontsize=8)
+            plt.show()
+            break
 
 
 tight_range=[120,175]
@@ -98,7 +104,7 @@ else:
 
 
 for filename in dir_list:
-    if filename[-4:].lower()=='.jpg':
+    if filename[-4:].lower()==file_type:
         filname=os.path.join(directory, filename)
         # print filname
         #############_____PREP PHOTO__________###############3
