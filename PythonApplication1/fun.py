@@ -2475,6 +2475,8 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
     minimum_count=1
     available_ROIs=range(roi_total)
 
+    #[[[roi1][roi2][roi3]],[mark]]
+
     if use_all_rois:
         ROI_count_loop=[roi_total]
     else:
@@ -2492,7 +2494,7 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
             blank_sum=[]
             sum_list=[]
             mark_list=[]
-            for row in dataframe_input.itertuples():
+            for row in range(len(list_data_holder)):
                 sum=0
                 for roi_index in active_ROIs:
                     roi_thresh=best_roi_thresh[roi_index]
@@ -2500,13 +2502,14 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
                     read_count=0
                     for scan_index in range(scan_size):
                         #col_caller='roi_'+str(roi_index)+'_scan_'+str(scan_index)
-                    
-                        if row[roi_starter_index_list[roi_index]+scan_index]>roi_thresh:
+                        scan_value=list_data_holder[row][0][roi_index][scan_index]
+                        #print scan_value
+                        if scan_value>roi_thresh:
                             read_count+=1
                     confidence_value=float(read_count)/float(scan_size)
                     if confidence_value>dec_thresh:
                         sum+=1
-                row_marker=row[roi_starter_index_list[-1]]
+                row_marker=list_data_holder[row][1]
                 mark_list.append(row_marker)
                 #print row_marker
                 if row_marker==1:
