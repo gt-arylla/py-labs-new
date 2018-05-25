@@ -1448,6 +1448,7 @@ if(1): #Genertic Thresholding Analysis
     #13 - Throw errors in inner loop
     #14 - Only return individual ROI J Values for Circle Check
     #15 - Run Subset of Bins for Circle Check
+    #16 - Center Thresholds OFF
 
 
 
@@ -1465,7 +1466,7 @@ if(1): #Genertic Thresholding Analysis
 
 
     test_index=[-1,2,3,6,7]
-    test_index=[2,9]
+    test_index=[-1,13,2,9,12,16]
 
     serial_dict={}
     serial_dict[0]=[1,0]
@@ -1584,7 +1585,7 @@ if(1): #Genertic Thresholding Analysis
 
                      #Manual text filter
                     #df=fun.arbitrary_include(df,'test','vtdemoonstands')
-                    df=fun.arbitrary_include(df,'user','be')
+                    #df=fun.arbitrary_include(df,'user','be')
 
                     #Manual number filters
                     #df=fun.arbitrary_include_number(df,'focus_type',0)
@@ -1929,9 +1930,10 @@ if(1): #Genertic Thresholding Analysis
                                             bin_inputs=[-1]
 
                                         if 12 in test_index:
-                                                summary_list=[0,1,2,3,4,10,11,12,13,21,22,23,24]
+                                                summary_list=[[0],[1],[2],[3],[4],[10],[11],[12],[13],[21],[22],[23],[24]]
+                                                summary_list=[[1,101]]
                                         else:
-                                            summary_list=[0]
+                                            summary_list=[[0]]
 
                                         for bin_index in bin_inputs:
                                             for summ_value in summary_list:
@@ -1949,8 +1951,12 @@ if(1): #Genertic Thresholding Analysis
                                                 else:
                                                     no_tot_J=False;
 
+                                                cent_thresh=True
+                                                if 16 in test_index:
+                                                    cent_threh=False
+                         
 
-                                                result=fun.cg_redundancy_modeler_v4(df_fin,ROI_scans,ROI_count,string_input,use_all_ROIs,summ_value,no_total_J=no_tot_J)
+                                                result=fun.cg_redundancy_modeler_v4(df_fin,ROI_scans,ROI_count,string_input,use_all_ROIs,summ_value,no_total_J=no_tot_J,center_thresholds=cent_thresh)
                                                 #result=fun.cg_redundancy_modeler_v4(df_fin,ROI_scans,ROI_count)
                                     
                                                 try:
@@ -1984,10 +1990,10 @@ if(1): #Genertic Thresholding Analysis
                                                 except:
                                                     null=1
                                                 print "bin:"+str(int(bin_index))+";",
-                                                print "summary:"+str(int(summ_value))+";",
+                                                print "summary:"+str(summ_value)+";",
                                                 print "numfilter:"+str(number_filter)+";",
                                                 save_string+="bin:"+str(int(bin_index))+";"
-                                                save_string+="summary:"+str(int(summ_value))+";"
+                                                save_string+="summary:"+str(summ_value)+";"
                                                 save_string+="numfilter:"+str(number_filter)+";"
                                                # print str(number_filter)+";",
                                                 if 9 in test_index:
