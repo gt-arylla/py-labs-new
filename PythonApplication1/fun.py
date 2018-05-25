@@ -1109,6 +1109,8 @@ def adapted_J(sensitivity,specificity,n_print=0,n_CP=0):
     #force biased J
     #J=2*(sen_weight*sensitivity+spec_weight*specificity)/float(sen_weight+spec_weight)-1
 
+    #print '{0:2f},{1:2f}'.format(prelim_J,J)
+
     return J
    
 def J_from_vectors(guess_list,input_mark):
@@ -2144,7 +2146,7 @@ def cg_redundancy_modeler_v3(dataframe_input,scan_size=10,roi_total=3):
     #print "*********END*********"
     return [[best_J,best_sensitivity,best_specificity,len(print_sum),len(blank_sum)],best_roi_thresh,best_dec_thresh,best_redundancy,active_rois_final]
 
-def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col="",use_all_rois=False,summary_mode=0,no_total_J=False):
+def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col="",use_all_rois=False,summary_mode=[0],no_total_J=False,center_thresholds=True):
     scan_range=cg_scan_range_finder(dataframe_input,scan_size,3)
     #reset index of input dataframe
     dataframe_input=dataframe_input.reset_index(drop=True)
@@ -2187,61 +2189,61 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
         list_data_holder.append(row_tuple)
 
     #Convert rundundant data into summarized data
-    if summary_mode>0:
+    if any(x>0 and x<100 for x in summary_mode):
         list_data_holder_new=[]
         for row in list_data_holder:
             roi_list=[]
             for roi in row[0]:
                 roi_new=[]
-                if summary_mode==1:
+                if 1 in summary_mode:
                     roi_val=np.average(roi)
                     roi_new.append(roi_val)
-                elif summary_mode==2:
+                elif 2 in summary_mode:
                     roi_val=np.median(roi)
                     roi_new.append(roi_val)
-                elif summary_mode==3:
+                elif 3 in summary_mode:
                     roi_val=np.max(roi)
                     roi_new.append(roi_val)
-                elif summary_mode==4:
+                elif 4 in summary_mode:
                     roi_val=np.percentile(roi,0.7)
                     roi_new.append(roi_val)
-                elif summary_mode==10:
+                elif 10 in summary_mode:
                     percentile_threshold=np.percentile(roi,50)
                     roi_new=[]
                     for val in roi:
                         if val>percentile_threshold:
                             roi_new.append(val)
-                elif summary_mode==11:
+                elif 11 in summary_mode:
                     percentile_threshold=np.percentile(roi,25)
                     roi_new=[]
                     for val in roi:
                         if val>percentile_threshold:
                             roi_new.append(val)
-                elif summary_mode==12:
+                elif 12 in summary_mode:
                     percentile_threshold=np.percentile(roi,75)
                     roi_new=[]
                     for val in roi:
                         if val>percentile_threshold:
                             roi_new.append(val)
-                elif summary_mode==13:
+                elif 13 in summary_mode:
                     percentile_threshold=np.percentile(roi,85)
                     roi_new=[]
                     for val in roi:
                         if val>percentile_threshold:
                             roi_new.append(val)
-                elif summary_mode==21:
+                elif 21 in summary_mode:
                     roi_val=np.average(roi)
                     roi.append(roi_val)
                     roi_new=copy.copy(roi)
-                elif summary_mode==22:
+                elif 22 in summary_mode:
                     roi_val=np.median(roi)
                     roi.append(roi_val)
                     roi_new=copy.copy(roi)
-                elif summary_mode==23:
+                elif 23 in summary_mode:
                     roi_val=np.max(roi)
                     roi.append(roi_val)
                     roi_new=copy.copy(roi)
-                elif summary_mode==24:
+                elif 24 in summary_mode:
                     roi_val=np.percentile(roi,0.7)
                     roi.append(roi_val)
                     roi_new=copy.copy(roi)
@@ -2252,7 +2254,23 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
         list_data_holder=copy.copy(list_data_holder_new)
         #print list_data_holder[0:10]
         #print list_data_holder_new[0:10]
+    if any(x>=100 for x in summary_mode): #combine together ROIs
+        list_data_holder_new=[]
+        for row in list_data_holder:
+            if 101 in summary_mode: #average of ROI data
+                roi_combo_data=[]
+                for roi in row[0]:
+                    roi_combo_data.extend(roi)
+                roi_combo_val=np.average(roi_combo_data)
+                row_tuple_new=[[[roi_combo_val]],row[1]]
+                list_data_holder_new.append(row_tuple_new)
+            scan_size=1
+            roi_total=1
+            #print list_data_holder_new
+        list_data_holder=copy.copy(list_data_holder_new)
+
     scan_size=len(list_data_holder[0][0][0])
+    roi_total=len(list_data_holder[0][0])
 
         #gonna sweep over bloody everything, and figure out the J value in each case, then save cases where J value is real good
     scan_n=100;
@@ -2339,6 +2357,8 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
         #print len(T_list)
         #print len(D_list)
 
+    #print '{0:2f} {1:2f} {2:2f}'.format(best_J[0],best_roi_thresh[0],best_dec_thresh[0])
+
     #print [best_J,best_roi_thresh,best_dec_thresh]
     scan_n=100
     T_swing=0.5
@@ -2362,6 +2382,7 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
 
     for roi_iterator in range(roi_total):
         thresh_list_temp=np.linspace(best_roi_thresh[roi_iterator]-T_swing,best_roi_thresh[roi_iterator]+T_swing,scan_n)
+        thresh_list_temp= np.append(thresh_list_temp,[best_roi_thresh[roi_iterator]])
         roi_thresh_rng_list.append(thresh_list_temp)
         dec_list_temp=np.arange(np.max([-0.05,best_dec_thresh[roi_iterator]-D_swing]),np.min([0.95,best_dec_thresh[roi_iterator]+D_swing])+0.1,0.1)
        # roi_dec_rng_list.append(dec_list_temp)
@@ -2376,6 +2397,12 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
     best_roi_thresh=len(roi_thresh_rng_list)*[-1]
     best_dec_thresh=len(roi_thresh_rng_list)*[-1]
     #best_J=len(roi_thresh_rng_list)*[-1]
+
+    if center_thresholds:
+        center_bounds=0.05
+    else:
+        center_bounds=0.0
+
     for roi_index in range(len(roi_thresh_rng_list)):
         if True:
             T_list=[]
@@ -2419,12 +2446,24 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
                     J=sensitivity+specificity-1
                     J=adapted_J(sensitivity,specificity)
 
-                    if J>best_J[roi_index]-0.05:
+                   # for thing in [roi_thresh,roi_dec,J,sensitivity,specificity,best_J]:
+                    #    print type(thing)
+
+                    #print '{:2f},{:2f},{:2f},{:2f},{:2f},{:2f},{},{}'.format(roi_thresh,roi_dec,J,sensitivity,specificity,best_J[roi_index],T_list,D_list)
+
+                    if J>=best_J[roi_index]-center_bounds:
                         T_list.append(roi_thresh)
                         D_list.append(roi_dec)
+                        if J-center_bounds>best_J[roi_index]:
+                            T_list=[roi_thresh]
+                            D_list=[roi_dec]
+                            best_J[roi_index]=J
         #once all threshold-dec pairs have been tried, take median of each of T_list and D_list vectors
+        
         best_roi_thresh[roi_index]=np.median(T_list)
         best_dec_thresh[roi_index]=np.median(D_list)
+
+        #print '{0:2f},{1:2f}'.format(best_roi_thresh[0],best_dec_thresh[0])
         #print len(T_list)
         #print len(D_list)
 
@@ -2511,7 +2550,7 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
                         sum+=1
                 row_marker=list_data_holder[row][1]
                 mark_list.append(row_marker)
-                #print row_marker
+
                 if row_marker==1:
                     print_sum.append(sum)
                     sum_list.append(sum)
@@ -2550,13 +2589,7 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
                 J=adapted_J(sensitivity,specificity)
                 #sensitivity+specificity-1
 
-                #print redundancy,
-                #print ",",
-                #print J,
-                #print ",",
-                #print sensitivity,
-                #print ",",
-                #print specificity
+                print '{:2f},{:2f},{:2f},{:2f},{:2f}'.format(redundancy,J,sensitivity,specificity,best_J)
 
                 if J>best_J:
                     best_J=J
