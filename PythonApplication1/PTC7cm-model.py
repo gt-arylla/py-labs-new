@@ -111,7 +111,7 @@ def PictureDeviation(Data):
 
 
 # Getting the all the file names that are of interest
-list = sorted(os.listdir('/Users/gagandeepphull/Documents/Arylla/Pixel-To-Cm-LargeDataset'))
+list = sorted(os.listdir('Pixel-To-Cm-LargeDataset'))
 
 # Setting up the variables of interest
 Stdevhumanerror = [0]*len(list)
@@ -123,7 +123,7 @@ Ratio = [1] * len(list)
 for x in range(0,len(list)):
 
     # Gets filename
-    filepath = '/Users/gagandeepphull/Documents/Arylla/Pixel-To-Cm-LargeDataset{}{}'.format('/',list[x])
+    filepath = 'Pixel-To-Cm-LargeDataset{}{}'.format('/',list[x])
     
     # Pulls data from the file of interest and put it into a useful format
     Data = PullData(filepath)
