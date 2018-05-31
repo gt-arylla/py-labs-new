@@ -34,6 +34,14 @@ from scipy import stats
 
 #    return clean_dict 
 
+def checkEqual(iterator):
+    iterator = iter(iterator)
+    try:
+        first = next(iterator)
+    except StopIteration:
+        return True
+    return all(first == rest for rest in iterator)
+
 def euclidian_distance(reference_point,test_point):
     if not len(reference_point)==len(test_point):
         raise ValueError('Reference and Tests Points not the same length in euclidian distance calculation')
