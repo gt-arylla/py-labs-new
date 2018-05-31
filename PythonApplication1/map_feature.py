@@ -1,3 +1,7 @@
+#This function converts a list of counts per bin to a smoothed matrix
+#The final output is smoothed and has had a logistic ratio applied
+#Negative numbers are more indicitive of blanks.  Positive points toward prints
+
 import math, sys, os, random, struct, json
 
 #lines is a list of each line of the text file
