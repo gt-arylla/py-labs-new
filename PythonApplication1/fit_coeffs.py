@@ -12,8 +12,11 @@ def transcript_iter ():
       #each line is for an individual image.  It is setup as [class] [filename] [DATA]
       #The DATA is set up as [a:b:c:d:e:f a:b:c:d:e:f a:b:c:d:e:f a:b:c:d:e:f ...]
 
-      #split up the data by whitespace.
-    pieces = line.strip().split() 
+
+    #split up the data by whitespace.
+    pieces = line.strip().split(";") 
+    #print line
+    #print pieces
     #this is the class
     cl = int(pieces[0])
     #return list of the scores
@@ -85,7 +88,7 @@ while True and numdone < 1000000:
     #difference between current average log likelihood and new log likelihood
   delta = avLL - pavLL
   #print current results
-  print "%8.4f %8.4f %8i %8.4f %8.4f" % (avLL, math.exp(avLL), numdone, (1e-6)/delta, ssize)
+  print "\r%8.4f %8.4f %8i %8.4f %8.4f         " % (avLL, math.exp(avLL), numdone, (1e-6)/delta, ssize),
   #we want avLL to get bigger and bigger as the log likelihood increases.  This first case is if the new best guess is not better than the old guess
   if avLL < pavLL + 1e-6:
       #ssize ensures that we don't keep trying over and over if things are bad.
