@@ -1,3 +1,7 @@
+#This function takes in photo information and returns a 'transcript' file, which describest the bin, index, and ratio information for each file
+#The transcript is used to determine the best
+
+
 import math, os, sys, random, json
 
 fns = []
@@ -17,6 +21,9 @@ v2_Mi50_text = ("Mi.50/", ["104"], ["102"])
 v2_Nii40_logo = ("Nii.40/", ["109"], ["101"])
 v2_Nii40_text = ("Nii.40/", ["110"], ["102"])
 
+gt_test5=("v2app/Nii.40/",["110"],["102"])
+vt_test=("C",["1"],["0"])
+
 # ==== choose a configuration =================================================
 #This determines what is actually used int he analysis.  The config file defines:
 #prefix (part of the filename)
@@ -29,7 +36,7 @@ v2_Nii40_text = ("Nii.40/", ["110"], ["102"])
 #config = v2_Nii40_logo # 67, 73, 81, 86
 #config = v2_Nii40_text # 65, 84, 92, 96 
 
-config = v2_Mi50_logo # 83, 84, 89
+config = vt_test # 83, 84, 89
 #config = v2_Mi50_text # 75, 82, 82, 89 
 
 # ============================================================================
@@ -71,7 +78,7 @@ pos = []
 neg = []
 buff = []
 num_filtered = 0
-min_contrast = 0.25
+min_contrast = 0
 
 #iterate through all the 'otsu_#.txt' files in the list you defined int the beginning
 for fn in fns:
@@ -82,6 +89,7 @@ for fn in fns:
       J = json.loads(line)
     except:
       continue
+    #print J
     #define the filename.  If it does not contain the necessary prefix, defined in the config file, skip that file
     f = J["file"]
     if not f.startswith(prefix): continue
@@ -103,6 +111,8 @@ for fn in fns:
     #Save the J dictionary to either the negativeclass or the positive class list
     if k in negclass: neg.append(J)
     elif k in posclass: pos.append(J)
+    #print negclass
+    #print posclass
 
 def split (x):
     #assign a random number between 0 and 1 to each element in the input list
@@ -237,8 +247,8 @@ for K0 in range(36):
     maps[(K0,K1)] = (buck0, buck1, J)
     #save the indices, the buckets, and the ratio grid to a list
     out_map.append ( [K0,K1,buck0,buck1,J]  )
-    print "... %4i %4i"  % (K0,K1)
-  print "=", K0
+    print '\r ... %4i %4i        '  % (K0,K1),
+  print '\r = ', K0, '                     ',
 
 # == feature transcript ======================================================
 
@@ -271,8 +281,8 @@ for x,s in zip( [pos_train, neg_train, pos_test, neg_test], [0,1,2,3]):
     #the data is saved to the transcript file.  It is in the format:
     #[filename] [DATA]
     #The DATA is in the format [index0]:[bin0]:[index1]:[bin1]:[number of times data has been writtedn for this image]:[score for this particular data bin]
-    f.write(str(s) + " " + fn + " ")
-    f.write(" ".join(buff) + "\n")
+    f.write(str(s) + ";" + fn + ";")
+    f.write(";".join(buff) + "\n")
 f.close()
 
 #save the supermap with all 36 choose 2 combinations, each of which has a 61x61 grid in the format:
