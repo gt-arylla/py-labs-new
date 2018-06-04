@@ -27,11 +27,88 @@ for line in open("coeffs.txt"):
   id = int(id)
   w = float(w)
   K[id] = w
-lf = open("model_data.txt", "wb")
+lf = open("model_data2.txt", "wb")
 model_name="model";
 if serial_input: model_name="model_"+serial_number
 lf.write("float "+model_name+"[] = {")
 #print "float model[] = {"
+counter=0
+tuple_list=[]
+consec_index=-1
+
+#for q in range(len(J)):
+#    #jj is the info relating to a single index pair
+#  jj = J[q]
+#  #w is the coefficient value.  You have to add one to q since there is no row for the intercept
+#  w = K[q+1]
+#  K0,K1,buck0,buck1,k0k1map = jj
+#  # 4*61
+#  #make four rows that describe the buckets.
+#  #row0 - left side of bucket0
+#  #row1 - right side of bucket0
+#  #row3 - left side of bucket1
+#  #row4 - right side of bucket1
+
+#  step0=buck0[0][1]-buck0[0][0]
+#  start0=buck0[0][0]
+
+#  step1=buck1[0][1]-buck1[0][0]
+#  start1=buck1[0][0]
+#  thing=[]
+#  for row in k0k1map:
+## 61*61
+#      for i in range(len(row)):
+#          row[i] *= w
+#      thing.append(row)
+#  print len(thing)
+#  print len(thing[0])
+#  lf.write("%6.4e" % step0 + ",")
+#  lf.write("%6.4e" % start0 + ",")
+#  lf.write("%6.4e" % step1 + ",")
+#  lf.write("%6.4e" % start1 + ",")
+
+#  #the 'thing' matrix is printed to the console window in a pretty way so it can be pasted into the c code.
+#  compression=True
+#  if compression:
+#      for t in thing:
+#          for val in t:
+#              if (1):
+#                  if not val==0:
+#                      tuple_list.append((counter,val))
+#                      lf.write(str(int(counter))+",")
+#                      lf.write("%6.4e" % val + ",")
+#                      #print counter
+#              counter+=1
+#              #elif (1):
+#              #    if not val==0:
+#              #         lf.write("%6.4e" % val + ",")
+#              #    else:
+#              #         lf.write("0,")
+#              #else:
+#              #    if not val==0:
+#              #        if counter==consec_index+1:
+#              #            consec_index=counter
+#              #        else:
+#              #            lf.write(str(int(counter))+",")
+#              #counter+=1
+#      continue
+#  #else:
+#  #    for t in thing:
+#  #      for i in range(8):
+#  #          #out is 8 elements.  0->8, then 8->16, etc
+#  #        out = t[8*i:8*(i+1)]
+#  #        o1 = out[:6]
+#  #        o2 = out[6:]
+#  #        f1 = ",".join(["%6.4e"]*len(o1))
+#  #        f2 = ",".join(["%6.4e"]*len(o2))
+#  #        if len(o1) > 0:
+#  #          #print "  " + f1 % tuple(o1), ","
+#  #          lf.write( "  " + f1 % tuple(o1)+ ","+"\n")
+#  #        if len(o2) > 0:
+#  #          #print "  " + f2 % tuple(o2), ","
+#  #          lf.write( "  " + f2 % tuple(o2)+ ","+"\n")
+
+
 for q in range(len(J)):
     #jj is the info relating to a single index pair
   jj = J[q]
@@ -61,23 +138,49 @@ for q in range(len(J)):
   #the remaining 61 elements are coefficients
 
   #the 'thing' matrix is printed to the console window in a pretty way so it can be pasted into the c code.
-  for t in thing:
-    for i in range(8):
-        #out is 8 elements.  0->8, then 8->16, etc
-      out = t[8*i:8*(i+1)]
-      o1 = out[:6]
-      o2 = out[6:]
-      f1 = ",".join(["%6.4e"]*len(o1))
-      f2 = ",".join(["%6.4e"]*len(o2))
-      if len(o1) > 0:
-        #print "  " + f1 % tuple(o1), ","
-        lf.write( "  " + f1 % tuple(o1)+ ","+"\n")
-      if len(o2) > 0:
-        #print "  " + f2 % tuple(o2), ","
-        lf.write( "  " + f2 % tuple(o2)+ ","+"\n")
-#print "};"
+  compression=True
+  if compression:
+      for t in thing:
+          for val in t:
+              if (0):
+                  if not val==0:
+                      tuple_list.append((counter,val))
+                      lf.write(str(int(counter))+",")
+                      lf.write("%6.4e" % val + ",")
+              elif (1):
+                  if not val==0:
+                       lf.write("%3.2e" % val + ",")
+                  else:
+                       lf.write("0,")
+              else:
+                  if not val==0:
+                      if counter==consec_index+1:
+                          consec_index=counter
+                      else:
+                          lf.write(str(int(counter))+",")
+              counter+=1
+      continue
+  else:
+      for t in thing:
+        for i in range(8):
+            #out is 8 elements.  0->8, then 8->16, etc
+          out = t[8*i:8*(i+1)]
+          o1 = out[:6]
+          o2 = out[6:]
+          f1 = ",".join(["%6.4e"]*len(o1))
+          f2 = ",".join(["%6.4e"]*len(o2))
+          if len(o1) > 0:
+            #print "  " + f1 % tuple(o1), ","
+            lf.write( "  " + f1 % tuple(o1)+ ","+"\n")
+          if len(o2) > 0:
+            #print "  " + f2 % tuple(o2), ","
+            lf.write( "  " + f2 % tuple(o2)+ ","+"\n")
+
 lf.write("};")
 lf.close()
+
+#print tuple_list
+print len(tuple_list)
 
 new_model_name='model_data.c'
 if serial_input: new_model_name="model_data_"+serial_number+".c"
