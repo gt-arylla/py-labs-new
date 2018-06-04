@@ -1,4 +1,4 @@
-import json, sys
+import json, sys,os
 
 #master map is generated in 'make_feature_maps.py'
 #it is a list of information relating to the 630 combinations:
@@ -11,7 +11,14 @@ import json, sys
 #buck1 - the buckets for K1
 #J - the 61x61 matrix
 
-J = json.loads(open("master_map.json").read())
+load_file="master_map.json"
+serial_input=False
+serial_number=""
+if len(sys.argv)>1:
+    serial_input=True
+    serial_number=str(int(sys.argv[1]))
+if serial_input: load_file="master_map_"+serial_number+".json"
+J = json.loads(open(load_file).read())
 
 K = {}
 #make a dictionary of coeffs.  It's important to note that this is all coeffs, including the intercept
@@ -20,8 +27,11 @@ for line in open("coeffs.txt"):
   id = int(id)
   w = float(w)
   K[id] = w
-
-print "float model[] = {"
+lf = open("model_data.txt", "wb")
+model_name="model";
+if serial_input: model_name="model_"+serial_number
+lf.write("float "+model_name+"[] = {")
+#print "float model[] = {"
 for q in range(len(J)):
     #jj is the info relating to a single index pair
   jj = J[q]
@@ -43,7 +53,9 @@ for q in range(len(J)):
     for i in range(len(row)):
       row[i] *= w
     thing.append(row)
-  print "  //", q
+  #print "  //", q
+  #lf.write("  //")
+  #lf.write(str(q)+"\n")
   #thing is the 65 element set of data
   #the first four elements are the bin buckets
   #the remaining 61 elements are coefficients
@@ -58,8 +70,16 @@ for q in range(len(J)):
       f1 = ",".join(["%6.4e"]*len(o1))
       f2 = ",".join(["%6.4e"]*len(o2))
       if len(o1) > 0:
-        print "  " + f1 % tuple(o1), ","
+        #print "  " + f1 % tuple(o1), ","
+        lf.write( "  " + f1 % tuple(o1)+ ","+"\n")
       if len(o2) > 0:
-        print "  " + f2 % tuple(o2), ","
-print "};"
+        #print "  " + f2 % tuple(o2), ","
+        lf.write( "  " + f2 % tuple(o2)+ ","+"\n")
+#print "};"
+lf.write("};")
+lf.close()
+
+new_model_name='model_data.c'
+if serial_input: new_model_name="model_data_"+serial_number+".c"
+os.rename('model_data.txt',new_model_name)
 
