@@ -1,5 +1,7 @@
 #Imports
-import json,fun 
+import json,fun, os
+import itertools as it
+import shutil
 
 def transcript_to_dict(roi_index):
 	#finds the transcript file that corresponds to the input roi_index
@@ -96,7 +98,7 @@ def calculate_redundancy(active_rois):
 
     return thresh,J,sen,spec
 
-def serial_test(serial_map):
+def serial_test(serial_map,use_all_rois=True):
     #make a new serial map setup as [serial_number:[old_roi,new_roi]]
     #determine what the max serial number is
     max_sn=0
@@ -110,7 +112,48 @@ def serial_test(serial_map):
     for key in serial_map.keys():
         new_serial_map[serial_map[key][0]].append(key)
 
-    print new_serial_map
+    #print new_serial_map
+
+    minimum_count=2
+    best_J=0
+    best_sen=0
+    best_spec=0
+    best_thresh=0
+    best_rois=[]
 
     for serial_number in new_serial_map.keys():
-        calculate_redundancy(new_serial_map[serial_number])
+        available_ROIs=new_serial_map[serial_number]
+        available_ROIs_count=len(new_serial_map[serial_number])
+        if use_all_rois:
+            ROI_count_loop=[available_ROIs_count]
+        else:
+            ROI_count_loop=range(minimum_count,available_ROIs_count+1)
+        for ROI_count in ROI_count_loop:
+            if use_all_rois:
+                active_ROIs_loop=[available_ROIs]
+            else:
+                active_ROIs_loop=list(it.combinations(available_ROIs,ROI_count))
+            for active_ROIs in active_ROIs_loop:
+                thresh,J,sen,spec=calculate_redundancy(active_ROIs)
+                #print [thresh,J,sen,spec,active_ROIs]
+                if J>best_J:
+                    best_J=J
+                    best_sen=sen
+                    best_spec=spec
+                    best_thresh=thresh
+                    best_rois=active_ROIs
+            
+        print [serial_number,best_thresh,best_J,best_sen,best_spec,best_rois]
+
+def model_header_compile(active_rois):
+    #make big .c files
+    output_file_list=[]
+    for active_roi in active_rois:
+        os.system("python make_model_header.py "+str(int(active_roi))) #make model files for each ROI
+        output_file_list.append("model_data_"+str(int(active_roi))+".c")
+        print "finished", active_roi
+    with open('output_file.txt','wb') as wfd:
+        for f in output_file_list:
+            with open(f,'rb') as fd:
+                shutil.copyfileobj(fd, wfd, 1024*1024*10)
+    os.rename('output_file.txt', 'model_data_fin.c')
