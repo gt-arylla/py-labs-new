@@ -18,6 +18,7 @@
 *.ipynb
 *.json
 *.txt
+*.c
 
 # Build results
 [Dd]ebug/
