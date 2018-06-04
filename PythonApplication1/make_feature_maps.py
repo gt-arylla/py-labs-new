@@ -22,7 +22,7 @@ v2_Nii40_logo = ("Nii.40/", ["109"], ["101"])
 v2_Nii40_text = ("Nii.40/", ["110"], ["102"])
 
 gt_test5=("v2app/Nii.40/",["110"],["102"])
-vt_test=("C",["1"],["0"])
+vt_test=("",["1"],["0","-1"])
 
 # ==== choose a configuration =================================================
 #This determines what is actually used int he analysis.  The config file defines:
@@ -92,7 +92,9 @@ for fn in fns:
     #print J
     #define the filename.  If it does not contain the necessary prefix, defined in the config file, skip that file
     f = J["file"]
-    if not f.startswith(prefix): continue
+    #add in case where prefix isn't used
+    if not prefix=="":
+        if not f.startswith(prefix): continue
     #define the photoset.  
     k = J["set"]
     #keep track of how many of each photoset have been loaded in
