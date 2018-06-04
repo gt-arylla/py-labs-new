@@ -41,8 +41,9 @@ pattern   = "*.csv"
 for dir,_,_ in os.walk(start_dir): 
     files.extend(glob(os.path.join(dir,pattern))) 
 
-#prism_fun.serial_test(serial_dict)
+//prism_fun.model_header_compile(range(0,12))
 
+//prism_fun.serial_test(serial_dict,False)
 #thresh,J,sen,spec=prism_fun.calculate_redundancy([0,2,5])
 #print [thresh,J,sen,spec]
 
@@ -56,7 +57,7 @@ for file in files:
         #'0' - blank image
         #'1' - print image
         #'-1' - blank roi.  However, this is on a serialized image so other elements of the image have been printed onto
-        roi_index=7;
+        roi_index=0;
        
         while (True):
             print "ROI_index= %i" % (roi_index)
@@ -102,7 +103,6 @@ for file in files:
 
                 #perform logistic regression analysis
                 os.system("python make_feature_maps.py") #make giant 630x61x61 index
-                print "DONE"
                 os.system("python fit_coeffs.py") #fit the data to a logistic regression model
                 os.system("python eval_test_perf.py") #determine the accuracy of the model
 
@@ -113,7 +113,10 @@ for file in files:
                 os.rename('master_map.json', 'master_map_'+str(int(roi_index))+'.json')
                 roi_index+=1
                 
-            except:
+            except KeyError:
+                break
+            except WindowsError:
                 raise
+        prism_fun.serial_test(serial_dict)
     except:
         raise
