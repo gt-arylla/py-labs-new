@@ -19,6 +19,7 @@
 *.json
 *.txt
 *.c
+*.xlsx
 
 # Build results
 [Dd]ebug/
