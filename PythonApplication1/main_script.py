@@ -1428,7 +1428,7 @@ if(0): #CanadaGoose Logistic Regression
 
                         except:
                             skipped=True
-if(1): #Genertic Thresholding Analysis
+if(0): #Genertic Thresholding Analysis
     
     #-2 - Use Concat df
     #-1 - Throw errors in file-by-file loading
@@ -2162,13 +2162,14 @@ if(1): #Genertic Thresholding Analysis
 
 
 
-if(0): #FeatureFinding Accuracy Test
+if(1): #FeatureFinding Accuracy Test
     test_index=[]
 
-    point_count=6
+    point_count=10
 
     line_by_line_check=0
-
+    plot_data_switch=1
+    export_data_switch=0
 
     files=[]
     json_files=[]
@@ -2193,6 +2194,9 @@ if(0): #FeatureFinding Accuracy Test
         if not len(std_dict[key])==point_count:
             del std_dict[key]
 
+    #Prepare export dictionary
+    export_list=[]
+
     for file in files:
 
 
@@ -2216,15 +2220,67 @@ if(0): #FeatureFinding Accuracy Test
             print df
 
         #df=fun.arbitrary_include(df,'path','iP8plus')
-
+        
         distance_superdict={}
-        print filename
-        print '{} {} {} {}'.format('point','avg','stdev','count')
+        distance_filter_superlist={}
+        #print filename
+        #print '{} {} {} {}'.format('point','avg','stdev','count')
+        export_data=["mean","std","median","count","filtered_mean","filtered_std","filtered_median","filtered_count","outlier_count"]
+        summary_dict={}
         for ff_index in range(point_count):
-            mean_dist,stdev_dist,list_dist,dict_dist=fun.ff_accuracy(df,std_dict,ff_index)
-            print '{0:2d} {1:3f} {2:4f} {3:5d}'.format(ff_index,mean_dist,stdev_dist,len(list_dist))
-            #print stdev_dist
+            output_dict=fun.ff_accuracy(df,std_dict,ff_index)
+            mean_dist=output_dict["mean"]
+            stdev_dist=output_dict["std"]
+            list_dist=output_dict["data"]
+            dict_dist=output_dict["data_dict"]
+            median_dist=output_dict["median"]
+            filtered_data=output_dict["filtered_data"]
+            #print '{0:2d} {1:3f} {2:4f} {3:5d}'.format(ff_index,mean_dist,stdev_dist,len(list_dist))
+
+            #Save data to export list
+            temp_dict={}
+            for key in export_data:
+                temp_dict[key]=output_dict[key]
+            temp_dict["path"]=file
+            temp_dict["filename"]=filename
+            temp_dict["test"]="roi"+str(int(ff_index))
+            export_list.append(temp_dict)
             distance_superdict[str(ff_index)]=list_dist
+            distance_filter_superlist[str(ff_index)]=filtered_data
+
+            #Save data to summary dict
+            if ff_index==0:
+                summary_dict=temp_dict
+            else:
+                for key in export_data:
+                    summary_dict[key]+=temp_dict[key]
+        if 't_total' in df:
+            mean_t=df["t_total"].mean()
+            stdev_t=df["t_total"].std()
+            count_t=df["t_total"].count()
+            time_series=df["t_total"]
+            time_series= time_series.dropna()
+            #print 'time {0:3f} {1:4f} {2:5d}'.format(mean_t,stdev_t,count_t)
+
+            #save data to export list
+            output_dict=fun.summary_statistics(list(time_series))
+            temp_dict={}
+            for key in export_data:
+                temp_dict[key]=output_dict[key]
+            temp_dict["path"]=file
+            temp_dict["filename"]=filename
+            temp_dict["test"]="time"
+            export_list.append(temp_dict)
+            
+        #do summary stuff for the rois
+        temp_dict={}
+        for key in export_data:
+            summary_dict[key]=summary_dict[key]/float(point_count)
+        summary_dict["path"]=file
+        summary_dict["filename"]=filename
+        summary_dict["test"]="roisummary"
+        export_list.append(summary_dict)
+
         #    for key in dict_dist.keys():
         #        print key
 
@@ -2232,12 +2288,34 @@ if(0): #FeatureFinding Accuracy Test
         #for key in distance_superdict[0].keys():
         #    print key
 
-        for key in distance_superdict:
-            data=distance_superdict[key]
-            if len(data)>0:
-                plt.hist(distance_superdict[key],alpha=0.3,label=key,normed=1,histtype='stepfilled')
-                #label_list.append(key)
-       
+        if (plot_data_switch):
+            for key in distance_superdict:
+                data=distance_superdict[key]
+                if len(data)>0:
+                    plt.subplot(131)
+                    plt.hist(distance_superdict[key],alpha=0.3,label=key,normed=1,histtype='stepfilled')
+                    plt.xlabel('raw data')
+                    plt.subplot(132)
+                    plt.hist(distance_filter_superlist[key],alpha=0.3,label=key,normed=1,histtype='stepfilled')
+                    plt.xlabel('outlier filtered data')
+                    plt.subplot(133)
+                    plt.hist(distance_filter_superlist[key],alpha=0.3,label=key,normed=1,histtype='stepfilled')
+                    plt.xlabel('ot_filt data locked rng')
+                    plt.xlim(0,75)
+                    plt.ylim(0,0.25)
+                    #label_list.append(key)
+            plt.legend()
+            plt.subplot(132)
+            plt.title(filename)
+            plt.savefig(filename+".png")
+            plt.clf()
+            plt.cla()
+            plt.close()
+    if (export_data_switch):
+        final_df=pd.DataFrame(export_list)
+        writer = pd.ExcelWriter('output.xlsx')
+        final_df.to_excel(writer,'data')
+        writer.save()
                         
                             
 
