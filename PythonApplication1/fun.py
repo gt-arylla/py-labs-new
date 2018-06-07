@@ -34,6 +34,16 @@ from scipy import stats
 
 #    return clean_dict 
 
+
+def reject_outliers(data, m = 2.): #pulled from https://stackoverflow.com/questions/11686720/is-there-a-numpy-builtin-to-reject-outliers-from-a-list?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+    d = np.abs(data - np.median(data))
+    mdev = np.median(d)
+    s = d/(mdev if mdev else 1.)
+    data_new=[]
+    for count,val in enumerate(s):
+        if val<m: data_new.append(data[count])
+    return data_new
+
 def checkEqual(iterator):
     iterator = iter(iterator)
     try:
@@ -2634,6 +2644,32 @@ def cg_redundancy_modeler_v4(dataframe_input,scan_size=10,roi_total=3,bin_col=""
     #print "*********END*********"
     return output_dict
 
+def summary_statistics(data):
+    mean_data=np.average(data)
+    stdev_data=np.std(data)
+    median_data=np.median(data)
+    filtered_list=reject_outliers(data,3)
+    filtered_mean=np.average(filtered_list)
+    filtered_stdev=np.std(filtered_list)
+    filtered_median=np.median(filtered_list)
+    outlier_count=len(data)-len(filtered_list)
+
+    #return data as a dict
+    return_dict={}
+    return_dict["mean"]=mean_data
+    return_dict["std"]=stdev_data
+    return_dict["median"]=median_data
+    return_dict["data"]=data
+    return_dict["count"]=len(data)
+    return_dict["filtered_data"]=filtered_list
+    return_dict["filtered_mean"]=filtered_mean
+    return_dict["filtered_std"]=filtered_stdev
+    return_dict["filtered_median"]=filtered_median
+    return_dict["filtered_count"]=len(filtered_list)
+    return_dict["outlier_count"]=outlier_count
+
+    return return_dict
+
 def ff_accuracy(dataframe_input,standard_map,ff_index):
     #clean up 'path' column of dataframe_input and keys in standard_map to eliminate '\','/' and make everything lowercase
     data=copy.copy(dataframe_input)
@@ -2668,10 +2704,10 @@ def ff_accuracy(dataframe_input,standard_map,ff_index):
                 distance_dict[data.at[key,'path']]=distance
                 distance_list.append(distance)
 
-    mean_distance=np.average(distance_list)
-    stdev_distance=np.std(distance_list)
+    return_dict=summary_statistics(distance_list)
+    return_dict["data_dict"]=distance_dict
 
-    return mean_distance,stdev_distance,distance_list,distance_dict
+    return return_dict
 
 
 
