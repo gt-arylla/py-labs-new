@@ -85,7 +85,7 @@ if(0): #make a slightly more complex list
             print "},",
     print "}"
 
-if(1): #make a slightly more complex list
+if(0): #make a slightly more complex list
     start=0
     end=0
     index=0
@@ -103,3 +103,25 @@ if(1): #make a slightly more complex list
             end+=step
         start+=step
         end=start
+
+if(1): #make a nested for loop type list
+    super_tuple=(
+        [605,610,620,630,650],
+        [705,710,720,730,750],
+        [810,811,812,809,800]
+        )
+    all_output_numbers=[-10,22]
+    counter=0
+    print "{",
+    for p in it.product(*super_tuple):
+        counter+=1
+        x_cols=list(p)
+        x_cols.extend(all_output_numbers)
+        print "{",
+        for iter in range(len(x_cols)-1):
+            print x_cols[iter],
+            print ",",
+        print x_cols[-1],
+        print "},",
+    print "};"
+    print counter
