@@ -20,8 +20,9 @@ resize_thresh=130000
 
 file_type='.jpg'
 
-if sys.argv[2]=="png":
-    file_type='.png'
+if len(sys.argv)>=3:
+    if sys.argv[2]=="png":
+        file_type='.png'
 
 c_thresh=.0
 stdev_t=110
