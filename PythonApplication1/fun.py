@@ -2698,6 +2698,7 @@ def ff_accuracy(dataframe_input,standard_map,ff_index):
             ff_column='ff_point'+str(int(ff_index))
             test_x=data.at[key,ff_column+'x']
             test_y=data.at[key,ff_column+'y']
+            if test_x==-1 or test_y==-1: continue
             distance=euclidian_distance([std_x,std_y],[test_x,test_y])
             #print data.at[key,'path']
             if not math.isnan(distance):
