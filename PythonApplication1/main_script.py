@@ -2169,7 +2169,7 @@ if(1): #FeatureFinding Accuracy Test
 
     line_by_line_check=0
     plot_data_switch=1
-    export_data_switch=0
+    export_data_switch=1
 
     files=[]
     json_files=[]
@@ -2279,8 +2279,8 @@ if(1): #FeatureFinding Accuracy Test
         summary_dict["path"]=file
         summary_dict["filename"]=filename
         summary_dict["test"]="roisummary"
-        export_list.append(summary_dict)
-
+        #export_list.append(summary_dict)
+        summary_dict={}
         #    for key in dict_dist.keys():
         #        print key
 
