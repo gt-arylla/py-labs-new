@@ -41,9 +41,9 @@ pattern   = "*.csv"
 for dir,_,_ in os.walk(start_dir): 
     files.extend(glob(os.path.join(dir,pattern))) 
 
-//prism_fun.model_header_compile(range(0,12))
+#prism_fun.model_header_compile(range(0,12))
 
-//prism_fun.serial_test(serial_dict,False)
+#prism_fun.serial_test(serial_dict,False)
 #thresh,J,sen,spec=prism_fun.calculate_redundancy([0,2,5])
 #print [thresh,J,sen,spec]
 
