@@ -11,24 +11,13 @@ import pandas as pd
 import os, sys, math, json, prism_fun
 from glob import glob
 
-#Make a serial map - maps basic ROI index to serialized ROI index
-#For serial_dict[x]=[y,z]
-#x = basic ROI Index
-#y = Serial number
-#z = Serialized ROI index
+#serial_dict is set up as:
+#key - serial index.  Set arbitrarily
+#value - binay string, which indicates which ROIs are printed and which aren't.  The length of the string must be the same length as the available ROIs
+
 serial_dict={}
-serial_dict[0]=[1,0]
-serial_dict[1]=[2,0]
-serial_dict[2]=[1,1]
-serial_dict[3]=[2,1]
-serial_dict[4]=[2,2]
-serial_dict[5]=[1,2]
-serial_dict[6]=[2,3]
-serial_dict[7]=[1,3]
-serial_dict[8]=[1,4]
-serial_dict[9]=[2,4]
-serial_dict[10]=[2,5]
-serial_dict[11]=[1,5]
+serial_dict[1]="101010101010101010110101010101"
+serial_dict[2]="010101010101010101001010101010"
 
 #Define bin constants
 bins=["wh", "lg", "mg", "dg", "bk", "r", "o", "y", "sg", "g", "tu", "cy", "az", "b", "pu","ma","pi","bc"]
@@ -88,9 +77,22 @@ for file in files:
                     pset=""
                     if int(row["mark"])==0: pset="0"
                     elif int(row["mark"])==1:
-                        if "serial" in df_columns:
-                            active_serial=serial_dict[roi_index][0]
-                            if row["serial"]==active_serial: pset="1"
+                        if ("decimal" in df_columns) and ("roi_count" in df_columns):
+                            #Get identity of ROI via the 'decimal' input
+                            #decimal is converted to binary, which is then converted to a vector of bools
+                            roi_number=row["roi_count"]
+                            decimal_print=row["decimal"]
+                            binary_string=format(decimal_print,'b').zfill(roi_number)
+                            binary_list=list(binary_string)
+                            mark_value=int(binary_list[roi_index])
+                            if (mark_value): pset="1"
+                            else: pset="-1"
+                        elif "serial" in df_columns:
+                            binary_string=serial_dict[row["serial"]]
+                            binary_list=list(binary_string)
+                            mark_value=int(binary_list[roi_index])
+                            print row["serial"],binary_string, mark_value,roi_index
+                            if (mark_value): pset="1"
                             else: pset="-1"
                         else: pset="1"
                     else: continue
