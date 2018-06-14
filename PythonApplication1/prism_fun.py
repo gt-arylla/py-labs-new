@@ -2,6 +2,7 @@
 import json,fun, os
 import itertools as it
 import shutil
+import math
 
 def transcript_to_dict(roi_index):
 	#finds the transcript file that corresponds to the input roi_index
@@ -157,3 +158,41 @@ def model_header_compile(active_rois):
             with open(f,'rb') as fd:
                 shutil.copyfileobj(fd, wfd, 1024*1024*10)
     os.rename('output_file.txt', 'model_data_fin.c')
+
+def make_otsu_string(row,roi_idx):
+    #makes the otsu string that is put into the 'otsu_0' file
+    #if it encounters any invalid elements, it raises and exception
+    bins=["wh", "lg", "mg", "dg", "bk", "r", "o", "y", "sg", "g", "tu", "cy", "az", "b", "pu","ma","pi","bc"]
+    sides=["l","r"]
+    otsu_string=""
+    for bin in bins:
+        otsu_string+=" "+bin.upper()
+        for side in sides:
+            data_key="roi"+str(int(roi_idx))+"_"+side+"_"+bin                          
+            value=row[data_key]
+            try:
+                value=float(value)
+                if math.isnan(value): 
+                    raise
+            except ValueError: raise    
+            otsu_string+=" "+str(value)
+        otsu_string+="\n"
+    return otsu_string
+
+def make_otsu_vector(row,roi_idx):
+    #makes the otsu string that is put into the 'otsu_0' file
+    #if it encounters any invalid elements, it raises and exception
+    bins=["wh", "lg", "mg", "dg", "bk", "r", "o", "y", "sg", "g", "tu", "cy", "az", "b", "pu","ma","pi","bc"]
+    sides=["l","r"]
+    output_list=[]
+    for side in sides:
+        for bin in bins:
+            data_key="roi"+str(int(roi_idx))+"_"+side+"_"+bin                          
+            value=row[data_key]
+            try:
+                value=float(value)
+                if math.isnan(value): 
+                    raise
+            except ValueError: raise    
+            output_list.append(value)
+    return output_list
