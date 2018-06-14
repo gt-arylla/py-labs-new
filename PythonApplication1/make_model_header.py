@@ -27,7 +27,7 @@ for line in open("coeffs.txt"):
   id = int(id)
   w = float(w)
   K[id] = w
-lf = open("model_data2.txt", "wb")
+lf = open("model_data.txt", "wb")
 model_name="model";
 if serial_input: model_name="model_"+serial_number
 lf.write("float "+model_name+"[] = {")
