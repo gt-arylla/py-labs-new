@@ -73,7 +73,7 @@ perf_dict["DM_ThreshPerc"]=odds/(1+odds)
 perf_dict["DM_ThreshScore"]=lastscore
 
 
-for cl_filter,name in zip([[0,1],[2,3],[0,1,2,3]],["train","test","tot"]):
+for cl_filter,name in zip([[0,1],[2,3],[0,1,2,3]],["train","test","tot"]): 
     diff_holder=[]
     mark_holder=[]
     for sco, ro, cl, fn in test:
@@ -101,4 +101,4 @@ for cl_filter,name in zip([[0,1],[2,3],[0,1,2,3]],["train","test","tot"]):
 
 
 with open("testperf.txt","wb") as file:
-    file.write(json.dumps(perf_dict))
+    file.write(json.dumps(perf_dict,sort_keys=True,indent=4,separators=(',', ': ')))
