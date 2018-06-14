@@ -23,11 +23,6 @@ serial_dict[2]="010101010101010101001010101010"
 roi_combo_switch=1
 roi_combo_list=[0,2,4,6,8,10,12,14,16,18]
 
-
-#Define bin constants
-bins=["wh", "lg", "mg", "dg", "bk", "r", "o", "y", "sg", "g", "tu", "cy", "az", "b", "pu","ma","pi","bc"]
-sides=["l","r"]
-
 #Make list of CSV files
 files=[]
 start_dir='csv_import'
@@ -71,24 +66,11 @@ for file in files:
                     for roi_idx in roi_list:
                         qq={}
                         #export the prism data
-                        printer=True
-                        otsu_string=""
-                        for bin in bins:
-                            otsu_string+=" "+bin.upper()
-                            for side in sides:
-                                data_key="roi"+str(int(roi_idx))+"_"+side+"_"+bin
-                           
-                                value=row[data_key]
-                                try:
-                                    value=float(value)
-                                    if math.isnan(value): printer=False
-                                except ValueError:
-                                    printer=False
-                                #print data_key,value,type(value)
-                                #don't save line if there are nan values                          
-                                otsu_string+=" "+str(value)
-                            otsu_string+="\n"
-                        if not printer: continue
+                        try:
+                            otsu_string=prism_fun.make_otsu_string(row,roi_idx)
+                        except:
+                            print "#######################OUTER ERROR#########################"
+                            continue
                         qq["otsu"]=otsu_string
 
                         #export the filename
