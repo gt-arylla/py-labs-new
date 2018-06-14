@@ -27,10 +27,13 @@ for line in open("coeffs.txt"):
   id = int(id)
   w = float(w)
   K[id] = w
-lf = open("model_data.txt", "wb")
+lf = open("model.json", "wb")
 model_name="model";
 if serial_input: model_name="model_"+serial_number
-lf.write("float "+model_name+"[] = {")
+superstring=''
+#lf.write('{"model": [')
+superstring+='{"model": ['
+
 #print "float model[] = {"
 counter=0
 tuple_list=[]
@@ -149,9 +152,11 @@ for q in range(len(J)):
                       lf.write("%6.4e" % val + ",")
               elif (1):
                   if not val==0:
-                       lf.write("%3.2e" % val + ",")
+                      superstring+="%3.2e" % val + ","
+                       #lf.write("%3.2e" % val + ",")
                   else:
-                       lf.write("0,")
+                       superstring+="0,"
+                       #lf.write("0,")
               else:
                   if not val==0:
                       if counter==consec_index+1:
@@ -176,13 +181,18 @@ for q in range(len(J)):
             #print "  " + f2 % tuple(o2), ","
             lf.write( "  " + f2 % tuple(o2)+ ","+"\n")
 
-lf.write("};")
+
+superstring=superstring[:-1]
+superstring+="]}"
+lf.write(superstring)
+
+#lf.write("]}")
 lf.close()
 
 #print tuple_list
 print len(tuple_list)
 
-new_model_name='model_data.c'
-if serial_input: new_model_name="model_data_"+serial_number+".c"
-os.rename('model_data.txt',new_model_name)
+#new_model_name='model_data.c'
+#if serial_input: new_model_name="model_data_"+serial_number+".c"
+#os.rename('model_data.txt',new_model_name)
 
