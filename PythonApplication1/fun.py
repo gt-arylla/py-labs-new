@@ -35,6 +35,15 @@ from scipy import stats
 #    return clean_dict 
 
 
+def split_print_blank_list(diff_holder,mark_holder):
+    print_list=[]
+    blank_list=[]
+    for index, mark in enumerate(mark_holder):
+        if mark: print_list.append(diff_holder[index])
+        else: blank_list.append(diff_holder[index])
+
+    return blank_list,print_list
+
 def reject_outliers(data, m = 2.): #pulled from https://stackoverflow.com/questions/11686720/is-there-a-numpy-builtin-to-reject-outliers-from-a-list?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
     d = np.abs(data - np.median(data))
     mdev = np.median(d)
