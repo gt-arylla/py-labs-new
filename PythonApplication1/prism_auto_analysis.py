@@ -8,7 +8,7 @@
 #Imports
 import pandas as pd
 
-import os, sys, math, json, prism_fun
+import os, sys, math, json, prism_fun,fun
 from glob import glob
 
 #serial_dict is set up as:
@@ -22,6 +22,8 @@ serial_dict[2]="010101010101010101001010101010"
 #optionally, combine ROIs
 roi_combo_switch=1
 roi_combo_list=[0,2,4,6,8,10,12,14,16,18]
+#roi_combo_list=[6,8,10]
+#roi_combo_list=[12,14,16]
 
 #Make list of CSV files
 files=[]
@@ -45,12 +47,13 @@ for file in files:
 
     try:
         df=pd.read_csv(file,header=0,error_bad_lines=False,warn_bad_lines=False)
+        #df=fun.arbitrary_include(df,"color","red")
         #iterate through all the ROIs, make a cotsu file, then put it into the detailed analysis
         #The photos are differentiated by 'set' in the following way:
         #'0' - blank image
         #'1' - print image
         #'-1' - blank roi.  However, this is on a serialized image so other elements of the image have been printed onto
-        roi_index=1;
+        roi_index=0;
        
         while (run_switch):
             print "ROI_index= %i" % (roi_index)
@@ -69,7 +72,7 @@ for file in files:
                         try:
                             otsu_string=prism_fun.make_otsu_string(row,roi_idx)
                         except:
-                            print "#######################OUTER ERROR#########################"
+                            #print "#######################OUTER ERROR#########################"
                             continue
                         qq["otsu"]=otsu_string
 
@@ -121,9 +124,11 @@ for file in files:
                 lf.close()
 
                 if blank_count==0 or print_count==0:
+                    print "no data"
                     roi_index+=1
                     continue
-
+                print blank_count
+                print print_count
                 #perform logistic regression analysis
                 os.system("python make_feature_maps.py") #make giant 630x61x61 index
                 os.system("python fit_coeffs.py") #fit the data to a logistic regression model
