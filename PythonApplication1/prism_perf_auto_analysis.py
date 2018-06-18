@@ -26,14 +26,13 @@ export_list=[]
 for file in files:
     run_switch=1
     filename=file.rpartition("\\")[2]
-
+    data={}
     try:
-        os.system("python eval_test_perf.py "+'"'+filename+'"'+"_ _1") #determine the accuracy of the model
+        os.system("python eval_test_perf.py "+'"'+filename+'"'+"_ _0") #determine the accuracy of the model
         with open ("testperf.txt") as json_file:
             data=json.load(json_file)
             data["filename"]=filename
             export_list.append(data)
-
     except:
         continue
 
