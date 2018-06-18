@@ -1,15 +1,11 @@
-#Function holds code to automatically run analysis of prism data contained in CSVs
-#A lot of this work will be based on analysis loop in 'main_script.py' but it will be kept cleaner
-#Also, this will ONLY be used to analyze prism data
-#The data will be cast into the prism analysis in the form of 'costu_1.txt'
-
-#We are replacing the 'make_otsu_index.py' call
+#Function holds code to run prism data pulled from export CSVs in the C++ score code
 
 #Imports
 import pandas as pd
 
-import os, sys, math, json, prism_fun,fun
+import os, sys, math, json, prism_fun
 from glob import glob
+from shutil import copyfile
 
 #serial_dict is set up as:
 #key - serial index.  Set arbitrarily
@@ -22,8 +18,6 @@ serial_dict[2]="010101010101010101001010101010"
 #optionally, combine ROIs
 roi_combo_switch=1
 roi_combo_list=[0,2,4,6,8,10,12,14,16,18]
-#roi_combo_list=[6,8,10]
-#roi_combo_list=[12,14,16]
 
 #Make list of CSV files
 files=[]
@@ -41,22 +35,23 @@ for dir,_,_ in os.walk(start_dir):
 
 #Iterate through all the csv files
 print files
+export_list=[]
 for file in files:
+    print file
     run_switch=1
     filename=file.rpartition("\\")[2]
 
     try:
         df=pd.read_csv(file,header=0,error_bad_lines=False,warn_bad_lines=False)
-        #df=fun.arbitrary_include(df,"color","red")
         #iterate through all the ROIs, make a cotsu file, then put it into the detailed analysis
         #The photos are differentiated by 'set' in the following way:
         #'0' - blank image
         #'1' - print image
         #'-1' - blank roi.  However, this is on a serialized image so other elements of the image have been printed onto
-        roi_index=0;
+        roi_index=1;
        
         while (run_switch):
-            print "ROI_index= %i" % (roi_index)
+            #print "ROI_index= %i" % (roi_index)
             try:         
                 lf = open("otsu_0.txt", "wb")
                 blank_count=0
@@ -67,24 +62,38 @@ for file in files:
                     else:
                         roi_list=[roi_index]
                     for roi_idx in roi_list:
+                        #print "ROI_index= %i" % (roi_idx)
                         qq={}
                         #export the prism data
                         try:
-                            otsu_string=prism_fun.make_otsu_string(row,roi_idx)
+                            otsu_vector=prism_fun.make_otsu_vector(row,roi_idx)
                         except:
-                            #print "#######################OUTER ERROR#########################"
+                            print "#######################OUTER ERROR#########################"
                             continue
-                        qq["otsu"]=otsu_string
+                        
+                        export_dict={}
+                        export_dict["data"]=otsu_vector
+                        #write the prism data so it's accessible by the c++ file
+                        with open("prismdata.json","wb") as file:
+                            file.write(json.dumps(export_dict))
+                        #make the model accesible by the c++ file
+                        try:
+                            os.remove("modeldata.json")
+                        except OSError:
+                            pass
+                        copyfile(filename+"_model_"+"1"+".json","modeldata.json")
 
-                        #export the filename
-                        fn=row["path"]
-                        qq["file"]=fn
+                        os.system("C:\Users\gttho\Repos\Library\SaveMe\score.exe") #run scoring on exported json
+                        score = float([line.rstrip('\n') for line in open('score.txt')][0])
+                        print score
 
-                        #export the set
+                        #Save the Mark information
                         df_columns=list(df)
-                        pset=""
+                        mark=""
+                        mark_type=""
                         if int(row["mark"])==0: 
-                            pset="0"
+                            mark=0
+                            mark_type=0
                             blank_count+=1
                         elif int(row["mark"])==1:
                             if ("decimal" in df_columns) and ("roi_count" in df_columns):
@@ -96,10 +105,12 @@ for file in files:
                                 binary_list=list(binary_string)
                                 mark_value=int(binary_list[roi_idx])
                                 if (mark_value): 
-                                    pset="1"
+                                    mark=1
+                                    mark_type=1
                                     print_count+=1
                                 else: 
-                                    pset="-1"
+                                    mark=0
+                                    mark_type=-1
                                     blank_count+=1
                             elif "serial" in df_columns:
                                 binary_string=serial_dict[row["serial"]]
@@ -107,45 +118,34 @@ for file in files:
                                 mark_value=int(binary_list[roi_idx])
                                 #print row["serial"],binary_string, mark_value,roi_idx
                                 if (mark_value):
-                                    pset="1"
+                                    mark=1
+                                    mark_type=1
                                     print_count+=1
                                 else: 
-                                    pset="-1"
+                                    mark=0
+                                    mark_type=-1
                                     blank_count+=1
                             else: 
-                                pset="1"
+                                mark=1
+                                mark_type=1
                                 print_count+=1
-                        else: continue
-                        qq["set"]=pset
 
-                        #write to text file
-                        lf.write(json.dumps(qq) + "\n")
-
-                lf.close()
-
-                if blank_count==0 or print_count==0:
-                    print "no data"
-                    roi_index+=1
-                    continue
-                print blank_count
-                print print_count
-                #perform logistic regression analysis
-                os.system("python make_feature_maps.py") #make giant 630x61x61 index
-                os.system("python fit_coeffs.py") #fit the data to a logistic regression model
-                os.system("python eval_test_perf.py") #determine the accuracy of the model
-
-                #rename important files so they won't be overwritten later
-                os.rename('coeffs.txt', filename+'_coeffs_'+str(int(roi_index))+'.txt')
-                os.rename('transcript.txt', filename+'_transcript_'+str(int(roi_index))+'.txt')
-                os.rename('testperf.txt', filename+'_testperf_'+str(int(roi_index))+'.txt')
-                os.rename('master_map.json', filename+'_master_map_'+str(int(roi_index))+'.json')
+                        temp_dict={}
+                        temp_dict["score"]=score
+                        temp_dict["roi"]=roi_idx
+                        temp_dict["model"]=filename
+                        temp_dict["path"]=row["path"]
+                        temp_dict["mark"]=mark
+                        temp_dict["mark_type"]=mark_type
+                        export_list.append(temp_dict)
                 if roi_combo_switch: run_switch=0
-                roi_index+=1
-                
-            except KeyError:
-                break
-            except WindowsError:
-                raise
-        #prism_fun.serial_test(serial_dict)
-    except:
-        continue
+
+
+            except:raise
+    except: raise
+
+#save as excel file
+final_df=pd.DataFrame(export_list)
+writer = pd.ExcelWriter('model_perf.xlsx')
+final_df.to_excel(writer,'data')
+writer.save()

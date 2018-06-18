@@ -11,26 +11,31 @@ import json, sys,os
 #buck1 - the buckets for K1
 #J - the 61x61 matrix
 
-load_file="master_map.json"
-serial_input=False
-serial_number=""
+#Allow the user to modify the loaded files via command line inputs
+prefix=""
+suffix=""
 if len(sys.argv)>1:
-    serial_input=True
-    serial_number=str(int(sys.argv[1]))
-if serial_input: load_file="master_map_"+serial_number+".json"
-J = json.loads(open(load_file).read())
+    prefix=sys.argv[1]
+if len(sys.argv)>2:
+    suffix=sys.argv[2]
+
+
+master_map_file=prefix+"master_map"+suffix+".json"
+J = json.loads(open(master_map_file).read())
 
 K = {}
 #make a dictionary of coeffs.  It's important to note that this is all coeffs, including the intercept
-for line in open("coeffs.txt"):
+coeffs_file=prefix+"coeffs"+suffix+".txt"
+for line in open(coeffs_file):
   id, w = line.strip().split()
   id = int(id)
   w = float(w)
   K[id] = w
-lf = open("model_data2.txt", "wb")
-model_name="model";
-if serial_input: model_name="model_"+serial_number
-lf.write("float "+model_name+"[] = {")
+lf = open("model.json", "wb")
+superstring=''
+#lf.write('{"model": [')
+superstring+='{"model": ['
+
 #print "float model[] = {"
 counter=0
 tuple_list=[]
@@ -149,9 +154,11 @@ for q in range(len(J)):
                       lf.write("%6.4e" % val + ",")
               elif (1):
                   if not val==0:
-                       lf.write("%3.2e" % val + ",")
+                      superstring+="%3.2e" % val + ","
+                       #lf.write("%3.2e" % val + ",")
                   else:
-                       lf.write("0,")
+                       superstring+="0,"
+                       #lf.write("0,")
               else:
                   if not val==0:
                       if counter==consec_index+1:
@@ -176,13 +183,17 @@ for q in range(len(J)):
             #print "  " + f2 % tuple(o2), ","
             lf.write( "  " + f2 % tuple(o2)+ ","+"\n")
 
-lf.write("};")
+
+superstring=superstring[:-1]
+superstring+="]}"
+lf.write(superstring)
+
+#lf.write("]}")
 lf.close()
 
 #print tuple_list
 print len(tuple_list)
 
-new_model_name='model_data.c'
-if serial_input: new_model_name="model_data_"+serial_number+".c"
-os.rename('model_data.txt',new_model_name)
+new_model_name=prefix+'model'+suffix+'.json'
+os.rename('model.json',new_model_name)
 

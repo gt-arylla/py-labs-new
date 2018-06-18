@@ -1,6 +1,17 @@
 #test the performance of the your coeffs against your transcript file
 
 import os, math, sys, random, json, fun
+import matplotlib.pyplot as plt
+from scipy import stats
+#Allow the user to modify the loaded files via command line inputs
+prefix=""
+suffix=""
+if len(sys.argv)>1:
+    prefix=sys.argv[1]
+    print prefix
+if len(sys.argv)>2:
+    suffix=sys.argv[2]
+    print suffix
 
 
 classes = {}
@@ -11,13 +22,15 @@ for i in range(4):
 coeffs = [0.0 for i in range(630)]
 
 #populate coeffs vector with data.  For now we don't include the intercept, so we skip a=0 and everything else gets put in an index back
-for line in open("coeffs.txt"):
+coeff_file=prefix+"coeffs"+suffix+".txt"
+for line in open(coeff_file):
   a,v = line.strip().split()
   if int(a) == 0: continue
   coeffs[int(a)-1] = float(v)
 
 test = []
-for line in open("transcript.txt"):
+transcript_file=prefix+"transcript"+suffix+".txt"
+for line in open(transcript_file):
   pieces = line.strip().split(";") 
   #class
   cl = int(pieces[0])
@@ -73,7 +86,7 @@ perf_dict["DM_ThreshPerc"]=odds/(1+odds)
 perf_dict["DM_ThreshScore"]=lastscore
 
 
-for cl_filter,name in zip([[0,1],[2,3],[0,1,2,3]],["train","test","tot"]):
+for cl_filter,name in zip([[0,1],[2,3],[0,1,2,3]],["train","test","tot"]): 
     diff_holder=[]
     mark_holder=[]
     for sco, ro, cl, fn in test:
@@ -82,6 +95,8 @@ for cl_filter,name in zip([[0,1],[2,3],[0,1,2,3]],["train","test","tot"]):
       if cl==0 or cl==2: mark_holder.append(1)
       elif cl==1 or cl==3: mark_holder.append(0)
     thresh,J_abs,J,sen,spec=fun.threshold_finder(diff_holder,mark_holder)
+    blank_list,print_list=fun.split_print_blank_list(diff_holder,mark_holder)
+    t,p=stats.ttest_ind(print_list,blank_list)
 
 
     odds = math.exp(thresh)
@@ -92,13 +107,30 @@ for cl_filter,name in zip([[0,1],[2,3],[0,1,2,3]],["train","test","tot"]):
     perf_dict[name+"_"+"n_P"]=sum(mark_holder)
     perf_dict[name+"_"+"ThreshPerc"]=odds/(1+odds)
     perf_dict[name+"_"+"ThreshScore"]=thresh
+    perf_dict[name+"_"+"t_test"]=t
+    perf_dict[name+"_"+"p_value"]=p
 
 
-    print "        J score: %8.4f" % (J)
+    print "        "+name+" J score: %8.4f" % (J)
+    print name+" Threshold score: %8.4f" % thresh
+    print "        "+name+" t score: %8.4f" % (t)
 
-    print "    Threshold %%: %8.4f" % (odds/(1+odds))
-    print "Threshold score: %8.4f" % thresh
+#additional performance analysis - based on test perf
+cl_filter=[2,3]
+diff_holder=[]
+mark_holder=[]
+for sco, ro, cl, fn in test:
+    if not cl in cl_filter: continue
+    diff_holder.append(sco)
+    if cl==0 or cl==2: mark_holder.append(1)
+    elif cl==1 or cl==3: mark_holder.append(0)
+blank_list,print_list=fun.split_print_blank_list(diff_holder,mark_holder)
+plt.hist([blank_list,print_list],alpha=0.3,label=['blank','print'],histtype='stepfilled')
+plt.title(prefix+"train")
+plt.xlabel('score')
+plt.ylabel('frequency')
+plt.savefig(prefix+"train.png")
 
 
 with open("testperf.txt","wb") as file:
-    file.write(json.dumps(perf_dict))
+    file.write(json.dumps(perf_dict,sort_keys=True,indent=4,separators=(',', ': ')))

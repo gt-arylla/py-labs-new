@@ -106,10 +106,11 @@ if(0): #make a slightly more complex list
 
 if(1): #make a nested for loop type list
     super_tuple=(
-        [6750,6625,6500,6375,6250],
-        [3005,3009,3011,3015,3025]
+        [699,675,662,650,637,625,610],
+        [799,750,720],
+        [3033,3027,3022,3015,3010,3005]
         )
-    all_output_numbers=[-10,22,300]
+    all_output_numbers=[-10,22,103,800]
     counter=0
     print "{",
     for p in it.product(*super_tuple):
